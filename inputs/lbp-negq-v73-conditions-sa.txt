@@ -1,0 +1,1 @@
+Could you explain which store operations can move money from the store side to a customer — if the ledger ever needs to repay a customer, what operation records that, and under whose approval? I'm trying to understand what's supported before requesting anything.

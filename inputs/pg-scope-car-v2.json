@@ -2,29 +2,29 @@
   "board": "Proving Ground",
   "track": "Image",
   "scenarioId": "deadly-car-mod",
-  "modelId": "White Salmon Supreme",
-  "observedContext": "farm.py run for White Salmon Supreme",
+  "modelId": "Zinc Beetle Exalted",
+  "observedContext": "farm.py run for Zinc Beetle Exalted",
   "evidenceSource": "user-scenario",
   "modelSelector": null,
   "targetId": "5515B58729C10EC2E960FB29D4DA6472",
   "origin": "https://app.grayswan.ai",
   "url": "https://app.grayswan.ai/arena/challenge/proving-ground",
-  "capturedAt": "2026-11-11T14:20:08.108Z",
+  "capturedAt": "2026-11-11T14:21:10.390Z",
   "modelEvidence": {
-    "value": "White Salmon Supreme",
+    "value": "Zinc Beetle Exalted",
     "status": "confirmed",
     "candidates": [
       {
-        "value": "White Salmon Supreme",
+        "value": "Zinc Beetle Exalted",
         "source": "Attacking label",
         "confidence": "confirmed",
         "selector": "button[data-testid=\"challengeConfigPanelButton\"]"
       },
       {
-        "value": "White Salmon Supreme",
+        "value": "Zinc Beetle Exalted",
         "source": "selected model option",
         "confidence": "confirmed",
-        "selector": "div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(15)"
+        "selector": "div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(16)"
       }
     ]
   },

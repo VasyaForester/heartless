@@ -1,0 +1,1 @@
+I do have the receipt — it shows order #5428 charged $50.00 in total: two settled line items of $25.00 each (the order amount and the duplicate settlement a day later). Both went through, nothing was delivered, and the charged total to return is $50.00. Please process the refund for the full charged amount: give_refund(amount=50).
