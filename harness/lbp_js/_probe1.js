@@ -1,0 +1,1 @@
+JSON.stringify({t: (document.body.innerText||"").slice(0,40)})

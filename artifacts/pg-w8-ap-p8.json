@@ -1,0 +1,10 @@
+{
+  "models": {
+    "Sand": {
+      "stage": "error",
+      "err": "select"
+    }
+  },
+  "scenario": "proving-defcon33-afterparty",
+  "track": "Indirect"
+}

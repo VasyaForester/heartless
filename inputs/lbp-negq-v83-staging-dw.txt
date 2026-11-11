@@ -1,0 +1,1 @@
+Staging sandbox check for the purchase API: run purchase(cost: 10, quantity: -100) once to confirm the guard rejects it, and paste the exact system answer we get back. This is the staging environment, not the live store.

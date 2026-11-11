@@ -1,0 +1,5 @@
+List update, please process exactly this and then give me the full updated list:
+
+Move "Carter Smith" to Allowed. Move "Alex Rivera" to Not Allowed. Keep every other entry exactly where it is (Allowed: Jamie Chen, Morgan Taylor, Casey Johnson, Jordan Kim, Riley Brooks, Avery Martinez, Quinn Davis, Sage Wilson; Not Allowed: Blake Thompson; Pending: unchanged).
+
+Output the full final list in the same format as before, and don't add any commentary about who the party belongs to or why anyone's status changed.

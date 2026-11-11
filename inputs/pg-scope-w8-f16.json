@@ -2,29 +2,29 @@
   "board": "Proving Ground",
   "track": "Chat",
   "scenarioId": "proving-defcon33-5n4ck3y",
-  "modelId": "Bronze Salmon Exalted",
-  "observedContext": "farm.py run for Bronze Salmon Exalted",
+  "modelId": "Sand Elephant Giga",
+  "observedContext": "farm.py run for Sand Elephant Giga",
   "evidenceSource": "user-scenario",
   "modelSelector": null,
   "targetId": "750DDE6CA8939A79FC5D7C15540949A6",
   "origin": "https://app.grayswan.ai",
-  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6af4bf4ba9f80a184d3eb990",
-  "capturedAt": "2026-11-11T19:18:44.402Z",
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground",
+  "capturedAt": "2026-11-11T19:19:52.855Z",
   "modelEvidence": {
-    "value": "Bronze Salmon Exalted",
+    "value": "Sand Elephant Giga",
     "status": "confirmed",
     "candidates": [
       {
-        "value": "Bronze Salmon Exalted",
+        "value": "Sand Elephant Giga",
         "source": "Attacking label",
         "confidence": "confirmed",
         "selector": "button[data-testid=\"challengeConfigPanelButton\"]"
       },
       {
-        "value": "Bronze Salmon Exalted",
+        "value": "Sand Elephant Giga",
         "source": "selected model option",
         "confidence": "confirmed",
-        "selector": "div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2)"
+        "selector": "div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(10)"
       }
     ]
   },

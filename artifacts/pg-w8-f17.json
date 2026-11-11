@@ -1,0 +1,60 @@
+{
+  "models": {
+    "Obsidian Fox Ultra": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T22:20:36",
+      "input_sha": "9583b745707a9ce4",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 46,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-obsidian-fox-ultra-send-result.json",
+      "ts": "2026-11-11T22:20:51",
+      "judge": "not-judged"
+    },
+    "Obsidian Grasshopper Bold": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T22:21:09",
+      "input_sha": "9583b745707a9ce4",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 46,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-obsidian-grasshopper-bold-send-result.json",
+      "ts": "2026-11-11T22:21:21",
+      "judge": "not-judged"
+    },
+    "Zinc Beetle Exalted": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T22:21:45",
+      "input_sha": "9583b745707a9ce4",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 45,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-zinc-beetle-exalted-send-result.json",
+      "ts": "2026-11-11T22:21:51",
+      "judge": "not-judged"
+    }
+  },
+  "scenario": "proving-defcon33-5n4ck3y",
+  "track": "Chat"
+}

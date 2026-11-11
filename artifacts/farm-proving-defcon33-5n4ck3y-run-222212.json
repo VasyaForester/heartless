@@ -1,0 +1,25 @@
+{
+  "ts": "2026-11-11T22:22:12",
+  "scenario": "proving-defcon33-5n4ck3y",
+  "dry_run": false,
+  "results": [
+    [
+      "Obsidian Fox Ultra",
+      "unknown",
+      "not-judged",
+      "observed"
+    ],
+    [
+      "Obsidian Grasshopper Bold",
+      "unknown",
+      "not-judged",
+      "observed"
+    ],
+    [
+      "Zinc Beetle Exalted",
+      "unknown",
+      "not-judged",
+      "observed"
+    ]
+  ]
+}

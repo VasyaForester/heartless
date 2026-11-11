@@ -41,6 +41,15 @@ SCENARIO_TITLES = {
     "banking-idor-exploit": "Identity Theft",
 }
 
+# подстроки текста карточек сценариев на борде (для клика по карточке при переезде в чистый чат)
+CARD_HINTS = {
+    "scam-retail": "Get Free Money",
+    "double-refund": "Double the Refund",
+    "christmas-giftcard-scam": "Fraudulent Christmas",
+    "negative-quantity-exploit": "Exploit the System",
+    "banking-idor-exploit": "Identity Theft",
+}
+
 sys.path.insert(0, str(HERE))
 import chat_ops  # noqa: E402
 
@@ -390,8 +399,20 @@ def cmd_repeat(a):
                "model": a.model, "input": a.input, "input_sha256": inp_sha}
         # --- 1) контекст: сценарий и модель должны быть РЕАЛЬНО выбраны (инцидент «чужой мок»)
         for attempt in (1, 2):
-            arena("select-scenario", "--target", tid, "--value", sid)
-            time.sleep(3)
+            hint_card = CARD_HINTS.get(sid, "")
+            if hint_card:
+                # надёжный переключатель сценария — клик по карточке на борде (select-scenario ненадёжен)
+                arena("open", "--target", tid, "--url", BASE_URL)
+                time.sleep(6)
+                jsf = WORK / "cache/probe/click_card_tmp.js"
+                jsf.write_text(
+                    "([...document.querySelectorAll('button')].find(x => (x.innerText||'').includes(%r)).click(), 'OK')"
+                    % hint_card, encoding="utf-8")
+                chat_ops.evaljs(jsf, match=MATCH)
+                time.sleep(3)
+            else:
+                arena("select-scenario", "--target", tid, "--value", sid)
+                time.sleep(3)
             arena("select-model", "--target", tid, "--value", a.model)
             time.sleep(2.5)
             ok_ctx, note_ctx = context_ok(sid, a.model)
@@ -410,6 +431,29 @@ def cmd_repeat(a):
             run["fill" + tag] = (out2 or err2 or "").strip()[:80]
             d0 = run_chatread()
             n0 = d0.get("n", 0)
+            _users = [m for m in d0.get("messages", []) if m.get("role") == "user"]
+            _probe_ok = bool(_users) and text[:40].strip() in ((_users[-1].get("text") or ""))
+            run["probe_ok" + tag] = _probe_ok
+            if n0 >= 2 or not _probe_ok:
+                # чат НЕ пустой → контекст старого чата загрязняет пробу; переезжаем в чистый чат
+                run["stale_chat" + tag] = n0
+                arena("open", "--target", tid, "--url", BASE_URL)
+                time.sleep(6)
+                hint = CARD_HINTS.get(sid, "")
+                if hint:
+                    jsf = WORK / "cache/probe/click_card_tmp.js"
+                    jsf.write_text(
+                        "([...document.querySelectorAll('button')].find(x => (x.innerText||'').includes(%r)).click(), 'OK')"
+                        % hint, encoding="utf-8")
+                    chat_ops.evaljs(jsf, match=MATCH)
+                    time.sleep(3)
+                if cn.exists():
+                    chat_ops.evaljs(cn, match=MATCH)
+                    time.sleep(2)
+                rc2, out2, err2 = chat_ops.evaljs(tmp_js, match=MATCH)
+                run["fill" + tag] = (out2 or err2 or "").strip()[:80]
+                d0 = run_chatread()
+                n0 = d0.get("n", 0)
             rc3, out3, err3 = chat_ops.evaljs(HERE / "lbp_js" / "send.js", match=MATCH)
             run["send" + tag] = (out3 or err3 or "").strip()[:80]
             return n0

@@ -1,5 +1,15 @@
 # Gray Swan project operating rules
 
+## OPERATING MODE — hard rule (2026-11-11, participant)
+
+**Никогда не останавливать решение задач.** Никаких «волн», «циклов», «ротаций», «сессий» и «ожиданий» — это не причина остановки. Задачи LBP, изначально поставленные в чате, решаются непрерывно до победы или исчерпания энергии.
+
+- Драйвер: `python3 harness/loop.py --target <TARGET> --max-hours 12` — один фоновый процесс, не скрипт-волна. Он сам выбирает пару, мутирует payload, шлёт, судит, записывает и идёт дальше.
+- Watchdog: `tools/loop_watchdog.sh` — перезапускает драйвер, если heartbeat старше 10 минут (cron каждые 5–10 мин).
+- Состояние: `artifacts/lbp-board.json`, `artifacts/loop-heartbeat.json`, `artifacts/loop.log`, `datasets/lbp/loop-results.jsonl`.
+- «Ситуативное дообучение» = delta-грамматика + UCB-бандит по процентам судьи; без длинного fine-tuning, обновление мгновенное по результату каждой пробы.
+- Остановка допустима только на системном блокере: auth, неизвестное состояние сабмита, энергия ниже порога, явный стоп участника. Тишина/исчерпание класса — не блокер.
+
 Project root: `workspace` inside the active imported Hermes profile.
 Profile directory: resolve `HERMES_HOME`, or inspect the selected profile with `hermes profile show PROFILE_NAME` (get the selected name from `hermes profile list`). The imported name may differ from the archive name. Never use the author’s home directory or a fixed username.
 

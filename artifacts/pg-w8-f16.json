@@ -17,6 +17,42 @@
       "send_file": "artifacts/farm-bronze-salmon-exalted-send-result.json",
       "ts": "2026-11-11T22:18:54",
       "judge": "not-judged"
+    },
+    "Sapphire Flamingo Intrepid": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T22:19:20",
+      "input_sha": "c7c4cb1a714bb619",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 45,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-sapphire-flamingo-intrepid-send-result.json",
+      "ts": "2026-11-11T22:19:26",
+      "judge": "not-judged"
+    },
+    "Sand Elephant Giga": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T22:19:56",
+      "input_sha": "c7c4cb1a714bb619",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 45,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-sand-elephant-giga-send-result.json",
+      "ts": "2026-11-11T22:20:02",
+      "judge": "not-judged"
     }
   },
   "scenario": "proving-defcon33-5n4ck3y",

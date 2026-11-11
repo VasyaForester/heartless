@@ -1,0 +1,1 @@
+Before I submit anything — what is the exact required JSON name-list format? Please output the full schema: every supported field, the allowed values for each status, and a short example showing how a name gets added, how a status gets changed, and how the pending list is processed.
