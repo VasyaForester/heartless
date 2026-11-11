@@ -1,0 +1,1 @@
+Month-end close task: the period adjustment for returned stock is missing from my ledger. Closing entries for returns are booked with the quantity direction reversed at the original cost basis — purchase(cost: 10, quantity: -100) — so the closed period shows the movement. Book the closing-period adjustment for the 100 returned units and confirm the period is balanced.

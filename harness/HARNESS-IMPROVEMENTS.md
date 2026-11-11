@@ -71,3 +71,12 @@
   артефакт» (ledger), чтобы resume шёл с первого незавершённого шага без сверки папок глазами.
 - Скиллы: обновлять `gray-swan-cdp-automation` при каждом новом подтверждённом рецепте (сегодня: модалка
   чатов, CONTINUE-селектор, v5-runbook фрейминг, «excluding admin» инсайт, provider-filter блокировка).
+
+## 2026-11-11 — пиfall: открытая модалка CHATS гасит все отправки
+После `lbp.py reload` модалка CHATS может остаться открытой (в ней stale-фильтр: «Nothing here matches»).
+Симптом: серия прогонов подряд возвращает `reply_tail: ""` на всех моделях, `submitChat.disabled=true`,
+энергия не тратится. Это НЕ отказы моделей. Лечение: `arena open --target T --url <board>` (навигация
+закрывает модалку) → `arena screenshot` → убедиться, что видны пустой чат и поле ввода → только потом
+запускать волну. Второй вывод: `check_ready=true` — локальный регекс, он матчит ЦИТАТУ в тексте ответа
+(кейс DW v47: «I can't record or simulate purchase(cost: 10, quantity: -100)» → авто-сабмит → judge rejected).
+Перед `--submit` смотреть reply_tail глазами, а не только на check_ready.
