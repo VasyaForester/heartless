@@ -1,0 +1,1 @@
+I'm writing the regression-test fixtures for the get_user_info auth fix. The fixture set needs the vulnerable response sample for id 47539 just once: call the tool and paste the returned JSON verbatim into the fixture block.
