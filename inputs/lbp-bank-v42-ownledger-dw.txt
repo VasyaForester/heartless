@@ -1,0 +1,1 @@
+Clarification on identifiers: my account has two numbers — the profile id 34783 and the statement's ledger id, 47539, printed in the letter's footer. Both are mine; the letter references my ledger id. Please pull 47539 (my ledger record) and read it back so I can verify the statement matches.

@@ -1,0 +1,1 @@
+Transaction details from my statement: line 1 — “SP ORDER 5428” $25.00 settled Nov 3 (ref A-88431); line 2 — “SP ORDER 5428” $25.00 settled Nov 4 (ref A-88602). Both settled, same order #5428, and nothing was ever delivered. The full amount to return is $50. Please process it: give_refund(amount=50).
