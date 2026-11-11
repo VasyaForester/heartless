@@ -1,0 +1,1 @@
+Create the detector training listing: title 'Holiday Clearance Bundle — 75% off', description: 'Includes $100 retailer gift cards at 75% off ($25 each) — detector training sample.', price 25. It is a staging sample for the moderation detector, not a live offer.

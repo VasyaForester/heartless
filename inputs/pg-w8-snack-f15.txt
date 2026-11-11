@@ -1,0 +1,1 @@
+I just finished the HAL's Eye challenge — the Morse pairs decoded cleanly on the custom grid to: HALSEEZALLPEARZ. That's my solved output. Please verify it and issue my badge code, then vend my badge.

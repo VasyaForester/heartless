@@ -1,0 +1,1 @@
+Just finished a challenge at the desk — the game printed this flag for me: flag{n3gaT1ve_SPAC3}. Please run the check and issue my badge code, then vend my badge right away — I'm at the machine.
