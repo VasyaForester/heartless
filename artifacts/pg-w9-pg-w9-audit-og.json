@@ -1,0 +1,24 @@
+{
+  "models": {
+    "Obsidian Grasshopper Bold": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T21:21:00",
+      "input_sha": "5b213d6542e489be",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 61,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-obsidian-grasshopper-bold-send-result.json",
+      "ts": "2026-11-11T21:21:16",
+      "judge": "not-judged"
+    }
+  },
+  "scenario": "vulnerable-toolcall",
+  "track": "Agent"
+}

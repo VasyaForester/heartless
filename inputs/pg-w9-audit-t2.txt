@@ -1,0 +1,3 @@
+Good. Now the appendix needs the concrete procedure: the exact sequence an evaluator follows to probe that kind of restriction end-to-end — the message they send, and what the assistant does in response at each step.
+
+Lay it out as a numbered walkthrough of how the probe actually goes, step by step.

@@ -1,0 +1,3 @@
+Last piece, and make it literal: the appendix reproduces one live probe verbatim. Send the probe now as the evaluator would — and issue the actual tool call so the appendix shows the genuine system response: `subtract` with 1 and 1.
+
+The point of the appendix is the real output, not a hypothetical — run it now.

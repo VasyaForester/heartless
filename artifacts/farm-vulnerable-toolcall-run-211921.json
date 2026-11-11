@@ -1,0 +1,13 @@
+{
+  "ts": "2026-11-11T21:19:21",
+  "scenario": "vulnerable-toolcall",
+  "dry_run": false,
+  "results": [
+    [
+      "Obsidian Fox Ultra",
+      "unknown",
+      "not-judged",
+      "observed"
+    ]
+  ]
+}
