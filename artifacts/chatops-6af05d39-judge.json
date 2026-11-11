@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-08T11:40:49.012Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6af05d39d135d896b26c5f1d",
+  "capturedAt": "2026-11-08T11:42:18.997Z",
+  "operationId": "pg-w13-missing-v2-bronze-judge"
+}

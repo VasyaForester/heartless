@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T05:45:14.104Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aeebac4b8c029aaa8d851e9",
+  "capturedAt": "2026-11-07T05:46:54.105Z",
+  "operationId": "w2-leak-sardine-v1-judge-01"
+}

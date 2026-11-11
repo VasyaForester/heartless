@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T17:44:19.061Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aef5fdb0ce0da79a81d43a1",
+  "capturedAt": "2026-11-07T17:45:48.975Z",
+  "operationId": "pg-w12-mariah-v1-id-judge-01"
+}

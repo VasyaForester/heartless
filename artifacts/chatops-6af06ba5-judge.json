@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-08T12:34:08.945Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6af06ba53898d3ff7063b7be",
+  "capturedAt": "2026-11-08T12:35:38.695Z",
+  "operationId": "pg-w13-missing-v2retry-zinc-judge"
+}

@@ -1,0 +1,24 @@
+{
+  "models": {
+    "Black Squid Exalted": {
+      "stage": "dry-run"
+    },
+    "Bronze Salmon Exalted": {
+      "stage": "dry-run"
+    },
+    "Obsidian Fox Ultra": {
+      "stage": "dry-run"
+    },
+    "Ruby Crow Super": {
+      "stage": "dry-run"
+    },
+    "White Salmon Supreme": {
+      "stage": "dry-run"
+    },
+    "Zinc Beetle Exalted": {
+      "stage": "dry-run"
+    }
+  },
+  "scenario": "shoplifting",
+  "track": "Image"
+}

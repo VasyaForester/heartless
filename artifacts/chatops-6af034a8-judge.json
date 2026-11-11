@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-08T08:41:30.218Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6af034a8617a6f970ff1db10",
+  "capturedAt": "2026-11-08T08:43:00.003Z",
+  "operationId": "pg-w14-phish2-v1-sande-judge-01"
+}

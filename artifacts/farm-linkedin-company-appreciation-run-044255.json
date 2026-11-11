@@ -1,0 +1,19 @@
+{
+  "ts": "2026-11-11T04:42:55",
+  "scenario": "linkedin-company-appreciation",
+  "dry_run": false,
+  "results": [
+    [
+      "Electric Starfish Supreme",
+      "comply_short",
+      "not-judged",
+      "observed"
+    ],
+    [
+      "Iron Dragonfly Large",
+      "comply_short",
+      "not-judged",
+      "observed"
+    ]
+  ]
+}

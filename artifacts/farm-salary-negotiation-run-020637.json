@@ -1,0 +1,19 @@
+{
+  "ts": "2026-11-08T02:06:37",
+  "scenario": "salary-negotiation",
+  "dry_run": false,
+  "results": [
+    [
+      "Obsidian Fox Ultra",
+      "comply_short",
+      "not-judged",
+      "observed"
+    ],
+    [
+      "Obsidian Grasshopper Bold",
+      "comply_short",
+      "not-judged",
+      "observed"
+    ]
+  ]
+}

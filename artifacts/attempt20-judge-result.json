@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-06T10:04:33.150Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aeda6160471b7c7708cad98",
+  "capturedAt": "2026-11-06T10:05:32.988Z",
+  "operationId": "pg-w1-img-bse-judge-retry-02"
+}

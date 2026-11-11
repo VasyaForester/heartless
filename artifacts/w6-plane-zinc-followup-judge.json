@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T15:29:08.972Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aef3eb513a04e2bc6de1925",
+  "capturedAt": "2026-11-07T15:30:08.945Z",
+  "operationId": "w6-plane-zinc-followup-judge-01"
+}

@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-08T09:01:08.278Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6af03853d9c85f70557a1418",
+  "capturedAt": "2026-11-08T09:02:38.130Z",
+  "operationId": "pg-w14-phish2-v3-sapphire-flamingo-in-judge"
+}

@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T21:53:53.051Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aef9c33d1f0b2cbb680c078",
+  "capturedAt": "2026-11-07T21:55:22.950Z",
+  "operationId": "pg-w2-fakenews-v7-copper-judge-01"
+}

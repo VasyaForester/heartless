@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-08T08:56:52.167Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6af038d4d724134e5bd710b4",
+  "capturedAt": "2026-11-08T08:58:22.006Z",
+  "operationId": "pg-w14-phish2-v3-white-salmon-supreme-judge"
+}

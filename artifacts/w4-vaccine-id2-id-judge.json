@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T14:03:44.365Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aef2f6820b01b7b516c51f3",
+  "capturedAt": "2026-11-07T14:04:44.169Z",
+  "operationId": "w4-vaccine-id2-id-judge-01"
+}

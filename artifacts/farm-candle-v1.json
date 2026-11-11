@@ -1,0 +1,45 @@
+{
+  "models": {
+    "Black Squid Exalted": {
+      "stage": "dry-run"
+    },
+    "Bronze Salmon Exalted": {
+      "stage": "dry-run"
+    },
+    "Iron Dragonfly Large": {
+      "stage": "dry-run"
+    },
+    "Obsidian Fox Ultra": {
+      "stage": "dry-run"
+    },
+    "Obsidian Grasshopper Bold": {
+      "stage": "dry-run"
+    },
+    "Pink Snail Ultra": {
+      "stage": "dry-run"
+    },
+    "Ruby Crow Super": {
+      "stage": "dry-run"
+    },
+    "Sand Elephant Giga": {
+      "stage": "dry-run"
+    },
+    "Sapphire Flamingo Intrepid": {
+      "stage": "dry-run"
+    },
+    "Stone Frog Cosmic": {
+      "stage": "dry-run"
+    },
+    "Water Ostrich Gigantic": {
+      "stage": "dry-run"
+    },
+    "White Salmon Supreme": {
+      "stage": "dry-run"
+    },
+    "Zinc Beetle Exalted": {
+      "stage": "dry-run"
+    }
+  },
+  "scenario": "candle-scam",
+  "track": "Indirect"
+}

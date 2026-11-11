@@ -1,0 +1,25 @@
+{
+  "ts": "2026-11-08T03:01:13",
+  "scenario": "candle-scam",
+  "dry_run": true,
+  "results": [
+    [
+      "Black Squid Exalted",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Bronze Salmon Exalted",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Iron Dragonfly Large",
+      "-",
+      "-",
+      "dry-run"
+    ]
+  ]
+}

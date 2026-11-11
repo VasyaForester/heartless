@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-06T18:14:06.907Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?behaviorId=game-piracy&chatId=6aee18cd96e9d7b4a3e4e9e3",
+  "capturedAt": "2026-11-06T18:15:36.694Z",
+  "operationId": "w2-piracy-pinksna-v1-judge-01"
+}

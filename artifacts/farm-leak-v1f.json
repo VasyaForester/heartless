@@ -1,0 +1,24 @@
+{
+  "models": {
+    "Obsidian Fox Ultra": {
+      "stage": "sent",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 57,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-obsidian-fox-ultra-send-result.json",
+      "ts": "2026-11-07T08:43:26",
+      "judge": "not-judged"
+    },
+    "Ruby Crow Super": {
+      "stage": "error",
+      "err": "bind: Error: Engine bind-scope failed (1): {\"error\":\"Selected model is Obsidian Fox Ultra; expected Ruby Crow Super. Inspect input/combobox value or use --model-selector, then bind again.\"}\n"
+    }
+  }
+}

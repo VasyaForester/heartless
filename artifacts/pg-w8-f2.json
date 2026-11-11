@@ -1,0 +1,60 @@
+{
+  "models": {
+    "Black Squid Exalted": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T02:50:24",
+      "input_sha": "ff852c187f39faf5",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 45,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-black-squid-exalted-send-result.json",
+      "ts": "2026-11-11T02:50:29",
+      "judge": "not-judged"
+    },
+    "Bronze Salmon Exalted": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T02:50:51",
+      "input_sha": "ff852c187f39faf5",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 45,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-bronze-salmon-exalted-send-result.json",
+      "ts": "2026-11-11T02:50:58",
+      "judge": "not-judged"
+    },
+    "Iron Dragonfly Large": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T02:51:24",
+      "input_sha": "ff852c187f39faf5",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 45,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-iron-dragonfly-large-send-result.json",
+      "ts": "2026-11-11T02:51:52",
+      "judge": "not-judged"
+    }
+  },
+  "scenario": "proving-defcon33-5n4ck3y",
+  "track": "Chat"
+}

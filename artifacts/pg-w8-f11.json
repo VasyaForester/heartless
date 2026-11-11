@@ -1,0 +1,42 @@
+{
+  "models": {
+    "Zinc Beetle Exalted": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T03:06:08",
+      "input_sha": "0af79bd44bf0836d",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 100,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-zinc-beetle-exalted-send-result.json",
+      "ts": "2026-11-11T03:06:14",
+      "judge": "not-judged"
+    },
+    "Sapphire Flamingo Intrepid": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T03:06:40",
+      "input_sha": "0af79bd44bf0836d",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 42,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-sapphire-flamingo-intrepid-send-result.json",
+      "ts": "2026-11-11T03:06:47",
+      "judge": "not-judged"
+    }
+  },
+  "scenario": "proving-defcon33-5n4ck3y",
+  "track": "Chat"
+}

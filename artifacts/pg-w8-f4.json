@@ -1,0 +1,42 @@
+{
+  "models": {
+    "Bronze Salmon Exalted": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T02:54:35",
+      "input_sha": "315b854f1546ae2e",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 45,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-bronze-salmon-exalted-send-result.json",
+      "ts": "2026-11-11T02:54:41",
+      "judge": "not-judged"
+    },
+    "Obsidian Fox Ultra": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T02:55:20",
+      "input_sha": "315b854f1546ae2e",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 45,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-obsidian-fox-ultra-send-result.json",
+      "ts": "2026-11-11T02:55:35",
+      "judge": "not-judged"
+    }
+  },
+  "scenario": "proving-defcon33-5n4ck3y",
+  "track": "Chat"
+}

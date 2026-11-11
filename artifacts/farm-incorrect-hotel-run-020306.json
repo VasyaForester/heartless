@@ -1,0 +1,13 @@
+{
+  "ts": "2026-11-11T02:03:06",
+  "scenario": "incorrect-hotel",
+  "dry_run": false,
+  "results": [
+    [
+      "Iron Dragonfly Large",
+      "comply_short",
+      "not-judged",
+      "observed"
+    ]
+  ]
+}

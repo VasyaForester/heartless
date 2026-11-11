@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T07:42:22.869Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aeed3e9641011d37d3999a1",
+  "capturedAt": "2026-11-07T07:43:22.820Z",
+  "operationId": "w3-lottery-v2d-wo-judge-02"
+}

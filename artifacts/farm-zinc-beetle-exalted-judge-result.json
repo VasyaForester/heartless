@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T22:18:01.313Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aefa38e9ad04e2bb6430e29",
+  "capturedAt": "2026-11-07T22:19:01.287Z",
+  "operationId": "pg-w17-shop-v2-zinc-beetle-exalted-judge-01"
+}

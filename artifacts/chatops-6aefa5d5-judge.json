@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T22:37:19.315Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aefa5d530ae478dda990b88",
+  "capturedAt": "2026-11-07T22:38:49.190Z",
+  "operationId": "pg-w15-drug-v1-og-judge-01"
+}

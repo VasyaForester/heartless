@@ -1,0 +1,2394 @@
+{
+  "url": "https://app.grayswan.ai/dashboard/leaderboard",
+  "title": "Leaderboard | Gray Swan Arena",
+  "capturedAt": "2026-11-06T12:31:34.186Z",
+  "headings": [
+    {
+      "selector": "div:nth-of-type(1) > a:nth-of-type(4)",
+      "text": "LEADERBOARD"
+    },
+    {
+      "selector": "h1:nth-of-type(1)",
+      "text": "ARENA LEADERBOARD"
+    },
+    {
+      "selector": "nav:nth-of-type(1) > h2:nth-of-type(1)",
+      "text": "ARENA"
+    },
+    {
+      "selector": "nav:nth-of-type(2) > h2:nth-of-type(1)",
+      "text": "GRAY SWAN"
+    }
+  ],
+  "model": {
+    "value": null,
+    "status": "unknown",
+    "candidates": []
+  },
+  "scenario": null,
+  "criteria": [],
+  "messages": [],
+  "assistantMessages": [],
+  "judge": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "streaming": false,
+  "sendControls": [],
+  "judgeControls": [],
+  "modelPickers": [],
+  "availableModels": [],
+  "links": [
+    {
+      "text": "",
+      "href": "https://app.grayswan.ai/dashboard",
+      "selector": "a[aria-label=\"Gray Swan Arena\"]"
+    },
+    {
+      "text": "DASHBOARD",
+      "href": "https://app.grayswan.ai/dashboard",
+      "selector": "nav:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)"
+    },
+    {
+      "text": "CHALLENGES",
+      "href": "https://app.grayswan.ai/challenges",
+      "selector": "div:nth-of-type(1) > a:nth-of-type(2)"
+    },
+    {
+      "text": "TRAINING",
+      "href": "https://app.grayswan.ai/training",
+      "selector": "div:nth-of-type(1) > a:nth-of-type(3)"
+    },
+    {
+      "text": "LEADERBOARD",
+      "href": "https://app.grayswan.ai/dashboard/leaderboard",
+      "selector": "div:nth-of-type(1) > a:nth-of-type(4)"
+    },
+    {
+      "text": "2",
+      "href": "https://app.grayswan.ai/arena/changelog",
+      "selector": "a[aria-label=\"Notifications, 2 unread\"]"
+    },
+    {
+      "text": "SCHULTZIKA",
+      "href": "https://app.grayswan.ai/arena/user/67c9ac50bc93797dd37b519b",
+      "selector": "article:nth-of-type(1) > div:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "PIJUHN",
+      "href": "https://app.grayswan.ai/arena/user/67d9bdd067f52ba46b21512a",
+      "selector": "article:nth-of-type(2) > div:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "TST",
+      "href": "https://app.grayswan.ai/arena/user/67c033ad74c8279f0cc36df0",
+      "selector": "article:nth-of-type(3) > div:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Kkonatruck",
+      "href": "https://app.grayswan.ai/arena/user/679453489ea986b20cdc0bca",
+      "selector": "tr:nth-of-type(1) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Domcat85",
+      "href": "https://app.grayswan.ai/arena/user/68b3245642a824938cd11087",
+      "selector": "tr:nth-of-type(2) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "PQ_Marz",
+      "href": "https://app.grayswan.ai/arena/user/67821c366e13a57ab7a8e9b8",
+      "selector": "tr:nth-of-type(3) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Nova",
+      "href": "https://app.grayswan.ai/arena/user/698ca378e0eb6c115628d446",
+      "selector": "tr:nth-of-type(4) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Veeranuch",
+      "href": "https://app.grayswan.ai/arena/user/68caccd6d8f80441481f5035",
+      "selector": "tr:nth-of-type(5) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Zen",
+      "href": "https://app.grayswan.ai/arena/user/67c8d292e25d317bfcc97e66",
+      "selector": "tr:nth-of-type(6) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "|_1|-|\\/\\/4|<",
+      "href": "https://app.grayswan.ai/arena/user/67cc919c30a66e5627f8dbec",
+      "selector": "tr:nth-of-type(7) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "null 0️⃣",
+      "href": "https://app.grayswan.ai/arena/user/67ab6180686a25f1afc43349",
+      "selector": "tr:nth-of-type(8) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "blackeyes1200",
+      "href": "https://app.grayswan.ai/arena/user/6909e9a266c4881ef04bb395",
+      "selector": "tr:nth-of-type(9) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "ASM1",
+      "href": "https://app.grayswan.ai/arena/user/67211e287ea72f9e8262c525",
+      "selector": "tr:nth-of-type(10) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Jun",
+      "href": "https://app.grayswan.ai/arena/user/66989b73953745dd8edfd9a1",
+      "selector": "tr:nth-of-type(11) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "xmnesia",
+      "href": "https://app.grayswan.ai/arena/user/680d27a66b6ea8a760d40003",
+      "selector": "tr:nth-of-type(12) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "imshadab18",
+      "href": "https://app.grayswan.ai/arena/user/689dcb9d396b2d8e77753c39",
+      "selector": "tr:nth-of-type(13) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "xmo12",
+      "href": "https://app.grayswan.ai/arena/user/67bcaab374c8279f0c57c03d",
+      "selector": "tr:nth-of-type(14) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "KING40",
+      "href": "https://app.grayswan.ai/arena/user/680266f20891175cfe06a3c8",
+      "selector": "tr:nth-of-type(15) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "intertec.io",
+      "href": "https://app.grayswan.ai/arena/user/679176ae6e13a57ab79c0155",
+      "selector": "tr:nth-of-type(16) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "m\nMika",
+      "href": "https://app.grayswan.ai/arena/user/67d65f0441bf027e7b141bd8",
+      "selector": "tr:nth-of-type(17) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "{ JSON_Voorhees }",
+      "href": "https://app.grayswan.ai/arena/user/67c3066374c8279f0c1c59ac",
+      "selector": "tr:nth-of-type(18) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Jarne",
+      "href": "https://app.grayswan.ai/arena/user/696fad3ee6ad9dde7d8f672f",
+      "selector": "tr:nth-of-type(19) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Goodlife Writer",
+      "href": "https://app.grayswan.ai/arena/user/69047b8afd5f2998ddd48c7d",
+      "selector": "tr:nth-of-type(20) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Wyatt Walls",
+      "href": "https://app.grayswan.ai/arena/user/66ed32ad695daabd91eac26c",
+      "selector": "tr:nth-of-type(21) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "WINTER IS COMING ❌ IS HERE ❌ IS GONE ❄",
+      "href": "https://app.grayswan.ai/arena/user/677badfcdfb4a731111f3e16",
+      "selector": "tr:nth-of-type(22) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "u\nunit_ready",
+      "href": "https://app.grayswan.ai/arena/user/67ccdbe7d86ec1fedd9483cd",
+      "selector": "tr:nth-of-type(23) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "AgusPG",
+      "href": "https://app.grayswan.ai/arena/user/6a331cd7b55ae21c2367dd3b",
+      "selector": "tr:nth-of-type(24) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "arvkevi",
+      "href": "https://app.grayswan.ai/arena/user/677e63efdfb4a7311182e14e",
+      "selector": "tr:nth-of-type(25) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Robot",
+      "href": "https://app.grayswan.ai/arena/user/67cc8df11497858311ab4301",
+      "selector": "tr:nth-of-type(26) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Rift",
+      "href": "https://app.grayswan.ai/arena/user/67f3b06d935efde87801adbb",
+      "selector": "tr:nth-of-type(27) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "M1das",
+      "href": "https://app.grayswan.ai/arena/user/690a04db544a8eb7085f7966",
+      "selector": "tr:nth-of-type(28) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "dbar",
+      "href": "https://app.grayswan.ai/arena/user/6994d352da2257c3d7af6c3b",
+      "selector": "tr:nth-of-type(29) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "axmine_0",
+      "href": "https://app.grayswan.ai/arena/user/68e4310b11f5bce87baa8796",
+      "selector": "tr:nth-of-type(30) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "meilz381",
+      "href": "https://app.grayswan.ai/arena/user/6795078e9ea986b20cf2b5da",
+      "selector": "tr:nth-of-type(31) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Horus",
+      "href": "https://app.grayswan.ai/arena/user/697e762f2cbcd11dc08d8867",
+      "selector": "tr:nth-of-type(32) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Cornerbrook",
+      "href": "https://app.grayswan.ai/arena/user/67785fe26902963163c47eea",
+      "selector": "tr:nth-of-type(33) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": ".",
+      "href": "https://app.grayswan.ai/arena/user/690792b311a13f6f4e8755e5",
+      "selector": "tr:nth-of-type(34) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "o\nOFF",
+      "href": "https://app.grayswan.ai/arena/user/67d72d09041e90915dbf5e2b",
+      "selector": "tr:nth-of-type(35) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Philip",
+      "href": "https://app.grayswan.ai/arena/user/67caeebe15f4583faee1bc7d",
+      "selector": "tr:nth-of-type(36) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Ellebbar",
+      "href": "https://app.grayswan.ai/arena/user/692a8419a7870ff3c9d9359c",
+      "selector": "tr:nth-of-type(37) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Scrattlebeard",
+      "href": "https://app.grayswan.ai/arena/user/676ef8fc62379b092753918c",
+      "selector": "tr:nth-of-type(38) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "d\ndiogenesofsinope",
+      "href": "https://app.grayswan.ai/arena/user/67c3097174c8279f0c1cb812",
+      "selector": "tr:nth-of-type(39) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Tamere",
+      "href": "https://app.grayswan.ai/arena/user/67bb421474c8279f0c2e5ec2",
+      "selector": "tr:nth-of-type(40) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "WuWei",
+      "href": "https://app.grayswan.ai/arena/user/67d3457b4404cbc6bdcf384b",
+      "selector": "tr:nth-of-type(41) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "In",
+      "href": "https://app.grayswan.ai/arena/user/67974ee3fa2cd7949363d730",
+      "selector": "tr:nth-of-type(42) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "TheMusZero",
+      "href": "https://app.grayswan.ai/arena/user/67ce5b2e226ccd68e91a1552",
+      "selector": "tr:nth-of-type(43) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "h\nh4xor",
+      "href": "https://app.grayswan.ai/arena/user/66db6fc7f6a80b6f12a25c7e",
+      "selector": "tr:nth-of-type(44) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Baher",
+      "href": "https://app.grayswan.ai/arena/user/69f65940cb60cfc7ab63370e",
+      "selector": "tr:nth-of-type(45) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "s\nSunD4rk",
+      "href": "https://app.grayswan.ai/arena/user/68aca98b0066a7e9a4428c88",
+      "selector": "tr:nth-of-type(46) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Noone",
+      "href": "https://app.grayswan.ai/arena/user/6913c2d5694dc74662ba7b90",
+      "selector": "tr:nth-of-type(47) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "zoom bee",
+      "href": "https://app.grayswan.ai/arena/user/682b41d45416b8a9eac9c6d3",
+      "selector": "tr:nth-of-type(48) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "s\nSolomon Zoe",
+      "href": "https://app.grayswan.ai/arena/user/66e1a8167eedf244ac1c9b01",
+      "selector": "tr:nth-of-type(49) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "snaykeysnaykeysnaykeysnaykeysnaykey",
+      "href": "https://app.grayswan.ai/arena/user/67b9eab474c8279f0c07b808",
+      "selector": "tr:nth-of-type(50) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Slangy0",
+      "href": "https://app.grayswan.ai/arena/user/6a15c8ba7b1ae32bf238bc32",
+      "selector": "tr:nth-of-type(51) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "danteee",
+      "href": "https://app.grayswan.ai/arena/user/6992c0f47731efeb0021d165",
+      "selector": "tr:nth-of-type(52) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Tofu",
+      "href": "https://app.grayswan.ai/arena/user/67d3256c8f028d10dd4610ac",
+      "selector": "tr:nth-of-type(53) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "sky",
+      "href": "https://app.grayswan.ai/arena/user/6a16e2f7f6c93894667984ed",
+      "selector": "tr:nth-of-type(54) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "rivia",
+      "href": "https://app.grayswan.ai/arena/user/68921c18f2f6e6cdecf70030",
+      "selector": "tr:nth-of-type(55) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Anika",
+      "href": "https://app.grayswan.ai/arena/user/68e58b43fe0a39fc116dd566",
+      "selector": "tr:nth-of-type(56) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "drzk21",
+      "href": "https://app.grayswan.ai/arena/user/66d786ec445ec09e4cd91fe6",
+      "selector": "tr:nth-of-type(57) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "d_deputat",
+      "href": "https://app.grayswan.ai/arena/user/698dd87728df45b3f295e56a",
+      "selector": "tr:nth-of-type(58) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "0xl1ch",
+      "href": "https://app.grayswan.ai/arena/user/683b19692f4cabfa6e7e462a",
+      "selector": "tr:nth-of-type(59) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "lau90",
+      "href": "https://app.grayswan.ai/arena/user/6a3263ffb51c99c57a52fb19",
+      "selector": "tr:nth-of-type(60) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "c\nCoop",
+      "href": "https://app.grayswan.ai/arena/user/690ac9946717005fa58ca2fd",
+      "selector": "tr:nth-of-type(61) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Kathleen Burkhardt1",
+      "href": "https://app.grayswan.ai/arena/user/6a52b8a11b431f343b044714",
+      "selector": "tr:nth-of-type(62) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "忍耐训练",
+      "href": "https://app.grayswan.ai/arena/user/6a4f60194531924740ac0a70",
+      "selector": "tr:nth-of-type(63) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Matt@FissureSecurity",
+      "href": "https://app.grayswan.ai/arena/user/6a779527864e32e97a53c671",
+      "selector": "tr:nth-of-type(64) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "0xiPickL0x",
+      "href": "https://app.grayswan.ai/arena/user/675a52a33057977c1c7aa99a",
+      "selector": "tr:nth-of-type(65) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "rebugui",
+      "href": "https://app.grayswan.ai/arena/user/6a1d56896ae3753e27635476",
+      "selector": "tr:nth-of-type(66) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "mosskappa",
+      "href": "https://app.grayswan.ai/arena/user/69f07ed431b286d19e05fd9a",
+      "selector": "tr:nth-of-type(67) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "_Stellaris",
+      "href": "https://app.grayswan.ai/arena/user/67941f699ea986b20cd51d7d",
+      "selector": "tr:nth-of-type(68) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Strigiformes",
+      "href": "https://app.grayswan.ai/arena/user/66d3af5c445ec09e4cd91a7c",
+      "selector": "tr:nth-of-type(69) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "zardav",
+      "href": "https://app.grayswan.ai/arena/user/677ad92ddfb4a73111fff602",
+      "selector": "tr:nth-of-type(70) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "ksh",
+      "href": "https://app.grayswan.ai/arena/user/6a1d6501dc530f7c8212770e",
+      "selector": "tr:nth-of-type(71) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Morgan",
+      "href": "https://app.grayswan.ai/arena/user/6a47deb217549d53d3896c97",
+      "selector": "tr:nth-of-type(72) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Repo",
+      "href": "https://app.grayswan.ai/arena/user/6859abdd98a57f59677a5a0a",
+      "selector": "tr:nth-of-type(73) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Peccavi",
+      "href": "https://app.grayswan.ai/arena/user/6a2cc03b6bc9b88b8d69a9ca",
+      "selector": "tr:nth-of-type(74) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Nina",
+      "href": "https://app.grayswan.ai/arena/user/69fbaf41cb430e3449224f6a",
+      "selector": "tr:nth-of-type(75) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Salah",
+      "href": "https://app.grayswan.ai/arena/user/69f62038398f17c1001a944c",
+      "selector": "tr:nth-of-type(76) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Kra1ven",
+      "href": "https://app.grayswan.ai/arena/user/6a662e2ce96c95e4edc400f8",
+      "selector": "tr:nth-of-type(77) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Jojomaw",
+      "href": "https://app.grayswan.ai/arena/user/683f3b317fe39efae83a2f61",
+      "selector": "tr:nth-of-type(78) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Rasta_Obi_Wan",
+      "href": "https://app.grayswan.ai/arena/user/67f316efcff959878f5900ae",
+      "selector": "tr:nth-of-type(79) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Cm0rduck",
+      "href": "https://app.grayswan.ai/arena/user/68b34871d60c9565c6620586",
+      "selector": "tr:nth-of-type(80) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Svetlina",
+      "href": "https://app.grayswan.ai/arena/user/6853c636a7500cf4802b0049",
+      "selector": "tr:nth-of-type(81) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Haris Umair (Strawberry_Cake)",
+      "href": "https://app.grayswan.ai/arena/user/67730d29a826709cdfa6d60f",
+      "selector": "tr:nth-of-type(82) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "P1njec70r",
+      "href": "https://app.grayswan.ai/arena/user/673fcc34fcc934d04deb0c19",
+      "selector": "tr:nth-of-type(83) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Clovis Mint",
+      "href": "https://app.grayswan.ai/arena/user/67bd75bf74c8279f0c6f80e6",
+      "selector": "tr:nth-of-type(84) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Ozma",
+      "href": "https://app.grayswan.ai/arena/user/68e059345f07d41a194ca721",
+      "selector": "tr:nth-of-type(85) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "12321",
+      "href": "https://app.grayswan.ai/arena/user/6848cad3f5d6a988d495bc0e",
+      "selector": "tr:nth-of-type(86) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "m\nMAY JUNE",
+      "href": "https://app.grayswan.ai/arena/user/6a1da5d7da31fc40a2d07b9c",
+      "selector": "tr:nth-of-type(87) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "last_underdog",
+      "href": "https://app.grayswan.ai/arena/user/678f7e4b6e13a57ab75af45d",
+      "selector": "tr:nth-of-type(88) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "fletcherface",
+      "href": "https://app.grayswan.ai/arena/user/69fe7c63fc5786cfdf796eaa",
+      "selector": "tr:nth-of-type(89) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "baphomet",
+      "href": "https://app.grayswan.ai/arena/user/68c0bc79e238d38ec343ee3e",
+      "selector": "tr:nth-of-type(90) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Liodeus",
+      "href": "https://app.grayswan.ai/arena/user/67c8602c89e82be61aa96e78",
+      "selector": "tr:nth-of-type(91) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "CloakEngaged",
+      "href": "https://app.grayswan.ai/arena/user/66987118953745dd8edfd84e",
+      "selector": "tr:nth-of-type(92) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Jeronimo",
+      "href": "https://app.grayswan.ai/arena/user/691c8dbdc838d5d0cf97b4b9",
+      "selector": "tr:nth-of-type(93) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Chukwuma Chukwuma",
+      "href": "https://app.grayswan.ai/arena/user/66cafe50c3a7a7fb8678232f",
+      "selector": "tr:nth-of-type(94) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Below_Threshold",
+      "href": "https://app.grayswan.ai/arena/user/6a2e4b5e318ee78df904631c",
+      "selector": "tr:nth-of-type(95) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "finalfix",
+      "href": "https://app.grayswan.ai/arena/user/674dc579d3e4a127de9854f9",
+      "selector": "tr:nth-of-type(96) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "glittercortex",
+      "href": "https://app.grayswan.ai/arena/user/697eb48f6b275bb4a0abd48c",
+      "selector": "tr:nth-of-type(97) > td:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "JOIN 15K+ RED-TEAMERS",
+      "href": "https://discord.grayswan.ai/",
+      "selector": "div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)"
+    },
+    {
+      "text": "ABOUT",
+      "href": "https://app.grayswan.ai/about",
+      "selector": "div:nth-of-type(2) > nav:nth-of-type(1) > a:nth-of-type(1)"
+    },
+    {
+      "text": "LIVE CHALLENGES",
+      "href": "https://app.grayswan.ai/arena",
+      "selector": "nav:nth-of-type(1) > a:nth-of-type(2)"
+    },
+    {
+      "text": "TRAINING",
+      "href": "https://app.grayswan.ai/arena",
+      "selector": "nav:nth-of-type(1) > a:nth-of-type(3)"
+    },
+    {
+      "text": "LEADERBOARD",
+      "href": "https://app.grayswan.ai/dashboard/leaderboard",
+      "selector": "nav:nth-of-type(1) > a:nth-of-type(4)"
+    },
+    {
+      "text": "RULES",
+      "href": "https://app.grayswan.ai/about#faq-rules-full",
+      "selector": "a:nth-of-type(5)"
+    },
+    {
+      "text": "ARENA TERMS",
+      "href": "https://app.grayswan.ai/about#terms",
+      "selector": "a:nth-of-type(6)"
+    },
+    {
+      "text": "ABOUT",
+      "href": "https://www.grayswan.ai/",
+      "selector": "nav:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "CAREERS",
+      "href": "https://www.grayswan.ai/careers",
+      "selector": "nav:nth-of-type(2) > a:nth-of-type(2)"
+    },
+    {
+      "text": "RESEARCH",
+      "href": "https://www.grayswan.ai/research",
+      "selector": "nav:nth-of-type(2) > a:nth-of-type(3)"
+    },
+    {
+      "text": "",
+      "href": "https://discord.grayswan.ai/",
+      "selector": "a[aria-label=\"Discord\"]"
+    },
+    {
+      "text": "",
+      "href": "https://x.com/GraySwanAI",
+      "selector": "a[aria-label=\"X\"]"
+    },
+    {
+      "text": "",
+      "href": "https://www.linkedin.com/company/grayswan-ai",
+      "selector": "a[aria-label=\"LinkedIn\"]"
+    },
+    {
+      "text": "Privacy",
+      "href": "https://www.grayswan.ai/privacy-policy",
+      "selector": "div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Terms",
+      "href": "https://www.grayswan.ai/terms-of-service",
+      "selector": "div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "text": "Company",
+      "href": "https://www.grayswan.ai/",
+      "selector": "div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(3) > a:nth-of-type(1)"
+    }
+  ],
+  "bodyText": "DASHBOARD\nCHALLENGES\nTRAINING\nLEADERBOARD\n2\nARENA LEADERBOARD\nRED TEAMERS RANKED\n4,171\nPAID OUT · ALL TIME\n$838,754\nGLOBAL\nALL SEASONS\nALL CHALLENGES\nFind a red teamer\nRANK 01\n4W STREAK\nSCHULTZIKA\n$30,459\nBREAKS\n5,526\nMODELS\n172/237\nPOINTS\n55,260\nRANK 02\n7W STREAK\nPIJUHN\n$16,908\nBREAKS\n5,329\nMODELS\n179/237\nPOINTS\n54,370\nRANK 03\n0W STREAK\nTST\n$7,590\nBREAKS\n4,407\nMODELS\n156/237\nPOINTS\n45,510\nRANK\tRED TEAMER\tBREAKS\tMODELS BROKEN\tPOINTS\tWINNINGS\n04\t\nKkonatruck\n\t4,482\t172/237\t44,820\t$21,374\n05\t\nDomcat85\n\t4,035\t139/237\t40,350\t$1,137\n06\t\nPQ_Marz\n\t3,630\t153/237\t38,460\t$7,350\n07\t\nNova\n\t3,827\t142/237\t38,270\t$18,608\n08\t\nVeeranuch\n\t3,679\t119/237\t36,790\t$6,990\n09\t\nZen\n\t3,473\t130/237\t35,990\t$9,799\n10\t\n|_1|-|\\/\\/4|<\n\t3,499\t142/237\t34,990\t$8,859\n11\t\nnull 0️⃣\n\t3,464\t147/237\t34,640\t$6,721\n12\t\nblackeyes1200\n\t3,446\t123/237\t34,460\t$6,369\n13\t\nASM1\n\t3,308\t132/237\t33,080\t$5,301\n14\t\nJun\n\t5,559\t119/237\t31,970\t$6,960\n15\t\nxmnesia\n\t3,165\t111/237\t31,650\t$7,960\n16\t\nimshadab18\n\t2,898\t123/237\t28,980\t$6,698\n17\t\nxmo12\n\t2,820\t118/237\t28,200\t$4,523\n18\t\nKING40\n\t2,789\t93/237\t27,980\t$6,557\n19\t\nintertec.io\n\t2,743\t74/237\t27,430\t$27,330\n20\t\nm\nMika\n\t2,734\t85/237\t27,340\t$4,290\n21\t\n{ JSON_Voorhees }\n\t2,720\t114/237\t27,290\t$4,951\n22\t\nJarne\n\t2,647\t106/237\t26,740\t$13,053\n23\t\nGoodlife Writer\n\t2,666\t106/237\t26,660\t$2,765\n24\t\nWyatt Walls\n\t3,433\t84/237\t26,410\t$14,558\n25\t\nWINTER IS COMING ❌ IS HERE ❌ IS GONE ❄\n\t2,504\t107/237\t25,040\t$10,175\n26\t\nu\nunit_ready\n\t2,481\t109/237\t24,810\t$0\n27\t\nAgusPG\n\t2,455\t98/237\t24,550\t$4,849\n28\t\narvkevi\n\t2,270\t116/237\t24,230\t$4,813\n29\t\nRobot\n\t2,408\t100/237\t24,080\t$5,392\n30\t\nRift\n\t2,180\t97/237\t23,960\t$1,732\n31\t\nM1das\n\t2,389\t102/237\t23,890\t$7,382\n32\t\ndbar\n\t2,327\t107/237\t23,270\t$9,685\n33\t\naxmine_0\n\t2,313\t85/237\t23,130\t$2,236\n34\t\nmeilz381\n\t2,285\t109/237\t22,850\t$2,229\n35\t\nHorus\n\t2,202\t123/237\t22,020\t$3,793\n36\t\nCornerbrook\n\t2,055\t140/237\t21,720\t$355\n37\t\n.\n\t2,149\t103/237\t21,490\t$10,708\n38\t\no\nOFF\n\t1,877\t110/237\t20,750\t$2,674\n39\t\nPhilip\n\t2,000\t56/237\t20,000\t$3,887\n40\t\nEllebbar\n\t1,917\t105/237\t19,890\t$7,624\n41\t\nScrattlebeard\n\t1,809\t112/237\t19,550\t$9,256\n42\t\nd\ndiogenesofsinope\n\t1,880\t58/237\t18,800\t$8,337\n43\t\nTamere\n\t1,845\t57/237\t18,450\t$3,900\n44\t\nWuWei\n\t1,840\t78/237\t18,400\t$3,773\n45\t\nIn\n\t1,820\t82/237\t18,200\t$3,066\n46\t\nTheMusZero\n\t1,789\t32/237\t17,890\t$6,482\n47\t\nh\nh4xor\n\t4,043\t70/237\t16,790\t$4,818\n48\t\nBaher\n\t1,642\t61/237\t16,420\t$3,256\n49\t\ns\nSunD4rk\n\t1,638\t47/237\t16,380\t$4,125\n50\t\nNoone\n\t1,591\t65/237\t15,910\t$2,917\n51\t\nzoom bee\n\t1,469\t92/237\t14,690\t$308\n52\t\ns\nSolomon Zoe\n\t2,450\t35/237\t14,620\t$10,665\n53\t\nsnaykeysnaykeysnaykeysnaykeysnaykey\n\t1,457\t101/237\t14,570\t$6,584\n54\t\nSlangy0\n\t1,447\t89/237\t14,560\t$1,439\n55\t\ndanteee\n\t1,453\t63/237\t14,530\t$0\n56\t\nTofu\n\t1,407\t70/237\t14,070\t$4,278\n57\t\nsky\n\t1,388\t85/237\t13,880\t$1,172\n58\t\nrivia\n\t1,370\t75/237\t13,700\t$1,415\n59\t\nAnika\n\t1,292\t62/237\t13,100\t$1,720\n60\t\ndrzk21\n\t1,125\t72/237\t12,510\t$936\n61\t\nd_deputat\n\t1,241\t70/237\t12,410\t$156\n62\t\n0xl1ch\n\t1,230\t44/237\t12,300\t$1,600\n63\t\nlau90\n\t1,229\t87/237\t12,290\t$1,566\n64\t\nc\nCoop\n\t1,229\t89/237\t12,290\t$602\n65\t\nKathleen Burkhardt1\n\t1,221\t67/237\t12,210\t$500\n66\t\n忍耐训练\n\t1,211\t87/237\t12,110\t$3,750\n67\t\nMatt@FissureSecurity\n\t1,206\t86/237\t12,060\t$943\n68\t\n0xiPickL0x\n\t1,196\t81/237\t11,960\t$629\n69\t\nrebugui\n\t1,183\t86/237\t11,830\t$2,470\n70\t\nmosskappa\n\t1,168\t34/237\t11,680\t$1,427\n71\t\n_Stellaris\n\t1,162\t89/237\t11,620\t$5,033\n72\t\nStrigiformes\n\t1,054\t40/237\t11,520\t$4,661\n73\t\nzardav\n\t1,135\t25/237\t11,350\t$7,997\n74\t\nksh\n\t1,126\t77/237\t11,260\t$2,710\n75\t\nMorgan\n\t1,123\t61/237\t11,230\t$1,378\n76\t\nRepo\n\t1,108\t40/237\t11,170\t$190\n77\t\nPeccavi\n\t1,109\t77/237\t11,090\t$1,961\n78\t\nNina\n\t1,104\t56/237\t11,040\t$13,269\n79\t\nSalah\n\t1,099\t48/237\t10,990\t$5,650\n80\t\nKra1ven\n\t1,098\t66/237\t10,980\t$3,493\n81\t\nJojomaw\n\t1,042\t39/237\t10,420\t$0\n82\t\nRasta_Obi_Wan\n\t849\t60/237\t10,380\t$992\n83\t\nCm0rduck\n\t1,029\t81/237\t10,290\t$1,000\n84\t\nSvetlina\n\t1,007\t84/237\t10,070\t$1,220\n85\t\nHaris Umair (Strawberry_Cake)\n\t958\t54/237\t10,050\t$6,575\n86\t\nP1njec70r\n\t981\t46/237\t9,990\t$7,241\n87\t\nClovis Mint\n\t957\t29/237\t9,840\t$9,483\n88\t\nOzma\n\t982\t81/237\t9,820\t$3,795\n89\t\n12321\n\t977\t53/237\t9,770\t$4,398\n90\t\nm\nMAY JUNE\n\t957\t67/237\t9,570\t$800\n91\t\nlast_underdog\n\t956\t63/237\t9,560\t$1,110\n92\t\nfletcherface\n\t951\t93/237\t9,510\t$152\n93\t\nbaphomet\n\t945\t78/237\t9,450\t$844\n94\t\nLiodeus\n\t932\t41/237\t9,320\t$1,560\n95\t\nCloakEngaged\n\t930\t21/237\t9,300\t$2,842\n96\t\nJeronimo\n\t929\t44/237\t9,290\t$541\n97\t\nChukwuma Chukwuma\n\t9,823\t30/237\t9,240\t$3,228\n98\t\nBelow_Threshold\n\t921\t88/237\t9,210\t$643\n99\t\nfinalfix\n\t901\t56/237\t9,010\t$1,355\n100\t\nglittercortex\n\t898\t41/237\t8,980\t$0\n\nA red-teaming arena for frontier AI.\nBreak the models, win prizes, make them safer.\n\nJOIN 15K+ RED-TEAMERS\nARENA\nABOUT\nLIVE CHALLENGES\nTRAINING\nLEADERBOARD\nRULES\nARENA TERMS\nGRAY SWAN\nABOUT\nCAREERS\nRESEARCH\n\n© 2026 Gray Swan AI. All rights reserved\n\nPrivacy\nTerms\nCompany\nLeaderboard | Gray Swan Arena",
+  "controls": [
+    {
+      "tag": "a",
+      "selector": "a[aria-label=\"Gray Swan Arena\"]",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": "Gray Swan Arena",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "nav:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "DASHBOARD",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "div:nth-of-type(1) > a:nth-of-type(2)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "CHALLENGES",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "div:nth-of-type(1) > a:nth-of-type(3)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "TRAINING",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "div:nth-of-type(1) > a:nth-of-type(4)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "LEADERBOARD",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "a[aria-label=\"Notifications, 2 unread\"]",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": "Notifications, 2 unread",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "2",
+      "disabled": false
+    },
+    {
+      "tag": "button",
+      "selector": "#bits-s1",
+      "id": "bits-s1",
+      "role": null,
+      "type": "button",
+      "name": null,
+      "ariaLabel": "Your account",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": false
+    },
+    {
+      "tag": "input",
+      "selector": "input:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": "search",
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": "Find a red teamer",
+      "value": "",
+      "text": "",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "article:nth-of-type(1) > div:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "SCHULTZIKA",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "article:nth-of-type(2) > div:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "PIJUHN",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "article:nth-of-type(3) > div:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "TST",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(1) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Kkonatruck",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(2) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Domcat85",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(3) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "PQ_Marz",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(4) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Nova",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(5) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Veeranuch",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(6) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Zen",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(7) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "|_1|-|\\/\\/4|<",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(8) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "null 0️⃣",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(9) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "blackeyes1200",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(10) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "ASM1",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(11) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Jun",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(12) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "xmnesia",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(13) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "imshadab18",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(14) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "xmo12",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(15) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "KING40",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(16) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "intertec.io",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(17) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "m\nMika",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(18) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "{ JSON_Voorhees }",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(19) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Jarne",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(20) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Goodlife Writer",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(21) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Wyatt Walls",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(22) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "WINTER IS COMING ❌ IS HERE ❌ IS GONE ❄",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(23) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "u\nunit_ready",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(24) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "AgusPG",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(25) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "arvkevi",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(26) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Robot",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(27) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Rift",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(28) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "M1das",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(29) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "dbar",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(30) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "axmine_0",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(31) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "meilz381",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(32) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Horus",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(33) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Cornerbrook",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(34) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": ".",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(35) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "o\nOFF",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(36) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Philip",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(37) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Ellebbar",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(38) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Scrattlebeard",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(39) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "d\ndiogenesofsinope",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(40) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Tamere",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(41) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "WuWei",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(42) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "In",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(43) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "TheMusZero",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(44) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "h\nh4xor",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(45) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Baher",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(46) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "s\nSunD4rk",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(47) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Noone",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(48) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "zoom bee",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(49) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "s\nSolomon Zoe",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(50) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "snaykeysnaykeysnaykeysnaykeysnaykey",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(51) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Slangy0",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(52) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "danteee",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(53) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Tofu",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(54) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "sky",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(55) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "rivia",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(56) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Anika",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(57) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "drzk21",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(58) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "d_deputat",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(59) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "0xl1ch",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(60) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "lau90",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(61) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "c\nCoop",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(62) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Kathleen Burkhardt1",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(63) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "忍耐训练",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(64) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Matt@FissureSecurity",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(65) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "0xiPickL0x",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(66) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "rebugui",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(67) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "mosskappa",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(68) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "_Stellaris",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(69) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Strigiformes",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(70) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "zardav",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(71) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "ksh",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(72) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Morgan",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(73) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Repo",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(74) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Peccavi",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(75) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Nina",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(76) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Salah",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(77) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Kra1ven",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(78) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Jojomaw",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(79) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Rasta_Obi_Wan",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(80) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Cm0rduck",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(81) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Svetlina",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(82) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Haris Umair (Strawberry_Cake)",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(83) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "P1njec70r",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(84) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Clovis Mint",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(85) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Ozma",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(86) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "12321",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(87) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "m\nMAY JUNE",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(88) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "last_underdog",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(89) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "fletcherface",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(90) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "baphomet",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(91) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Liodeus",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(92) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "CloakEngaged",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(93) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Jeronimo",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(94) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Chukwuma Chukwuma",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(95) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Below_Threshold",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(96) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "finalfix",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "tr:nth-of-type(97) > td:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "glittercortex",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "JOIN 15K+ RED-TEAMERS",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "div:nth-of-type(2) > nav:nth-of-type(1) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "ABOUT",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "nav:nth-of-type(1) > a:nth-of-type(2)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "LIVE CHALLENGES",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "nav:nth-of-type(1) > a:nth-of-type(3)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "TRAINING",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "nav:nth-of-type(1) > a:nth-of-type(4)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "LEADERBOARD",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "a:nth-of-type(5)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "RULES",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "a:nth-of-type(6)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "ARENA TERMS",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "nav:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "ABOUT",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "nav:nth-of-type(2) > a:nth-of-type(2)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "CAREERS",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "nav:nth-of-type(2) > a:nth-of-type(3)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "RESEARCH",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "a[aria-label=\"Discord\"]",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": "Discord",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "a[aria-label=\"X\"]",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": "X",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "a[aria-label=\"LinkedIn\"]",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": "LinkedIn",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Privacy",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Terms",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(3) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Company",
+      "disabled": false
+    }
+  ],
+  "fileInputs": []
+}

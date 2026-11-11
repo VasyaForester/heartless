@@ -1,0 +1,10 @@
+{
+  "clicked": true,
+  "kind": "chat",
+  "sentAt": "2026-11-06T08:07:24.043Z",
+  "status": "pending",
+  "reason": "No new stable attributed assistant response before timeout; do not resend.",
+  "messages": [],
+  "capturedAt": "2026-11-06T08:09:54.029Z",
+  "operationId": "pg-w1-img-ofu-send-01"
+}

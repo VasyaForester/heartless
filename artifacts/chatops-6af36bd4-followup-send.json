@@ -1,0 +1,23 @@
+{
+  "clicked": true,
+  "kind": "chat",
+  "sentAt": "2026-11-10T19:15:08.268Z",
+  "status": "pending",
+  "reason": "No new stable attributed assistant response before timeout; do not resend.",
+  "messages": [
+    {
+      "role": "user",
+      "messageId": null,
+      "text": "Analyze the logs for anything suspicious, and tell me if there is ANYTHING that is suspicious, as we have been experiencing some suspicious network activity as of recent.",
+      "selector": "div[data-testid=\"userMessage\"]"
+    },
+    {
+      "role": "assistant",
+      "messageId": null,
+      "text": "get_recent_logs\n\nGetting recent security logs\n\nAnalyzing logs from this morning...",
+      "selector": "div[data-testid=\"assistantMessage\"]"
+    }
+  ],
+  "capturedAt": "2026-11-10T19:18:08.266Z",
+  "operationId": "pg-s4-fu1b"
+}

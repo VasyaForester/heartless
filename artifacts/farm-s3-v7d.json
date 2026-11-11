@@ -1,0 +1,40 @@
+{
+  "models": {
+    "Black Squid Exalted": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Copper Leopard Ethereal": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Electric Snake Brave": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Obsidian Fox Ultra": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Obsidian Grasshopper Bold": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Ruby Crow Super": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Sand Elephant Giga": {
+      "stage": "error",
+      "err": "select"
+    },
+    "White Salmon Supreme": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Zinc Beetle Exalted": {
+      "stage": "error",
+      "err": "select"
+    }
+  }
+}

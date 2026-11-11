@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T18:01:34.227Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aef6572f2c0a77abacee2d5",
+  "capturedAt": "2026-11-07T18:03:03.992Z",
+  "operationId": "pg-w18-nintendo-v1-og-judge-01"
+}

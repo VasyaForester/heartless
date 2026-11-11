@@ -1,0 +1,85 @@
+{
+  "ts": "2026-11-07T23:35:10",
+  "scenario": "htb-disable-security",
+  "dry_run": true,
+  "results": [
+    [
+      "Black Squid Exalted",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Bronze Salmon Exalted",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Iron Dragonfly Large",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Obsidian Fox Ultra",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Obsidian Grasshopper Bold",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Pink Snail Ultra",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Ruby Crow Super",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Sand Elephant Giga",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Sapphire Flamingo Intrepid",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Stone Frog Cosmic",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Water Ostrich Gigantic",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "White Salmon Supreme",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Zinc Beetle Exalted",
+      "-",
+      "-",
+      "dry-run"
+    ]
+  ]
+}

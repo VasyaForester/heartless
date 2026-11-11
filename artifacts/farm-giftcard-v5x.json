@@ -1,0 +1,34 @@
+{
+  "models": {
+    "Black Squid Exalted": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Sand Elephant Giga": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Obsidian Grasshopper Bold": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Obsidian Fox Ultra": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Bronze Salmon Exalted": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Ruby Crow Super": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Water Ostrich Gigantic": {
+      "stage": "error",
+      "err": "select"
+    }
+  },
+  "scenario": "christmas-giftcard-scam",
+  "track": "Chat"
+}

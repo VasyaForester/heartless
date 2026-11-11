@@ -1,0 +1,42 @@
+{
+  "models": {
+    "Obsidian Grasshopper Bold": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T03:01:58",
+      "input_sha": "61407a2b562cd4cd",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 123,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-obsidian-grasshopper-bold-send-result.json",
+      "ts": "2026-11-11T03:02:08",
+      "judge": "not-judged"
+    },
+    "Stone Frog Cosmic": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T03:02:41",
+      "input_sha": "61407a2b562cd4cd",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 165,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-stone-frog-cosmic-send-result.json",
+      "ts": "2026-11-11T03:02:47",
+      "judge": "not-judged"
+    }
+  },
+  "scenario": "proving-defcon33-5n4ck3y",
+  "track": "Chat"
+}

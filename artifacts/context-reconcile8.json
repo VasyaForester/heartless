@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "command": "context",
+  "result": {
+    "url": "https://app.grayswan.ai/arena/challenge/proving-ground?modal=chats&chatId=6aed8ac17a4c967c8dbfec80",
+    "title": "Proving Ground Chat | Gray Swan Arena | Gray Swan AI",
+    "capturedAt": "2026-11-06T08:10:26.588Z",
+    "headings": [],
+    "model": {
+      "value": null,
+      "status": "unknown",
+      "candidates": []
+    },
+    "scenario": null,
+    "criteria": [],
+    "messages": [],
+    "assistantMessages": [],
+    "judge": {
+      "status": "unknown",
+      "submissionId": null,
+      "evidence": []
+    },
+    "streaming": false,
+    "sendControls": [],
+    "judgeControls": [],
+    "modelPickers": [],
+    "availableModels": [],
+    "links": [
+      {
+        "text": "GO BACK HOME",
+        "href": "https://app.grayswan.ai/",
+        "selector": "a:nth-of-type(1)"
+      }
+    ],
+    "bodyText": "500\n\nSomething went wrong\n\nInternal Error\n\nGO BACK HOME\nTry Again\nProving Ground Chat | Gray Swan Arena | Gray Swan AI"
+  }
+}

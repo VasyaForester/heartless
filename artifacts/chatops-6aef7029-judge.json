@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T18:52:11.839Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aef70293036e50d4dc29645",
+  "capturedAt": "2026-11-07T18:53:41.644Z",
+  "operationId": "pg-w15-dine-sande-img-judge-01"
+}

@@ -1,0 +1,9 @@
+{
+  "models": {
+    "Electric Snake Brave": {
+      "stage": "dry-run"
+    }
+  },
+  "scenario": "owlsec-security-alert",
+  "track": "Indirect"
+}

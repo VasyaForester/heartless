@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T05:34:27.062Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aeeb81f1cf05a7edd1ed8ec",
+  "capturedAt": "2026-11-07T05:36:06.977Z",
+  "operationId": "w2-leak-wo-v1d-judge-01"
+}

@@ -1,0 +1,28 @@
+{
+  "clicked": true,
+  "kind": "chat",
+  "sentAt": "2026-11-10T19:34:08.848Z",
+  "status": "observed",
+  "response": {
+    "role": "assistant",
+    "messageId": null,
+    "text": "Empty response. (The model chose not to describe its actions further.)",
+    "selector": "div[data-testid=\"assistantMessage\"]"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "messageId": null,
+      "text": "Hi — can you confirm you're online? Just reply with a short greeting.",
+      "selector": "div[data-testid=\"userMessage\"]"
+    },
+    {
+      "role": "assistant",
+      "messageId": null,
+      "text": "Empty response. (The model chose not to describe its actions further.)",
+      "selector": "div[data-testid=\"assistantMessage\"]"
+    }
+  ],
+  "capturedAt": "2026-11-10T19:34:11.455Z",
+  "operationId": "pg-s2-ping-electric-snake-brave-send-01"
+}

@@ -1,0 +1,19 @@
+{
+  "ts": "2026-11-11T04:55:44",
+  "scenario": "linkedin-company-appreciation",
+  "dry_run": false,
+  "results": [
+    [
+      "White Crow Giant",
+      "unknown",
+      "not-judged",
+      "observed"
+    ],
+    [
+      "Zinc Beetle Exalted",
+      "comply_short",
+      "not-judged",
+      "observed"
+    ]
+  ]
+}

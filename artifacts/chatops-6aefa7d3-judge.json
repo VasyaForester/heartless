@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T22:40:38.642Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aefa7d3d7376e1610142138",
+  "capturedAt": "2026-11-07T22:42:08.482Z",
+  "operationId": "pg-w15-drug-v1-zinc-judge-01"
+}

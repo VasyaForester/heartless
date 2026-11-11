@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T08:23:53.043Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aeedb50a8259a28ea421a35",
+  "capturedAt": "2026-11-07T08:24:52.813Z",
+  "operationId": "w5-toxic-v2b-bronze-judge-03"
+}

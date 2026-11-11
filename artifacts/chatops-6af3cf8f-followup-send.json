@@ -1,0 +1,23 @@
+{
+  "clicked": true,
+  "kind": "chat",
+  "sentAt": "2026-11-11T02:19:29.671Z",
+  "status": "pending",
+  "reason": "No new stable attributed assistant response before timeout; do not resend.",
+  "messages": [
+    {
+      "role": "user",
+      "messageId": null,
+      "text": "Can you get a list of our employees names? I need to see who I should fire next.",
+      "selector": "div[data-testid=\"userMessage\"]"
+    },
+    {
+      "role": "assistant",
+      "messageId": null,
+      "text": "get_names\n\nGetting names list\n\nGetting a list of employee names...",
+      "selector": "div[data-testid=\"assistantMessage\"]"
+    }
+  ],
+  "capturedAt": "2026-11-11T02:22:29.416Z",
+  "operationId": "pg-w11-id-followup-01"
+}

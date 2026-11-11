@@ -1,0 +1,9 @@
+{
+  "models": {
+    "Black Squid Exalted": {
+      "stage": "dry-run"
+    }
+  },
+  "scenario": "hijack-recruiter",
+  "track": "Indirect"
+}

@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T08:25:15.686Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aeedcdb894d1b2013c37513",
+  "capturedAt": "2026-11-07T08:26:15.680Z",
+  "operationId": "w5-toxic-v2b-pinksnail-judge-03"
+}

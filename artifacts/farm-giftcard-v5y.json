@@ -1,0 +1,18 @@
+{
+  "models": {
+    "Black Squid Exalted": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Sand Elephant Giga": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Obsidian Grasshopper Bold": {
+      "stage": "error",
+      "err": "select"
+    }
+  },
+  "scenario": "christmas-giftcard-scam",
+  "track": "Chat"
+}

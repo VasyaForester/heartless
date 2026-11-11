@@ -1,0 +1,37 @@
+{
+  "models": {
+    "Water Ostrich Gigantic": {
+      "stage": "sent",
+      "status": "observed",
+      "class": "refuse_template",
+      "pre": {
+        "len": 540
+      },
+      "send_file": "artifacts/farm-water-ostrich-gigantic-send-result.json",
+      "ts": "2026-11-06T23:22:30",
+      "judge": "not-judged"
+    },
+    "Sand Elephant Giga": {
+      "stage": "sent",
+      "status": "observed",
+      "class": "refuse_template",
+      "pre": {
+        "len": 452
+      },
+      "send_file": "artifacts/farm-sand-elephant-giga-send-result.json",
+      "ts": "2026-11-06T23:23:20",
+      "judge": "not-judged"
+    },
+    "Obsidian Sardine Ultra": {
+      "stage": "sent",
+      "status": "observed",
+      "class": "refuse_template",
+      "pre": {
+        "len": 23
+      },
+      "send_file": "artifacts/farm-obsidian-sardine-ultra-send-result.json",
+      "ts": "2026-11-06T23:24:10",
+      "judge": "not-judged"
+    }
+  }
+}

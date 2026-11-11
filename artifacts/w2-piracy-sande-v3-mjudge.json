@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-06T18:40:51.726Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aee1d2a4f1525b672133556",
+  "capturedAt": "2026-11-06T18:42:21.592Z",
+  "operationId": "w2-piracy-sande-v3-mjudge-02"
+}

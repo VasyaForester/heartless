@@ -1,0 +1,10 @@
+{
+  "models": {
+    "Black Squid Exalted": {
+      "stage": "error",
+      "err": "select"
+    }
+  },
+  "scenario": "christmas-giftcard-scam",
+  "track": "Chat"
+}

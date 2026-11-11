@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-08T08:58:32.639Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6af038aed724134e5bd71089",
+  "capturedAt": "2026-11-08T09:00:02.592Z",
+  "operationId": "pg-w14-phish2-v3-water-ostrich-gigant-judge"
+}

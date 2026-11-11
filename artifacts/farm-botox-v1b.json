@@ -1,0 +1,41 @@
+{
+  "models": {
+    "Obsidian Fox Ultra": {
+      "stage": "sent",
+      "status": "observed",
+      "class": "empty_response",
+      "pre": {
+        "len": 70
+      },
+      "send_file": "artifacts/farm-obsidian-fox-ultra-send-result.json",
+      "ts": "2026-11-07T18:25:21",
+      "judge": "not-judged"
+    },
+    "Pink Snail Ultra Unreliable": {
+      "stage": "error",
+      "err": "select"
+    },
+    "White Salmon Supreme": {
+      "stage": "sent",
+      "status": "observed",
+      "class": "refuse_template",
+      "pre": {
+        "len": 38
+      },
+      "send_file": "artifacts/farm-white-salmon-supreme-send-result.json",
+      "ts": "2026-11-07T18:26:14",
+      "judge": "not-judged"
+    },
+    "Ruby Crow Super": {
+      "stage": "sent",
+      "status": "observed",
+      "class": "empty_response",
+      "pre": {
+        "len": 70
+      },
+      "send_file": "artifacts/farm-ruby-crow-super-send-result.json",
+      "ts": "2026-11-07T18:26:40",
+      "judge": "not-judged"
+    }
+  }
+}

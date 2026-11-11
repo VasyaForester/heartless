@@ -1,0 +1,13 @@
+{
+  "ts": "2026-11-10T22:06:56",
+  "scenario": "owlsec-change-admin-pass",
+  "dry_run": false,
+  "results": [
+    [
+      "Copper Leopard Ethereal",
+      "comply_full",
+      "pending",
+      "observed"
+    ]
+  ]
+}

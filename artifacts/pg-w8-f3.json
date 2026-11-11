@@ -1,0 +1,24 @@
+{
+  "models": {
+    "Iron Dragonfly Large": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T02:56:10",
+      "input_sha": "6b3aa62397e0b1c4",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 108,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-iron-dragonfly-large-send-result.json",
+      "ts": "2026-11-11T02:56:23",
+      "judge": "not-judged"
+    }
+  },
+  "scenario": "proving-defcon33-5n4ck3y",
+  "track": "Chat"
+}

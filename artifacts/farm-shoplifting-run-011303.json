@@ -1,0 +1,43 @@
+{
+  "ts": "2026-11-08T01:13:03",
+  "scenario": "shoplifting",
+  "dry_run": true,
+  "results": [
+    [
+      "Black Squid Exalted",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Bronze Salmon Exalted",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Obsidian Fox Ultra",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Ruby Crow Super",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "White Salmon Supreme",
+      "-",
+      "-",
+      "dry-run"
+    ],
+    [
+      "Zinc Beetle Exalted",
+      "-",
+      "-",
+      "dry-run"
+    ]
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?panel=criteria",
+  "title": "Proving Ground Chat | Gray Swan Arena | Gray Swan AI",
+  "capturedAt": "2026-11-06T07:25:21.201Z",
+  "headings": [
+    {
+      "selector": "div:nth-of-type(1) > div:nth-of-type(1) > h2:nth-of-type(1)",
+      "text": "Proving Ground"
+    },
+    {
+      "selector": "aside:nth-of-type(1) > div:nth-of-type(1) > h2:nth-of-type(1)",
+      "text": "Scenario criteria"
+    }
+  ],
+  "model": {
+    "value": null,
+    "status": "unknown",
+    "candidates": []
+  },
+  "scenario": null,
+  "criteria": [],
+  "messages": [],
+  "assistantMessages": [],
+  "judge": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "streaming": false,
+  "sendControls": [],
+  "judgeControls": [],
+  "modelPickers": [],
+  "availableModels": [],
+  "links": [
+    {
+      "text": "View Challenge Rules",
+      "href": "https://app.grayswan.ai/arena/challenge/proving-ground",
+      "selector": "div:nth-of-type(3) > div:nth-of-type(1) > a:nth-of-type(1)"
+    }
+  ],
+  "bodyText": "SUBMISSIONS\n0\nProving Ground\n\nWeekly drops across all red-teaming modalities\n\nJoin the Discord Server\n(1,347 online)\nView Challenge Rules\nScenario criteria",
+  "controls": [
+    {
+      "tag": "button",
+      "selector": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > button:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": "button",
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "SUBMISSIONS\n0",
+      "disabled": false
+    },
+    {
+      "tag": "button",
+      "selector": "#bits-s4",
+      "id": "bits-s4",
+      "role": null,
+      "type": "button",
+      "name": null,
+      "ariaLabel": "Open user menu",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": false
+    },
+    {
+      "tag": "button",
+      "selector": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > button:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": "button",
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "Join the Discord Server\n(1,347 online)",
+      "disabled": false
+    },
+    {
+      "tag": "a",
+      "selector": "div:nth-of-type(3) > div:nth-of-type(1) > a:nth-of-type(1)",
+      "id": null,
+      "role": null,
+      "type": null,
+      "name": null,
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "View Challenge Rules",
+      "disabled": false
+    },
+    {
+      "tag": "textarea",
+      "selector": "#chatTextarea",
+      "id": "chatTextarea",
+      "role": null,
+      "type": null,
+      "name": "prompt",
+      "ariaLabel": null,
+      "testId": null,
+      "placeholder": "Say something...",
+      "value": "",
+      "text": "",
+      "disabled": true
+    },
+    {
+      "tag": "button",
+      "selector": "#bits-s8",
+      "id": "bits-s8",
+      "role": null,
+      "type": "button",
+      "name": null,
+      "ariaLabel": "Tag this chat",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": true
+    },
+    {
+      "tag": "button",
+      "selector": "button[aria-label=\"Resize Scenario criteria panel\"]",
+      "id": null,
+      "role": "separator",
+      "type": "button",
+      "name": null,
+      "ariaLabel": "Resize Scenario criteria panel",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": false
+    },
+    {
+      "tag": "button",
+      "selector": "button[aria-label=\"Close panel\"]",
+      "id": null,
+      "role": null,
+      "type": "button",
+      "name": null,
+      "ariaLabel": "Close panel",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": false
+    },
+    {
+      "tag": "button",
+      "selector": "button[aria-label=\"Leaderboard\"]",
+      "id": null,
+      "role": null,
+      "type": "button",
+      "name": null,
+      "ariaLabel": "Leaderboard",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": false
+    },
+    {
+      "tag": "button",
+      "selector": "button[aria-label=\"Prizes\"]",
+      "id": null,
+      "role": null,
+      "type": "button",
+      "name": null,
+      "ariaLabel": "Prizes",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": false
+    },
+    {
+      "tag": "button",
+      "selector": "button[aria-label=\"Rules\"]",
+      "id": null,
+      "role": null,
+      "type": "button",
+      "name": null,
+      "ariaLabel": "Rules",
+      "testId": null,
+      "placeholder": null,
+      "value": null,
+      "text": "",
+      "disabled": false
+    }
+  ],
+  "fileInputs": []
+}

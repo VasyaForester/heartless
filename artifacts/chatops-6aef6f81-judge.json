@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T18:54:49.876Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aef6f813036e50d4dc294a0",
+  "capturedAt": "2026-11-07T18:56:19.865Z",
+  "operationId": "pg-w15-dine-og-img-judge-01"
+}

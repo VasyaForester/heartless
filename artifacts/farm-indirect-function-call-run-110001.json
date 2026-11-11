@@ -1,0 +1,13 @@
+{
+  "ts": "2026-11-08T11:00:01",
+  "scenario": "indirect-function-call",
+  "dry_run": false,
+  "results": [
+    [
+      "Black Squid Exalted",
+      "comply_short",
+      "not-judged",
+      "observed"
+    ]
+  ]
+}

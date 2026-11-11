@@ -1,0 +1,16 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-10T14:41:26.474Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": [],
+    "criteriaPercents": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/lucky-break-payday",
+  "capturedAt": "2026-11-10T14:42:56.432Z",
+  "operationId": "lbp-scam-retail-yellow-kangaroo-extreme-1794321683"
+}

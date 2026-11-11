@@ -1,0 +1,15 @@
+{
+  "clicked": true,
+  "kind": "judge",
+  "submittedAt": "2026-11-07T08:19:45.061Z",
+  "status": "pending",
+  "reason": "No new attributed judge verdict; do not submit again.",
+  "observation": {
+    "status": "unknown",
+    "submissionId": null,
+    "evidence": []
+  },
+  "url": "https://app.grayswan.ai/arena/challenge/proving-ground?chatId=6aeedcad6c4f79b66a529433",
+  "capturedAt": "2026-11-07T08:20:44.887Z",
+  "operationId": "w5-toxic-v2b-sardine-judge-03"
+}

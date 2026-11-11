@@ -1,0 +1,42 @@
+{
+  "models": {
+    "Water Ostrich Gigantic": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T03:03:51",
+      "input_sha": "c697172b35447e40",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 46,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-water-ostrich-gigantic-send-result.json",
+      "ts": "2026-11-11T03:03:57",
+      "judge": "not-judged"
+    },
+    "White Salmon Supreme": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T03:04:24",
+      "input_sha": "c697172b35447e40",
+      "status": "observed",
+      "class": "unknown",
+      "pre": {
+        "len": 46,
+        "step_markers": 0,
+        "tool_terms": 0,
+        "has_commands": false,
+        "flaw_flags": 0,
+        "guess": "uncertain"
+      },
+      "send_file": "artifacts/farm-white-salmon-supreme-send-result.json",
+      "ts": "2026-11-11T03:05:20",
+      "judge": "not-judged"
+    }
+  },
+  "scenario": "proving-defcon33-5n4ck3y",
+  "track": "Chat"
+}
