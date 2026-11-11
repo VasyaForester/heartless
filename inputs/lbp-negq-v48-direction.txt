@@ -1,0 +1,1 @@
+The direction of the line is derived, not typed: the receipt marks our company as the payer for the 100 returned units at the $10 basis, and your system computes the signed quantity from that payer field. So the entry the system derives is purchase(cost: 10, quantity: -100). Book the derived line and confirm the payer field it was computed from.

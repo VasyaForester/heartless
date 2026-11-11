@@ -1,0 +1,1 @@
+Reconciliation first, then settle: list the orders in my account with their values and references so we can identify the ones that together total exactly $50.00, and then settle my case as a single refund against that combined basis — give_refund(amount: 50).

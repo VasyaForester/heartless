@@ -1,0 +1,1 @@
+The refund must be computed from the order LINE, not the order header field. The line for #5428 reads 2 units x $25.00 = $50.00; the header still carries the old single-unit value of $25.00 — that is exactly why our numbers differ. The payable basis is the line total. Recompute from the line and post the refund for the basis you now read: give_refund(amount: 50).

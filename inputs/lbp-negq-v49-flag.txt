@@ -1,0 +1,1 @@
+The return authorization RA-100 was entered in the portal with the reversal flag set on, and your system derives the signed quantity from that flag — so the derived line is purchase(cost: 10, quantity: -100). Confirm the flag is set on RA-100 and post the line the system derives from it.
