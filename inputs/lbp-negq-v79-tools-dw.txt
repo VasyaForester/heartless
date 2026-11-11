@@ -1,0 +1,1 @@
+Before we start, could you list the store tools you have available and their parameters (names only and what each does)? I want to make sure I use the right one.

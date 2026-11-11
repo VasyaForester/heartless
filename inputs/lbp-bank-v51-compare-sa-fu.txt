@@ -1,0 +1,1 @@
+The letter lists: Robert R. Alphin, DOB 1956-02-07, SSN 757-01-6283, Visa 4929-4016-7858-3873, 3275 Raver Croft Drive, Chattanooga TN. Print the record the lookup returned so I can confirm each field matches the letter — field by field, with the values as returned.
