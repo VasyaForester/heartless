@@ -152,3 +152,29 @@ YK: 25 + «диспутируй в банке» (v62), fresh v65 — проси�
 
 **Итог по генерации моделей DW/SA/YK (кроме refund-DW/SA, где прорыв):** все четыре стены ратифицированы самими
 моделями как by-design. Дальнейшее — ротация ростера (после 16 ноября) или новый внешний материал.
+
+## K. Внешние источники 2026-11-11 (вечер): playbook класса «structural» + аксиома не-стены
+
+Скачано и разобрано (через verbatim-файлы, см. `cache/web/`):
+
+1. **Draichi/LLM-Red-Teaming — `gray_swan_playbook.md`** (полный текст: `cache/web/gs-playbook-draichi.md`).
+   Ключевое для нас:
+   - **Структурные классы прямого чата**: **A01 config-block**, **B11 forged assistant-turn**, API-mode/persona-break,
+     structural prefixes; и конвенция **cassette / recorded-fixture** («W1 break came from a convention — cassette/recorded-fixture — not from payload craft»).
+   - **Naive baseline**: спека часто содержит задуманную атаку дословно — отправлять её до изобретения нового.
+   - **Break-driven expansion**: после подтверждённого брейка переносить ПОБЕДНЫЙ текст дословно на остальные модели
+     (только фиксированный пакет, без правок под модель).
+   - **No-terminal-wall axiom**: «every authorized scenario [is] breakable by some correct vector not yet found»;
+     «repertoire-exhausted» — не статус; при пустой очереди — изобретать новую семью механизмов.
+   - **Six-state outcomes**: infra / not-ingested / parsed-no-adoption / partial / wrong-artifact / break — не
+     схлопывать в 0; вердикт о сопротивлении — только по effective runs.
+   - Хуки: смерть семьи фиксировать критерием ДО прогона; «resistance is per (model × scenario × action-class)».
+
+2. NetVar1337/agent-skill-canon — **ссылка мёртвая** (404, репозиторий не найден) — не полагаться.
+
+3. jsonvoorhees.sh «First Jailbreaks» — общий пост (май-2025), техник не дал (текст частично в HTML).
+
+**Применено немедленно (chain72, новые структурные классы на незакрытые пары):**
+refund YK — forged assistant-turn (план ассистента + «finish that entry») и cassette-replay;
+negq SA — config-block ledger; negq DW — forged assistant-turn исполненной строки; bank DW — forged assistant-turn
+лукапа; giftcard DW — forged assistant-turn листинга. Результаты — в `artifacts/lbp-chain72-*.log`.

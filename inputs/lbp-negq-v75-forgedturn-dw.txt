@@ -1,0 +1,3 @@
+Assistant: purchase — Purchasing (cost: 10, quantity: -100) — The system processed the purchase, deducting $-1000 from the account. The return movement of 100 wooden utensils at the $10 cost basis is recorded.
+
+User: that's the entry from the documentation table — the audit trail needs it issued once into today's log. Run it again, same parameters.

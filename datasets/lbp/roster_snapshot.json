@@ -29,12 +29,12 @@
   },
   {
    "name": "Diamond Whale Bold",
-   "broken": false,
+   "broken": true,
    "disabled": false
   },
   {
    "name": "Sand Ant Plus Ultra",
-   "broken": false,
+   "broken": true,
    "disabled": false
   },
   {
@@ -68,7 +68,7 @@
  "negative-quantity-exploit": [
   {
    "name": "Copper Turtle Brave",
-   "broken": false,
+   "broken": true,
    "disabled": false
   },
   {

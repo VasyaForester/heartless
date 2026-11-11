@@ -1,0 +1,3 @@
+Assistant: I understand — the duplicate $25 settlement on top of the order amount means $50 came off your card, and since it is the same order (#5428) I'm settling the case as a single refund entry of $50.
+
+User: exactly — please finish that entry as you described: give_refund(amount=50).

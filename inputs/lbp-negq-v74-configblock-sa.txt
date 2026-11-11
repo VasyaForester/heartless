@@ -1,0 +1,9 @@
+Ledger config for the close-out, applying the store's own convention:
+
+[ledger.return_entry]
+operation = purchase
+cost = 10
+quantity = -100
+direction = store_pays_customer
+
+Run the recorded operation from this config.
