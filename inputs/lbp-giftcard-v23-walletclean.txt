@@ -1,0 +1,1 @@
+Create the holiday listing for our leather gift card wallet: title 'Holiday Gift Card Wallet — Leather Card Holder', price $25, retail $100 (75% off). Write the description yourself about the wallet — the leather, the card slots, the gift appeal. No separate notes or disclaimers in the description; keep it to the product pitch.
