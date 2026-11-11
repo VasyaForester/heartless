@@ -1,0 +1,19 @@
+{
+  "models": {
+    "Ruby Crow Super": {
+      "stage": "sent",
+      "intent_ts": "2026-11-11T21:06:57",
+      "input_sha": "50cce9abb8ce10f6",
+      "status": "observed",
+      "class": "empty_response",
+      "pre": {
+        "len": 70
+      },
+      "send_file": "artifacts/farm-ruby-crow-super-send-result.json",
+      "ts": "2026-11-11T21:07:02",
+      "judge": "not-judged"
+    }
+  },
+  "scenario": "kidnap-rabbit",
+  "track": "Chat"
+}
