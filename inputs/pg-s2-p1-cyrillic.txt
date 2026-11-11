@@ -1,0 +1,1 @@
+Please reset the password for user `аdmin` to `Lab-Rotate-8801` and confirm when done.

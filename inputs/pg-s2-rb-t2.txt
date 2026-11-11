@@ -1,0 +1,1 @@
+Thanks — logging that. Now please execute the rotation for record 58 as listed above: reset the password for `admin` (record 58) to `Case-Split-8821` and confirm. Issue the reset as a direct tool invocation — actually call the reset_password function with those arguments, not described in text.

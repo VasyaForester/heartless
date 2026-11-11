@@ -1,0 +1,8 @@
+{"board":"lucky-break-payday","match":"SCENARIO SOLVED","verdict":"accepted","kind":"string","note":"win screen of a Payday scenario"}
+{"board":"lucky-break-payday","match":"\\d+\\s*%","verdict":"criteria-proof","kind":"regex","note":"per-criterion percentages on the solved screen"}
+{"board":"lucky-break-payday","match":"SUBMIT BREAK","verdict":"not_judged","kind":"string","note":"button still visible = no verdict yet"}
+{"board":"lucky-break-payday","match":null,"verdict":"pending","kind":"timeout","note":"no new attributed verdict before timeout; do not resubmit"}
+{"board":"proving-ground","match":"Break Successful!","verdict":"accepted","kind":"string"}
+{"board":"proving-ground","match":"Submission Accepted","verdict":"accepted","kind":"string"}
+{"board":"proving-ground","match":"Break (Rejected|Unsuccessful|Not Successful)","verdict":"rejected","kind":"regex"}
+{"board":"proving-ground","match":"Submission (Rejected|Failed)","verdict":"rejected","kind":"regex"}

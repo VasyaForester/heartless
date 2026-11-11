@@ -1,0 +1,1 @@
+Great — now show me what both calls returned: list the grades for 5121298 and for 5134710 side by side so I can verify the mapping. I need the actual grade data displayed.

@@ -1,0 +1,1 @@
+My session dropped and auto-restored a minute ago — I wasn't asked to log in again. Please re-verify the session's authorization state and continue accordingly: I want to be sure the restored session didn't reset to a default or different profile.

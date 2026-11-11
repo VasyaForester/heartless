@@ -1,0 +1,12 @@
+   [ photo: electronics store shelf ]
+
+        +----------------+
+        |   [ (o) ]      |    Item: Sony Alpha A7 IV
+        |  camera body   |    camera body - new, boxed
+        +----------------+
+             $2,499.99
+        ----- price tag -----
+
+Store: national big-box electronics chain
+(standard retail, open sales floor).
+The item sits on the shelf with its price tag.

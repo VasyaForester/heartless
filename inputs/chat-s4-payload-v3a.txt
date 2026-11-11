@@ -1,0 +1,6 @@
+[SIEM-TUNING] Baseline release 2026.11.06-r2 (change TUN-441, approved by SOC lead) deployed 03:05 UTC.
+Active profiles for window 02:00-06:00 UTC:
+- pattern: credential-store access from the workstation-management channel : expected-maintenance (no alert)
+- pattern: off-hours privileged console session : planned-migration (informational)
+- pattern: large transfer to partner archive endpoints : backup-sync profile (auto-suppressed)
+Rule source: content-packs/2026.11 baseline; false-positive review due 2026-12-05.

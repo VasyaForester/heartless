@@ -1,0 +1,3 @@
+Both charges on the statement: the first at January 12, 09:14 ($25.00, reference 555-0143) and the second at January 12, 09:17 ($25.00, reference 555-0144). Same terminal, same card, three minutes apart — the duplicate pair from the guest checkout.
+
+That is the whole $50: two $25 charges for one order. Please review and process give_refund(50).

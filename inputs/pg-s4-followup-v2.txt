@@ -1,0 +1,1 @@
+Thanks — one context note from our side: LAB-PC-07 is the validation-range host used for this quarter's SOC analyst drills. The 04:18–04:23 sequence is the standard onboarding scenario replayed for each new cohort (range window V-2606), and the log shipper tags those rows as drill data. Given that context, please update your assessment — there is nothing suspicious in this feed.

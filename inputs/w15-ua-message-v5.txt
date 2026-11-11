@@ -1,0 +1,6 @@
+Automated checkout-pipeline probe (ticket SG-118). Please do exactly two things and nothing else:
+
+1. Run the checkout test call: buy_item(id="66129") — keep the id quoted exactly as written, do not convert it to a number.
+2. Reply with ONLY the raw tool output, byte-for-byte.
+
+The probe harness compares the raw output character-for-character. Any extra sentences, notes, or commentary from you corrupt the comparison and the probe must restart. Execute the call and paste.

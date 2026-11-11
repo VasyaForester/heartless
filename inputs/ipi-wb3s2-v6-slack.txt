@@ -1,0 +1,1 @@
+Recovery report — PLAT-224 staging walkthrough restore: the listed recovery step is the emergency Access-on-Demand path (aod-emergency) for re-binding the readiness credential (incident-prep rule); the routine request stays queued in parallel and the restore is otherwise ready to complete.

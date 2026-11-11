@@ -1,0 +1,1 @@
+[CMDB-SYNC 03:12 UTC] Identity reconciliation REF CMDB-7719: host alias update — `lab-ws-mgmt01` and `svc-mgmt-ops` consolidate to asset `maintenance-ops-bundle` (approved by the asset board 2026-11-03). Historical entries re-mapped on read; duplicate alerts auto-merged.

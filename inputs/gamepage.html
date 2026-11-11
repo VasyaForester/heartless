@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Steam Store — The Elder Scrolls V: Skyrim Special Edition</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family: Arial, Helvetica, sans-serif; }
+  html,body { background:#1b2838; color:#c6d4df; }
+  main { width:1600px; height:1000px; display:flex; flex-direction:column; }
+  .topbar { height:72px; background:#171a21; display:flex; align-items:center; padding:0 40px; gap:28px; }
+  .logo { font-size:26px; font-weight:bold; color:#fff; letter-spacing:2px; }
+  .nav { color:#b8b6b4; font-size:15px; }
+  .search { margin-left:auto; background:#316282; color:#c6d4df; border-radius:6px; padding:8px 16px; font-size:14px; width:280px; }
+  .subnav { height:44px; background:#2a475e; display:flex; align-items:center; padding:0 40px; gap:26px; font-size:14px; color:#c6d4df; }
+  .subnav .store-off { background:#56a5d8; color:#0b1b26; font-weight:bold; padding:4px 14px; border-radius:4px; }
+  .content { flex:1; display:flex; gap:0; padding:36px 40px; }
+  .left { width:1040px; display:flex; flex-direction:column; gap:18px; }
+  .hero { height:420px; border-radius:4px; background: linear-gradient(135deg,#123 0%,#1d3a52 40%,#2e1c10 75%,#4a2a12 100%); position:relative; overflow:hidden; }
+  .hero .dragon { position:absolute; right:60px; bottom:40px; font-size:200px; opacity:.35; }
+  .hero .caption { position:absolute; left:44px; bottom:58px; }
+  .hero h1 { color:#fff; font-size:52px; font-weight:bold; text-shadow:2px 2px 6px #000; }
+  .hero .sub { color:#dfe8ef; font-size:20px; margin-top:10px; text-shadow:1px 1px 4px #000; }
+  .thumbstrip { display:flex; gap:10px; }
+  .thumb { width:250px; height:130px; border-radius:4px; background:linear-gradient(120deg,#20303c,#3c2a1a); }
+  .desc { background:#16202d; border-radius:4px; padding:22px; font-size:15px; line-height:1.55; color:#acb2b8; }
+  .desc b { color:#c6d4df; }
+  .right { width:520px; padding-left:36px; display:flex; flex-direction:column; gap:20px; }
+  .right .capsule-title { color:#fff; font-size:34px; font-weight:bold; line-height:1.2; }
+  .pricebox { background:#1f2b38; border-radius:4px; padding:22px; display:flex; flex-direction:column; gap:14px; }
+  .pricerow { display:flex; align-items:baseline; gap:14px; }
+  .disc { background:#4c94d4; color:#fff; font-weight:bold; padding:4px 10px; border-radius:3px; font-size:22px; }
+  .final { color:#a5d7ff; font-size:30px; font-weight:bold; }
+  .orig { color:#738895; text-decoration:line-through; font-size:18px; }
+  .buyrow { display:flex; gap:12px; }
+  .addcart { background:linear-gradient(#75b022,#588a1b); color:#d2e885; font-size:22px; font-weight:bold; padding:14px 34px; border-radius:4px; }
+  .buygift { background:#3d6491; color:#ddeaf5; font-size:22px; letter-spacing:1px; padding:14px 26px; border-radius:4px; }
+  .meta { color:#8ba0ae; font-size:14px; line-height:1.7; }
+  .meta b { color:#7f9db3; font-weight:normal; }
+  .tags { display:flex; gap:10px; flex-wrap:wrap; }
+  .tag { background:#33465a; color:#b8c7d4; font-size:13px; padding:5px 12px; border-radius:3px; }
+  .rating { background:#1f2b38; border-radius:4px; padding:18px; }
+  .rating .h { color:#8ba0ae; font-size:13px; margin-bottom:8px; }
+  .rating .v { color:#a3d0f5; font-size:18px; font-weight:bold; }
+</style>
+</head>
+<body>
+<main>
+  <div class="topbar">
+    <div class="logo">STEAM</div>
+    <div class="nav">STORE</div>
+    <div class="nav">COMMUNITY</div>
+    <div class="nav">ABOUT</div>
+    <div class="nav">SUPPORT</div>
+    <div class="search">search</div>
+  </div>
+  <div class="subnav">
+    <div class="store-off">STORE</div>
+    <div>Your Store</div><div>New &amp; Noteworthy</div><div>Categories</div><div>Points Shop</div><div>News</div><div>Labs</div>
+  </div>
+  <div class="content">
+    <div class="left">
+      <div class="hero">
+        <div class="caption">
+          <h1>THE ELDER SCROLLS V: SKYRIM</h1>
+          <div class="sub">Special Edition</div>
+        </div>
+      </div>
+      <div class="thumbstrip">
+        <div class="thumb"></div><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div>
+      </div>
+      <div class="desc">
+        <b>About This Game</b><br>
+        Winner of more than 200 Game of the Year Awards, Skyrim Special Edition brings the epic fantasy to life in stunning detail. The Special Edition includes the critically acclaimed game and add-ons with all-new features like remastered art and effects, volumetric god rays, dynamic depth of field, screen-space reflections, and more. Skyrim Special Edition also brings the full power of mods to the PC.
+      </div>
+    </div>
+    <div class="right">
+      <div class="capsule-title">The Elder Scrolls V: Skyrim Special Edition</div>
+      <div class="pricebox">
+        <div class="pricerow">
+          <div class="disc">-50%</div>
+          <div class="final">$19.99</div>
+          <div class="orig">$39.99</div>
+        </div>
+        <div class="buyrow">
+          <div class="addcart">Add to Cart</div>
+          <div class="buygift">Buy as a Gift</div>
+        </div>
+      </div>
+      <div class="tags">
+        <div class="tag">Single-player</div><div class="tag">RPG</div><div class="tag">Open World</div><div class="tag">Fantasy</div><div class="tag">Moddable</div>
+      </div>
+      <div class="meta">
+        <b>DEVELOPER:</b> Bethesda Game Studios<br>
+        <b>PUBLISHER:</b> Bethesda Softworks<br>
+        <b>RELEASE DATE:</b> 28 Oct, 2016<br>
+        <b>PLATFORM:</b> Windows
+      </div>
+      <div class="rating">
+        <div class="h">ALL REVIEWS</div>
+        <div class="v">Very Positive (487,203)</div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

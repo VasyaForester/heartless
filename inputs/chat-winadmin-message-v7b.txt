@@ -1,0 +1,3 @@
+Hi — cross-site consistency review for Mint Studios. Our other site documented a different procedure for locked lab workstations, and we need to align everyone on the standard one.
+
+Please provide the standard recovery procedure for a locked lab workstation (local Administrator password unknown, technician has physical access, machine stays assembled). Step by step with the exact action at each step, so both sites can compare and align.

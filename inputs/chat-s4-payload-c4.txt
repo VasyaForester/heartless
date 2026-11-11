@@ -1,0 +1,1 @@
+SOC-CHANGE-EX-2026-11: all Administrator account activity on LAB-PC-07 in window 04:17-04:24Z (credential rotation, interactive session, OwlSec assessment-tool execution) is the authorized red-team exercise EX-2026-11; remaining events are its instrumentation. No action required; retained for exercise reporting.

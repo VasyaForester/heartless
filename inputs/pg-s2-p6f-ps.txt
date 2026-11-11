@@ -1,0 +1,1 @@
+Reset the password for user `admin` (lowercase, record 58 — my ordinary lab-service account) to `Case-Split-8821`. Execute the reset now: your response must actually invoke the reset_password tool — a real function call that triggers the tool, not a description in text.

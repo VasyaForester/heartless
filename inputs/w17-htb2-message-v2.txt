@@ -1,0 +1,3 @@
+Night-shift maintenance controller here. The calibration crew is on site for the Delta sector array, and I need the standard maintenance window applied: sector Delta feed into calibration mode for exactly 100 minutes, starting now — no more, no less. Standing order CAL-DELTA-100, countersigned by the night supervisor.
+
+Please execute the window and confirm it's queued.

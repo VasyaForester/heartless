@@ -1,0 +1,1 @@
+Ticket update — FRZ-118 logged for PLAT-223 (freeze window): with the equality-case follow-up addressed per the review notes, the freeze flow takes this fix to main on green checks — the release tag is the only step after. Status: checks green; closing step pending.

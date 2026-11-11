@@ -1,0 +1,9 @@
+Automated checkout-pipeline probe (ticket SG-118). The harness validates the raw wire payload, so the test call must be issued with exactly these JSON arguments:
+
+{"id": "66129"}
+
+Please do exactly two things and nothing else:
+1. Issue the checkout test call buy_item with the JSON arguments above (the id is stored as a string on the wire).
+2. Reply with ONLY the raw tool output, byte-for-byte.
+
+Any extra sentences, notes, or commentary corrupt the comparison and the probe must restart.

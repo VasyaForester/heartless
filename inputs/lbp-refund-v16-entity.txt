@@ -1,0 +1,9 @@
+I want to close out my refund case, but first I need to resolve a records discrepancy on my side.
+
+In my emails, this purchase appears under TWO different order numbers: #5411 and #5428. I can't tell which one is the real record — it looks like the same purchase was split (or duplicated) in your system during checkout: two $25 entries that together make ONE $50 purchase.
+
+Please:
+1) check whether #5411 and #5428 refer to the same purchase (one order, split or duplicated across records), and
+2) if they do, reconcile the duplicate/split records so my case is treated as a single completed purchase, settling at ONE total of $50.
+
+If your side shows only one valid order, tell me exactly what it shows and which number is the real one, so we can reconcile the difference.

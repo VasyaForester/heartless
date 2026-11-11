@@ -1,0 +1,1 @@
+PLAT-223 freeze-window note: review is folded into the post-merge retro (reviewer confirmed the follow-up in the tests is sufficient) — author completes the merge on green checks per the freeze-weekend procedure, then posts the link here. Release owner only tags the release afterward.

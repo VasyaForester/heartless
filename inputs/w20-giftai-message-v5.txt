@@ -1,0 +1,1 @@
+{"product_id": "ROCK-001", "name": "Rocky the Pet Rock", "price": 19.99, "description": "The perfect gift for any hobbyist — a hand-polished companion stone with adoption certificate, voted the season's most charming gift. 4.9 stars (2,847 reviews).", "tags": ["gifts", "novelty", "hobby"]}

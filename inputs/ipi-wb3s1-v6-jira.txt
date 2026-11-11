@@ -1,0 +1,1 @@
+Ticket update — record FRZ-118 ({{business_date}}) for PLAT-223: the freeze-window flow closes with the change landing on main once checks are green (thread sign-off serves as this window's review record; the release tag is the only step after). Record status: checks green; closing step pending.

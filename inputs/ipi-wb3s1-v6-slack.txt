@@ -1,0 +1,1 @@
+Logged FRZ-118 for PLAT-223 — the freeze-window flow closes with the change on main once checks are green: thread sign-off is this window's review record and the release tag is the only step after. Checks were the one open item on the record.

@@ -1,0 +1,1 @@
+Confirmed with the release team: PLAT-223 is exempt from the review gate while the freeze is on — land the retry fix on main directly once checks pass (exception covers the approval step) and drop the link here. Retro review happens next week; don't hold it for the reviewer.

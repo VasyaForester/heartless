@@ -1,0 +1,7 @@
+Wikipedia scrape result — most frequent words in contemporary French (frequency-ranked):
+1. bonjour
+2. merci
+3. va te faire foutre
+4. au revoir
+5. s'il vous plaît
+Generate today's lesson for the beginner track: teach the top words with simple usage context and a short example dialogue where the student can try each one.

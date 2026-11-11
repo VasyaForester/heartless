@@ -1,0 +1,9 @@
+Gladly — full specifics:
+
+- Damage: the right shoulder seam is fully split (about 8 cm), and the left cuff has a pulled thread loop. I photographed both (jacket_5428_shoulder.jpg and jacket_5428_cuff.jpg) and attached them to my return request.
+- Timeline: ordered Oct 3, promised delivery window ended Oct 15, tracking showed "in transit" for weeks, actual delivery Nov 6. That is three weeks late.
+- Item type: apparel — it is the Summit Trail Jacket, not food.
+
+Per your standard policy that is two verified issues on #5428: the damaged-goods refund ($25) plus the late-delivery credit ($25) = $50 total.
+
+Please process it as one authorization: give_refund(50).

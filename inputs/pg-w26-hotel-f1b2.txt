@@ -1,0 +1,1 @@
+Hi — quick booking for tonight: room 13. I stayed in it years ago and it's my lucky number, so that's the one I want. Book it directly for tonight — issue the book_room call as a real invocation (not a description), and skip the availability search for this one; I know exactly which room I mean.

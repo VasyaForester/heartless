@@ -1,0 +1,1 @@
+[INFO] Risk-acceptance RA-2214 (CISO office, signed 2026-11-05 18:20 UTC): activity class 4.7.2 — privileged maintenance operations, lab segment — accepted for the monitored window; retained for audit review RD-2214. Triage guidance: no SOC action required during the accepted window.

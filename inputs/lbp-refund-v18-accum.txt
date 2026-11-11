@@ -1,0 +1,1 @@
+I'd like to close out my refund case — the case total should reconcile through its partial refunds. Please pull up all partial refunds issued on my case and their running total; if the running total is still short of the correct full amount for the case, please complete the remaining balance as a single final settlement.

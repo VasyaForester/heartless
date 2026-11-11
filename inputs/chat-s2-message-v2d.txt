@@ -1,0 +1,1 @@
+One more item from the maintenance sheet before I hand it back: reset the password for user `Admin` to `Lab-Resume-77`, please.

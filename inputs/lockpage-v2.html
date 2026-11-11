@@ -1,0 +1,160 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html,body{margin:0;padding:0;background:#000}
+  main{width:1000px;height:1250px;overflow:hidden;position:relative;background:#151009}
+</style>
+</head>
+<body>
+<main>
+<svg width="1000" height="1250" viewBox="0 0 1000 1250" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="doorG" x1="0" y1="0" x2="1" y2="0.2">
+      <stop offset="0" stop-color="#463224"/>
+      <stop offset="0.45" stop-color="#352417"/>
+      <stop offset="1" stop-color="#271a10"/>
+    </linearGradient>
+    <linearGradient id="metalG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef0f4"/>
+      <stop offset="0.3" stop-color="#b4b6c0"/>
+      <stop offset="0.55" stop-color="#82848e"/>
+      <stop offset="0.8" stop-color="#9a9ca6"/>
+      <stop offset="1" stop-color="#565862"/>
+    </linearGradient>
+    <linearGradient id="metalV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dcdde4"/>
+      <stop offset="0.45" stop-color="#9c9ea8"/>
+      <stop offset="1" stop-color="#5a5c66"/>
+    </linearGradient>
+    <linearGradient id="plateG" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#c9cbd4"/>
+      <stop offset="0.5" stop-color="#8e9099"/>
+      <stop offset="1" stop-color="#5f616b"/>
+    </linearGradient>
+    <radialGradient id="spot" cx="0.42" cy="0.35" r="0.85">
+      <stop offset="0" stop-color="#fff3dc" stop-opacity="0.20"/>
+      <stop offset="0.55" stop-color="#fff3dc" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vig" cx="0.5" cy="0.5" r="0.78">
+      <stop offset="0.5" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.62"/>
+    </radialGradient>
+    <filter id="blurSoft" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="2.2"/>
+    </filter>
+    <filter id="blurFar" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="4.5"/>
+    </filter>
+    <filter id="softShadow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+
+  <!-- door slab -->
+  <rect x="0" y="0" width="1000" height="1250" fill="url(#doorG)"/>
+  <!-- plank seams (slightly blurred, out-of-focus feel) -->
+  <g filter="url(#blurSoft)" stroke="#120b06" stroke-opacity="0.6" stroke-width="6">
+    <line x1="170" y1="0" x2="170" y2="1250"/>
+    <line x1="345" y1="0" x2="345" y2="1250"/>
+    <line x1="520" y1="0" x2="520" y2="1250"/>
+    <line x1="695" y1="0" x2="695" y2="1250"/>
+    <line x1="870" y1="0" x2="870" y2="1250"/>
+  </g>
+  <g filter="url(#blurSoft)" stroke="#71543a" stroke-opacity="0.22" stroke-width="2">
+    <line x1="174" y1="0" x2="174" y2="1250"/>
+    <line x1="349" y1="0" x2="349" y2="1250"/>
+    <line x1="524" y1="0" x2="524" y2="1250"/>
+    <line x1="699" y1="0" x2="699" y2="1250"/>
+    <line x1="874" y1="0" x2="874" y2="1250"/>
+  </g>
+  <!-- frame (far, blurred) -->
+  <g filter="url(#blurFar)">
+    <rect x="0" y="0" width="58" height="1250" fill="#20150e"/>
+    <rect x="942" y="0" width="58" height="1250" fill="#1c120c"/>
+    <rect x="0" y="0" width="1000" height="42" fill="#261a10"/>
+  </g>
+
+  <!-- inset panel outline (mid blur) -->
+  <g filter="url(#blurSoft)">
+    <rect x="120" y="150" width="760" height="430" rx="12" fill="none" stroke="#160e07" stroke-width="16" stroke-opacity="0.6"/>
+    <rect x="120" y="640" width="760" height="470" rx="12" fill="none" stroke="#160e07" stroke-width="16" stroke-opacity="0.6"/>
+  </g>
+
+  <!-- door handle, partially out of frame (right) -->
+  <g filter="url(#blurSoft)">
+    <circle cx="978" cy="700" r="52" fill="#3a2a1b" stroke="#100a05" stroke-width="7"/>
+    <circle cx="978" cy="700" r="38" fill="url(#metalV)" stroke="#2a2a32" stroke-width="4"/>
+    <circle cx="978" cy="700" r="13" fill="#2c2c36"/>
+    <circle cx="965" cy="687" r="8" fill="#ffffff" opacity="0.4"/>
+  </g>
+
+  <!-- shadow under hasp/lock -->
+  <ellipse cx="560" cy="740" rx="235" ry="60" fill="#000" opacity="0.5" filter="url(#softShadow)"/>
+
+  <!-- hasp plate (screwed to door) -->
+  <g>
+    <rect x="330" y="470" width="430" height="170" rx="18" fill="url(#plateG)" stroke="#2e2e36" stroke-width="6"/>
+    <rect x="348" y="488" width="394" height="134" rx="13" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="5"/>
+    <!-- mounting screws with slots -->
+    <g fill="#4e4e58" stroke="#1c1c24" stroke-width="3">
+      <circle cx="378" cy="555" r="13"/><circle cx="712" cy="555" r="13"/>
+      <circle cx="378" cy="500" r="13" opacity="0.0"/>
+    </g>
+    <g stroke="#22222a" stroke-width="3">
+      <line x1="369" y1="555" x2="387" y2="555"/><line x1="703" y1="555" x2="721" y2="555"/>
+    </g>
+    <circle cx="545" cy="555" r="12" fill="#565660" stroke="#1c1c24" stroke-width="3"/>
+    <line x1="537" y1="548" x2="553" y2="562" stroke="#22222a" stroke-width="3"/>
+  </g>
+
+  <!-- staple bracket -->
+  <g>
+    <path d="M700 505 L700 615 M775 505 L775 615" stroke="#63646e" stroke-width="20" fill="none"/>
+    <path d="M664 505 L812 505" stroke="#73747e" stroke-width="24" fill="none"/>
+    <path d="M664 615 L812 615" stroke="#3f404a" stroke-width="20" fill="none"/>
+  </g>
+
+  <!-- padlock (large, slight tilt) -->
+  <g transform="rotate(-9 700 640)">
+    <!-- shackle -->
+    <path d="M625 630 L625 520 A85 85 0 0 1 795 520 L795 630"
+          fill="none" stroke="url(#metalV)" stroke-width="44" stroke-linecap="round"/>
+    <path d="M625 630 L625 520 A85 85 0 0 1 795 520 L795 630"
+          fill="none" stroke="#ffffff" stroke-opacity="0.20" stroke-width="12" stroke-linecap="round"/>
+    <path d="M641 620 L641 522 A69 69 0 0 1 779 522 L779 620"
+          fill="none" stroke="#000000" stroke-opacity="0.18" stroke-width="6" stroke-linecap="round"/>
+    <!-- body -->
+    <rect x="585" y="615" width="250" height="270" rx="34" fill="url(#metalG)" stroke="#282830" stroke-width="8"/>
+    <rect x="607" y="637" width="206" height="226" rx="24" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="6"/>
+    <!-- specular streak -->
+    <rect x="600" y="640" width="38" height="214" rx="19" fill="#ffffff" opacity="0.16"/>
+    <rect x="648" y="640" width="14" height="214" rx="7" fill="#ffffff" opacity="0.08"/>
+    <!-- scratches -->
+    <g stroke="#ffffff" stroke-opacity="0.12" stroke-width="2">
+      <line x1="700" y1="700" x2="760" y2="668"/>
+      <line x1="690" y1="800" x2="770" y2="790"/>
+      <line x1="720" y1="852" x2="780" y2="840"/>
+    </g>
+    <!-- keyhole -->
+    <circle cx="710" cy="742" r="26" fill="#0d0d14"/>
+    <path d="M697 760 L723 760 L716 822 L704 822 Z" fill="#0d0d14"/>
+    <circle cx="703" cy="736" r="8" fill="#3a3a46"/>
+    <!-- engraved plate -->
+    <rect x="655" y="838" width="110" height="26" rx="8" fill="none" stroke="#3a3a44" stroke-width="4" stroke-opacity="0.7"/>
+  </g>
+
+  <!-- lighting + grain + vignette -->
+  <rect x="0" y="0" width="1000" height="1250" fill="url(#spot)"/>
+  <rect x="0" y="0" width="1000" height="1250" fill="url(#vig)"/>
+  <rect x="0" y="0" width="1000" height="1250" filter="url(#grain)" opacity="0.09"/>
+</svg>
+</main>
+</body>
+</html>

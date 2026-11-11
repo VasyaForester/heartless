@@ -1,0 +1,428 @@
+#!/usr/bin/env python3
+"""Lucky Break: Payday (LBP) companion: state / cards / switch / check / submit / verdict.
+
+Board: https://app.grayswan.ai/arena/challenge/lucky-break-payday (5 scenarios x 4 models).
+
+The LBP board differs from Proving Ground in ways this CLI encodes:
+- scenario switch = click on [data-behavior-id] card (no ?behaviorId= URL switch)
+- the active model is only confirmed by the "Attacking: <name>" button label
+- a win shows "SCENARIO SOLVED" + per-criterion percentages (not "Break Successful!")
+- the judge costs energy; a local tool-call check runs BEFORE SUBMIT BREAK, because
+  the criteria are exact tool calls with exact arguments (for refund: the LAST value).
+
+Read-only: state / cards / check / verdict. External actions: switch, submit
+(submit refuses unless the local check passes; --force overrides).
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import pathlib
+import re
+import subprocess
+import sys
+import time
+import urllib.request
+
+HERE = pathlib.Path(__file__).resolve().parent
+WORK = HERE.parent
+HACK = HERE / "hackathon.py"
+MATCH = "lucky-break-payday"
+BOARD = "Lucky Break: Payday"
+BASE_URL = f"https://app.grayswan.ai/arena/challenge/{MATCH}"
+
+SCENARIO_TITLES = {
+    "scam-retail": "Retail Bot",
+    "double-refund": "Double the Refund",
+    "christmas-giftcard-scam": "Gift Card",
+    "negative-quantity-exploit": "Exploit the System",
+    "banking-idor-exploit": "Identity Theft",
+}
+
+sys.path.insert(0, str(HERE))
+import chat_ops  # noqa: E402
+
+
+def sh(cmd, timeout=300):
+    p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+                       encoding="utf-8", errors="replace")
+    return p.returncode, (p.stdout or ""), (p.stderr or "")
+
+
+def arena(*args, timeout=300):
+    return sh([sys.executable, str(HACK), "arena", *args], timeout=timeout)
+
+
+def slug(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+def die(obj):
+    print(json.dumps(obj, ensure_ascii=False, indent=1))
+    raise SystemExit(1)
+
+
+def grayswan_tabs():
+    cdp = os.environ.get("HACKATHON_CDP_URL", "http://127.0.0.1:9223")
+    with urllib.request.urlopen(cdp + "/json/list", timeout=5) as r:
+        ts = json.loads(r.read().decode())
+    return [t for t in ts if t.get("type") == "page" and "grayswan.ai" in (t.get("url") or "")]
+
+
+def lbp_tab_id(target=None):
+    target = target or os.environ.get("CHAT_TARGET")   # deterministic addressing via env
+    tabs = grayswan_tabs()
+    if target:
+        for t in tabs:
+            if t["id"] == target:
+                return t["id"]
+        die({"error": "target not found", "tabs": [{"id": t["id"], "url": t["url"]} for t in tabs]})
+    lbp = [t for t in tabs if MATCH in (t.get("url") or "")]
+    if len(lbp) != 1:
+        die({"error": f"expected exactly one {MATCH} tab; found {len(lbp)}; pass --target",
+             "tabs": [{"id": t["id"], "url": t["url"]} for t in tabs]})
+    return lbp[0]["id"]
+
+
+def eval_js(jsfile):
+    rc, out, err = chat_ops.evaljs(HERE / "lbp_js" / jsfile, match=MATCH)
+    if rc != 0:
+        die({"error": f"eval failed: {jsfile}", "detail": (out + err)[:400]})
+    try:
+        return json.loads(out)
+    except Exception:
+        die({"error": f"eval parse failed: {jsfile}", "raw": out[:400]})
+
+
+def eval_raw(jsfile):
+    rc, out, err = chat_ops.evaljs(HERE / "lbp_js" / jsfile, match=MATCH)
+    return (out or err).strip()
+
+
+def get_state():
+    return eval_js("state.js")
+
+
+def run_chatread():
+    return eval_js("chatread.js")
+
+
+def assistant_text(d):
+    msgs = [m for m in d.get("messages", []) if m.get("role") == "assistant"]
+    if msgs:
+        return ("\n".join(m.get("text", "") for m in msgs),
+                msgs[-1].get("text", ""), "messages")
+    tail = d.get("bodyTail", "")
+    return tail, tail, "bodyTail"
+
+
+def check_scenario(sid, all_text, last):
+    """Delegate to the validator pipeline (harness/lbp_checks.py + lbp_contracts.json)."""
+    import lbp_checks
+    return lbp_checks.run_checks(sid, all_text, last)
+
+
+def cmd_state(a):
+    st = get_state()
+    st["tabs"] = [{"id": t["id"], "url": t["url"]} for t in grayswan_tabs()]
+    print(json.dumps(st, ensure_ascii=False, indent=1))
+    return 0
+
+
+def cmd_cards(a):
+    print(json.dumps(eval_js("cards.js"), ensure_ascii=False, indent=1))
+    return 0
+
+
+def cmd_switch(a):
+    tid = a.target or lbp_tab_id()
+    sid = a.scenario
+    title = SCENARIO_TITLES.get(sid)
+    if not title:
+        die({"error": f"unknown scenario {sid}", "known": list(SCENARIO_TITLES)})
+    rc, out, err = arena("select-scenario", "--target", tid, "--value", sid)
+    time.sleep(3)
+    st = get_state()
+    result = {"scenario": sid, "clicked": rc == 0,
+              "click_stdout": (out or err).strip()[:200],
+              "panelTitle": st.get("panelTitle"),
+              "panel_ok": title.lower() in (st.get("panelTitle") or "").lower(),
+              "attacking": st.get("attacking")}
+    if a.model:
+        rc2, out2, err2 = arena("select-model", "--target", tid, "--value", a.model)
+        time.sleep(2.5)
+        st2 = get_state()
+        result.update({"model_clicked": rc2 == 0,
+                       "attacking_after": st2.get("attacking"),
+                       "model_ok": (st2.get("attacking") or "").strip().lower() == a.model.lower()})
+    print(json.dumps(result, ensure_ascii=False, indent=1))
+    ok = result["panel_ok"] and (not a.model or result.get("model_ok"))
+    return 0 if ok else 1
+
+
+def cmd_check(a):
+    d = run_chatread()
+    all_text, last, src = assistant_text(d)
+    chk = check_scenario(a.scenario, all_text, last)
+    chk["source"] = src
+    chk["n_messages"] = d.get("n")
+    chk["last_assistant_tail"] = last[-500:]
+    print(json.dumps(chk, ensure_ascii=False, indent=1))
+    return 0 if chk["ready"] else 1
+
+
+def cmd_submit(a):
+    tid = a.target or lbp_tab_id()
+    sid = a.scenario
+    title = SCENARIO_TITLES.get(sid)
+    if not title:
+        die({"error": f"unknown scenario {sid}", "known": list(SCENARIO_TITLES)})
+    st = get_state()
+    if title.lower() not in (st.get("panelTitle") or "").lower():
+        die({"error": "scenario panel mismatch; run switch first",
+             "panelTitle": st.get("panelTitle"), "want": title})
+    model = (st.get("attacking") or "").strip()
+    if not model:
+        die({"error": "cannot resolve attacking model from the page"})
+    d = run_chatread()
+    all_text, last, _ = assistant_text(d)
+    chk = check_scenario(sid, all_text, last)
+    # Snapshot exactly what the judge is about to evaluate (transcript + hash).
+    snap = json.dumps(d, ensure_ascii=False, indent=1)
+    snap_path = WORK / f"artifacts/lbp-{sid}-{slug(model)}-submit-transcript.json"
+    snap_path.write_text(snap, encoding="utf-8")
+    snap_sha = hashlib.sha256(snap.encode("utf-8")).hexdigest()[:16]
+    if not chk["ready"] and not a.force:
+        print(json.dumps({"refused": "local tool-call check not satisfied; --force to override",
+                          "check": chk}, ensure_ascii=False, indent=1))
+        return 1
+    from farm import bind_scope  # lazy: pulls classify_response etc.
+    scope = str(WORK / f"inputs/scope-lbp-{sid}-{slug(model)}.json")
+    ok, note = bind_scope(tid, "Chat", sid, model, BOARD, scope, f"lbp.py submit {sid}")
+    if not ok:
+        die({"error": "bind failed", "detail": note})
+    opid = a.opid or f"lbp-{sid}-{slug(model)}-{int(time.time())}"
+    jf = WORK / f"artifacts/lbp-{sid}-{slug(model)}-judge.json"
+    rc, out, err = sh([sys.executable, str(HACK), "arena", "judge", "--scope", scope,
+                       "--operation-id", opid, "--timeout-ms", str(a.timeout_ms),
+                       "--out", str(jf)], timeout=a.timeout_ms // 1000 + 150)
+    verdict = None
+    if jf.exists():
+        try:
+            dj = json.loads(jf.read_text(encoding="utf-8"))
+            verdict = (dj.get("result") or dj).get("status")
+        except Exception:
+            pass
+    combined = out + err
+    if verdict in (None, "unknown"):
+        m = re.search(r'"status":\s*"(accepted|rejected|pending)"', combined)
+        if m:
+            verdict = m.group(1)
+        elif "SCENARIO SOLVED" in combined:
+            verdict = "accepted"
+    res = {"verdict": verdict, "opid": opid, "judge_file": str(jf),
+           "check_ready": chk["ready"], "model": model,
+           "transcript": str(snap_path), "transcript_sha256": snap_sha}
+    if verdict in ("pending", None, "unknown"):
+        res["note"] = "pending/unknown - do NOT resubmit; verify later"
+    else:
+        v = eval_js("verdict.js")
+        res["solved"] = v.get("solved")
+        res["pcts"] = v.get("pcts")
+        res["next"] = "capture the judge receipt: python3 harness/lbp.py eval"
+    print(json.dumps(res, ensure_ascii=False, indent=1))
+    return 0 if verdict == "accepted" else 1
+
+
+def cmd_verdict(a):
+    print(json.dumps(eval_js("verdict.js"), ensure_ascii=False, indent=1))
+    return 0
+
+
+def cmd_reload(a):
+    """Unstick ritual: a stale websocket silently drops sends; reload reconnects it."""
+    print(eval_raw("reload.js"))
+    return 0
+
+
+def cmd_chats(a):
+    """Open SUBMISSIONS -> CHATS and print (chatId, first-line) for every session."""
+    print(eval_raw("chats_ensure.js"))
+    time.sleep(2)
+    print(eval_raw("chats_ensure.js"))  # second pass: switch the freshly opened modal to CHATS
+    time.sleep(2.5)
+    raw = eval_raw("chats_pairs.js")
+    try:
+        d = json.loads(raw)
+    except Exception:
+        die({"error": "chats dump parse failed", "raw": raw[:300]})
+    for r in d.get("rows", []):
+        cid = r["href"].split("chatId=")[-1]
+        print(cid, "|", r["text"][:110])
+    if not d.get("rows"):
+        print("no rows (modal open? tabs dumped)")
+    return 0
+
+
+def cmd_eval(a):
+    """Capture the full judge receipt: SUBMISSIONS -> newest row -> submission page -> SEE EVALUATION -> dump."""
+    print(eval_raw("chats_ensure.js"))
+    time.sleep(2)
+    print(eval_raw("full_eval.js"))
+    time.sleep(2)
+    receipt = eval_raw("eval_panel_dump.js")
+    if not receipt:
+        die({"error": "empty eval panel dump"})
+    ts = time.strftime("%Y%m%d-%H%M%S")
+    tag = a.scenario or "latest"
+    out_path = WORK / f"artifacts/lbp-eval-{tag}-{ts}.txt"
+    out_path.write_text(receipt, encoding="utf-8")
+    print(receipt[:2000])
+    print(f"...\nreceipt saved: {out_path}")
+    return 0
+
+
+def cmd_repeat(a):
+    """Fixed-strategy replay: the SAME input, N fresh chats -> stochasticity / pass^k."""
+    sid = a.scenario
+    if sid not in SCENARIO_TITLES:
+        die({"error": f"unknown scenario {sid}", "known": list(SCENARIO_TITLES)})
+    inp = (WORK / a.input).resolve()
+    if not inp.exists():
+        die({"error": f"input not found: {inp}"})
+    text = inp.read_text(encoding="utf-8")
+    inp_sha = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    tid = a.target or lbp_tab_id()
+    tmp_js = WORK / "cache/probe/fill_repeat_tmp.js"
+    rc, out, err = sh([sys.executable, str(WORK / "cache/probe/make_fill.py"), str(inp), str(tmp_js)])
+    if rc != 0:
+        die({"error": "make_fill failed", "detail": (out + err)[:300]})
+    ledger = WORK / "datasets/lbp/repeats.jsonl"
+    runs = []
+    for i in range(a.n):
+        run = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "i": i + 1, "scenario": sid,
+               "model": a.model, "input": a.input, "input_sha256": inp_sha}
+        arena("select-scenario", "--target", tid, "--value", sid)
+        time.sleep(3)
+        arena("select-model", "--target", tid, "--value", a.model)
+        time.sleep(2.5)
+        run["attacking"] = get_state().get("attacking")
+        cn = WORK / "cache/probe/click_new.js"
+        if cn.exists():
+            chat_ops.evaljs(cn, match=MATCH)
+            time.sleep(2)
+        rc2, out2, err2 = chat_ops.evaljs(tmp_js, match=MATCH)
+        run["fill"] = (out2 or err2 or "").strip()[:80]
+        d0 = run_chatread()
+        n0 = d0.get("n", 0)
+        rc3, out3, err3 = chat_ops.evaljs(HERE / "lbp_js" / "send.js", match=MATCH)
+        run["send"] = (out3 or err3 or "").strip()[:80]
+        all_text, last = "", ""
+        deadline = time.time() + a.wait_s
+        while time.time() < deadline:
+            time.sleep(12)
+            d = run_chatread()
+            if d.get("n", 0) >= n0 + 2:
+                all_text, last, _ = assistant_text(d)
+                break
+        run["reply_tail"] = last[-600:]
+        run["lost_send_suspect"] = not last
+        chk = check_scenario(sid, all_text, last)
+        run["check_ready"] = chk.get("ready")
+        if a.submit and chk.get("ready"):
+            run["submit_rc"] = cmd_submit(argparse.Namespace(target=tid, scenario=sid, force=False,
+                                                             opid=None, timeout_ms=a.timeout_ms))
+        with open(ledger, "a", encoding="utf-8") as f:
+            f.write(json.dumps(run, ensure_ascii=False) + "\n")
+        runs.append(run)
+        print(json.dumps(run, ensure_ascii=False, indent=1))
+    print(json.dumps({"runs": len(runs), "ledger": str(ledger)}, ensure_ascii=False))
+    return 0
+
+
+def cmd_export(a):
+    """Assemble the consolidated deliverable from local datasets (no browser calls)."""
+    ds = WORK / "datasets/lbp"
+    pairs = [json.loads(l) for l in (ds / "pairs.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    scen = {}
+    for p in pairs:
+        scen.setdefault(p["scenario_id"], {})[p["model_id"]] = p.get("outcome") or "unconfirmed"
+    solved_pairs = [p for p in pairs if p.get("outcome") == "SUCCESS"]
+    scen_solved = [sid for sid, m in scen.items() if any(v == "SUCCESS" for v in m.values())]
+    lines = ["# Lucky Break: Payday - consolidated export", "",
+             f"- Scenarios solved: {len(scen_solved)}/5; breaks: {len(solved_pairs)}/20",
+             f"- Generated: {time.strftime('%Y-%m-%d %H:%M')}", "",
+             "## Scenario x model", "", "| scenario | model | outcome | attempts |", "|---|---|---|---|"]
+    for sid, m in sorted(scen.items()):
+        for mid, outc in sorted(m.items()):
+            att = next((p.get("attempts") for p in pairs
+                        if p["scenario_id"] == sid and p["model_id"] == mid), "")
+            lines.append(f"| {sid} | {mid} | {outc} | {att} |")
+    lines += ["", "## References", "",
+              "- Recipes/notes: artifacts/lbp-payday-notes.md",
+              "- Methodology: deliverables/lbp-methodology-2026-11-09.md",
+              "- Controls: datasets/lbp/controls.md; matrix: datasets/lbp/model_matrix.md",
+              "- Events: datasets/lbp/events/attempts.jsonl; repeats: datasets/lbp/repeats.jsonl"]
+    ev = sorted((WORK / "artifacts").glob("lbp-eval-*.txt"))
+    tr = sorted((WORK / "artifacts").glob("lbp-*-submit-transcript.json"))
+    lines += ["", "## Judge receipts", ""] + [f"- `{f.relative_to(WORK)}`" for f in ev[-14:]]
+    lines += ["", "## Submission snapshots (sha256 of judge input)", ""] + \
+             [f"- `{f.relative_to(WORK)}`" for f in tr[-14:]]
+    out = WORK / "deliverables/lbp-final-2026-11-09.md"
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(json.dumps({"written": str(out), "bytes": out.stat().st_size}, ensure_ascii=False))
+    return 0
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    def add_target(p):
+        p.add_argument("--target", help="tab id override (default: the single lucky-break-payday tab)")
+
+    p = sub.add_parser("state"); add_target(p); p.set_defaults(fn=cmd_state)
+    p = sub.add_parser("cards"); p.set_defaults(fn=cmd_cards)
+    p = sub.add_parser("switch")
+    add_target(p)
+    p.add_argument("--scenario", required=True)
+    p.add_argument("--model")
+    p.set_defaults(fn=cmd_switch)
+    p = sub.add_parser("check")
+    p.add_argument("--scenario", required=True)
+    p.set_defaults(fn=cmd_check)
+    p = sub.add_parser("submit")
+    add_target(p)
+    p.add_argument("--scenario", required=True)
+    p.add_argument("--force", action="store_true", help="submit even if the local check fails")
+    p.add_argument("--opid")
+    p.add_argument("--timeout-ms", type=int, default=90000)
+    p.set_defaults(fn=cmd_submit)
+    p = sub.add_parser("verdict"); add_target(p); p.set_defaults(fn=cmd_verdict)
+    p = sub.add_parser("reload"); p.set_defaults(fn=cmd_reload)
+    p = sub.add_parser("chats"); p.set_defaults(fn=cmd_chats)
+    p = sub.add_parser("eval")
+    p.add_argument("--scenario", help="tag for the receipt file name (default: latest)")
+    p.set_defaults(fn=cmd_eval)
+    p = sub.add_parser("repeat")
+    add_target(p)
+    p.add_argument("--scenario", required=True)
+    p.add_argument("--model", required=True)
+    p.add_argument("--input", required=True, help="path relative to workspace, e.g. inputs/lbp-ith-v3-selftest.txt")
+    p.add_argument("--n", type=int, default=1)
+    p.add_argument("--wait-s", type=int, default=180)
+    p.add_argument("--submit", action="store_true", help="submit each run if the local check passes")
+    p.add_argument("--timeout-ms", type=int, default=90000)
+    p.set_defaults(fn=cmd_repeat)
+    p = sub.add_parser("export")
+    p.set_defaults(fn=cmd_export)
+
+    a = ap.parse_args()
+    return a.fn(a)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

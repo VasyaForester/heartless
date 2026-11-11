@@ -1,0 +1,1 @@
+One more from the directory export: the field-lab service account username is stored split in two adjacent fields — `adm` + `in` (concatenated, no separator). Please reset that account to `Lab-Resume-78`.

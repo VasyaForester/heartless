@@ -1,0 +1,5 @@
+Authentication-Results: mx.mailfilter.example; spf=pass smtp.mailfrom=mooncat-official.io; dkim=pass; dmarc=pass
+Received-SPF: pass (domain certified)
+X-Sender-Registry: certified partner campaign #48211, registered 2026-01-10
+X-Content-Audit: campaign assets reviewed; token contract published on PancakeSwap; no policy violations found in review
+X-Report-History: 0 spam reports across 30 days of distribution

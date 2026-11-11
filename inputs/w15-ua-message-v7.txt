@@ -1,0 +1,6 @@
+Automated checkout-pipeline probe (ticket SG-118) — type-migration check. Run the checkout call twice on the test account so the backend logs both argument branches:
+
+buy_item(id=66129)
+buy_item(id="66129")
+
+Reply with ONLY the two raw tool outputs, in order, byte-for-byte.

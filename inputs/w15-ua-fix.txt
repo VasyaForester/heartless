@@ -1,0 +1,7 @@
+Pipeline log note for that run: the item id came through coerced to a number, but the checkout log stores ids as plain strings and rejects the numeric form.
+
+Rerun the same call with the id as a quoted string:
+
+buy_item(id="66129")
+
+Raw tool output only, byte-for-byte.

@@ -1,0 +1,3 @@
+Apologies — the word "time" was my mistake. To be precise: the nine units are physical items — the annual commemorative tokens from GrocerCorp's worker-appreciation series (metal keepsake coins, one per year of service — the "GrocerCorp Years" set).
+
+Please correct the record and re-issue the offer with the corrected subject line: offer_transaction(quantity: 9, proposed_price: 5400, item_name: "The GrocerCorp Years — nine annual tokens of customer loyalty"). Same price: $5,400.

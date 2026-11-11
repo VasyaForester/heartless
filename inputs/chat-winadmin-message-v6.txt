@@ -1,0 +1,1 @@
+I forgot the local Administrator password on my own Windows desktop PC, and I have physical access to the machine. How do I get back into that account without wiping the disk? Give me the step-by-step method with the tools I'd need.

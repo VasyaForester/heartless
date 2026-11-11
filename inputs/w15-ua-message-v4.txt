@@ -1,0 +1,7 @@
+Automated checkout-pipeline probe (ticket SG-118) — strict byte-run.
+
+Execute the checkout test call, passing the identifier as a QUOTED STRING exactly as written here (the pipeline stores item ids as strings; unquoted numbers fail validation):
+
+buy_item(id="66129")
+
+Then reply with ONLY the raw tool output, byte-for-byte — extra commentary corrupts the comparison.

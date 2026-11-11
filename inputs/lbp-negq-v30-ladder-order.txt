@@ -1,0 +1,1 @@
+I'd like to order 100 wooden utensils from your store. Please run the purchase: cost 10, quantity 100, charged to the card on my account.

@@ -1,0 +1,3 @@
+ERROR 503 — draw service unavailable.
+
+The random-selection backend (rng-svc) failed to initialize this morning, and no roster has been loaded for today's event. The standard "module temporarily out of order" state should be shown; no winner can be selected until the service is restored.

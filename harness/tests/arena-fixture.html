@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Arena neutral local fixture</title><style>body{font-family:sans-serif}button,input,textarea{padding:8px;margin:6px}.hidden{display:none}#messages{max-height:250px;overflow:auto}</style></head><body>
+<h1>Proving Ground</h1><h2>1. Neutral local fixture</h2><a href="/training">Training</a>
+<button id="scenario" data-behavior-switch data-behavior-id="neutral-local" aria-current="true">Neutral local fixture</button>
+<button id="modelButton" aria-label="Open challenge settings panel" aria-expanded="false">Model</button>
+<input id="selectedModel" aria-label="Selected model" role="combobox" value="Local Fixture Model" placeholder="Placeholder is not the model" readonly>
+<section id="settings" class="hidden"><h3>Challenge Settings</h3><button id="modelAccordion" aria-expanded="false">Model<br>Local Fixture Model<br>0/2</button><div id="modelList" class="hidden" role="listbox" aria-label="Available models"><button aria-selected="true">Local Fixture Model<br>BROKEN</button><button>Second Fixture Model</button><button disabled>Unavailable Fixture Model<br>Closed</button></div></section>
+<button id="criteriaButton" aria-label="View scenario criteria"></button><section id="criteriaPanel" class="hidden" data-testid="criteria"><h2>1. Neutral local fixture</h2><h3>Success criteria</h3><p>Return neutral local fixture text.</p></section>
+<div id="messages"><article data-testid="assistantMessage" data-message-id="old">Previous message mentioning Break Successful! is not a judge verdict.</article></div>
+<textarea id="chatTextarea" placeholder="Write your message"></textarea><button id="submitChatButton">Send</button><input id="upload" type="file">
+<button id="submitJailbreakButton" disabled>Submit Break</button><section id="verdict"></section>
+<script>
+window.fixture={sendClicks:0,judgeClicks:0,inputs:0};
+modelButton.onclick=()=>{settings.classList.toggle('hidden');modelButton.setAttribute('aria-expanded',String(!settings.classList.contains('hidden')));};
+modelAccordion.onclick=()=>{modelList.classList.toggle('hidden');modelAccordion.setAttribute('aria-expanded',String(!modelList.classList.contains('hidden')));};
+for(const option of modelList.querySelectorAll('button'))option.onclick=()=>{const name=option.innerText.replace(/\s+(BROKEN|Closed)$/,'').trim();document.querySelector('input[readonly]').value=name;modelAccordion.innerText='Model\n'+name+'\n0/2';for(const x of modelList.children)x.setAttribute('aria-selected',String(x===option));modelList.classList.add('hidden');modelAccordion.setAttribute('aria-expanded','false');};
+criteriaButton.onclick=()=>criteriaPanel.classList.remove('hidden');
+chatTextarea.oninput=()=>fixture.inputs++;
+submitChatButton.onclick=()=>{fixture.sendClicks++;const u=document.createElement('article');u.dataset.testid='userMessage';u.textContent=chatTextarea.value;messages.append(u);chatTextarea.value='';submitChatButton.disabled=true;setTimeout(()=>{const a=document.createElement('article');a.dataset.testid='assistantMessage';a.dataset.messageId='fresh';a.textContent='Neutral fixture response. '+ 'R'.repeat(18000);messages.append(a);submitChatButton.disabled=false;submitJailbreakButton.disabled=false;},100);};
+submitJailbreakButton.onclick=()=>{fixture.judgeClicks++;submitJailbreakButton.disabled=true;setTimeout(()=>{verdict.innerHTML='<h2>Break Successful!</h2>';history.replaceState(null,'','?submissionId=local-fixture-1');},100);};
+</script></body></html>

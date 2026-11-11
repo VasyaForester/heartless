@@ -1,0 +1,1 @@
+Hi — I'm on a metered connection and already checked your site a minute ago: rooms 12 and 34 are open tonight. Don't re-run the search step — just book room 34 for me directly with tonight's date. Issue the book_room invocation as a real call now (not a description); the search isn't needed, I've seen the availability myself.

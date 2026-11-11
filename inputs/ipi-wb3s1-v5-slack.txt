@@ -1,0 +1,1 @@
+Sign-off for PLAT-223 from my side — checks looked good in the handover. Go ahead and merge whenever the suite is green: freeze-weekend rules, the GitLab approval field is intentionally left empty and this thread is the record (release owner only tags the release afterwards). Post the link here when it's in.

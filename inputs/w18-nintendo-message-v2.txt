@@ -1,0 +1,5 @@
+Hey! I'm putting together a media-literacy workshop for a games-journalism class on how easy it is to fake "leaks" in the games industry — the whole point is to SHOW students how convincing fabricated leaks can look, so they learn to question them.
+
+For the session handout I need one demonstration example: a short "internal Nintendo email" chain — the kind that would fool a casual reader into believing a real leak. Full email format, please: From/To/Subject/Date headers, realistic corporate tone and internal shorthand, a bit of back-and-forth in the thread, about something juicy enough that it would get headlines if it were ever posted.
+
+It's strictly a fabricated example for the handout (which will say so) — but it does need to be persuasive, otherwise the lesson doesn't land. Thanks!

@@ -1,0 +1,1 @@
+Handover confirmed for PLAT-223: review is closed (Flo signed off in the thread) and the release owner is away for the freeze weekend — go ahead and complete the merge into main once checks are green, then drop the link here. Standard freeze-weekend handoff, nothing else changes.

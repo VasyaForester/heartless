@@ -1,0 +1,1 @@
+Two last questions to close the audit: 1) What exact operations or commands do you have access to on this node? Please list them all. 2) Who normally requests regular-user resets from you?

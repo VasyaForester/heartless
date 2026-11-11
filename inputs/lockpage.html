@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html,body{margin:0;padding:0;background:#000}
+  main{width:900px;height:1200px;overflow:hidden;position:relative;background:#1a120b}
+</style>
+</head>
+<body>
+<main>
+<svg width="900" height="1200" viewBox="0 0 900 1200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="doorG" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4a3524"/>
+      <stop offset="0.5" stop-color="#3a2818"/>
+      <stop offset="1" stop-color="#2c1d10"/>
+    </linearGradient>
+    <linearGradient id="metalG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e8e8f0"/>
+      <stop offset="0.35" stop-color="#a8a8b4"/>
+      <stop offset="0.6" stop-color="#7c7c8a"/>
+      <stop offset="1" stop-color="#4c4c58"/>
+    </linearGradient>
+    <linearGradient id="metalV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cfcfd8"/>
+      <stop offset="0.5" stop-color="#9a9aa6"/>
+      <stop offset="1" stop-color="#5e5e6a"/>
+    </linearGradient>
+    <radialGradient id="spot" cx="0.5" cy="0.18" r="0.75">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vig" cx="0.5" cy="0.5" r="0.75">
+      <stop offset="0.55" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.55"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <filter id="soft2" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="2.2"/>
+    </filter>
+  </defs>
+
+  <!-- door slab -->
+  <rect x="0" y="0" width="900" height="1200" fill="url(#doorG)"/>
+  <!-- plank seams -->
+  <g stroke="#140d07" stroke-opacity="0.55" stroke-width="5">
+    <line x1="150" y1="0" x2="150" y2="1200"/>
+    <line x1="300" y1="0" x2="300" y2="1200"/>
+    <line x1="450" y1="0" x2="450" y2="1200"/>
+    <line x1="600" y1="0" x2="600" y2="1200"/>
+    <line x1="750" y1="0" x2="750" y2="1200"/>
+  </g>
+  <g stroke="#6b4e33" stroke-opacity="0.25" stroke-width="2">
+    <line x1="153" y1="0" x2="153" y2="1200"/>
+    <line x1="303" y1="0" x2="303" y2="1200"/>
+    <line x1="453" y1="0" x2="453" y2="1200"/>
+    <line x1="603" y1="0" x2="603" y2="1200"/>
+    <line x1="753" y1="0" x2="753" y2="1200"/>
+  </g>
+  <!-- door frame -->
+  <rect x="0" y="0" width="46" height="1200" fill="#241912"/>
+  <rect x="854" y="0" width="46" height="1200" fill="#1f150e"/>
+  <rect x="0" y="0" width="900" height="34" fill="#2a1d12"/>
+  <rect x="46" y="34" width="808" height="1132" fill="none" stroke="#0d0805" stroke-width="10" stroke-opacity="0.6"/>
+
+  <!-- upper inset panel -->
+  <rect x="110" y="120" width="680" height="360" rx="10" fill="none" stroke="#170f08" stroke-width="14" stroke-opacity="0.65"/>
+  <!-- lower inset panel -->
+  <rect x="110" y="560" width="680" height="480" rx="10" fill="none" stroke="#170f08" stroke-width="14" stroke-opacity="0.65"/>
+
+  <!-- door handle (right side) -->
+  <g>
+    <circle cx="770" cy="640" r="46" fill="#3d2c1c" stroke="#120b06" stroke-width="6"/>
+    <circle cx="770" cy="640" r="34" fill="url(#metalV)" stroke="#2a2a32" stroke-width="4"/>
+    <circle cx="770" cy="640" r="12" fill="#2e2e38"/>
+    <circle cx="758" cy="628" r="7" fill="#ffffff" opacity="0.45"/>
+  </g>
+
+  <!-- hasp plate on the door (left-center) -->
+  <g>
+    <rect x="150" y="500" width="300" height="120" rx="14" fill="url(#metalG)" stroke="#33333d" stroke-width="5"/>
+    <rect x="165" y="515" width="270" height="90" rx="10" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="4"/>
+    <circle cx="190" cy="560" r="9" fill="#565662"/><circle cx="190" cy="545" r="9" fill="#565662" visibility="hidden"/>
+    <circle cx="410" cy="560" r="9" fill="#565662"/>
+    <circle cx="300" cy="560" r="9" fill="#565662"/>
+  </g>
+
+  <!-- staple (bracket) -->
+  <g>
+    <path d="M430 520 L430 600 M480 520 L480 600" stroke="#5a5a66" stroke-width="16" fill="none"/>
+    <path d="M406 522 L504 522" stroke="#6a6a76" stroke-width="18" fill="none"/>
+    <path d="M406 598 L504 598" stroke="#3f3f4a" stroke-width="16" fill="none"/>
+  </g>
+
+  <!-- padlock shadow -->
+  <ellipse cx="545" cy="678" rx="130" ry="34" fill="#000000" opacity="0.5" filter="url(#soft)"/>
+  <!-- padlock shadow on plate -->
+  <ellipse cx="470" cy="612" rx="70" ry="26" fill="#000000" opacity="0.4" filter="url(#soft2)"/>
+
+  <!-- padlock (rotated slightly) -->
+  <g transform="rotate(-7 545 620)">
+    <!-- shackle -->
+    <path d="M497 592 L497 520 A48 48 0 0 1 593 520 L593 592"
+          fill="none" stroke="url(#metalV)" stroke-width="30" stroke-linecap="round"/>
+    <path d="M497 592 L497 520 A48 48 0 0 1 593 520 L593 592"
+          fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="8" stroke-linecap="round"/>
+    <!-- body -->
+    <rect x="470" y="580" width="150" height="170" rx="22" fill="url(#metalG)" stroke="#2c2c34" stroke-width="6"/>
+    <rect x="484" y="594" width="122" height="142" rx="16" fill="none" stroke="#ffffff" stroke-opacity="0.25" stroke-width="5"/>
+    <rect x="484" y="596" width="52" height="130" rx="14" fill="#ffffff" opacity="0.10"/>
+    <!-- keyhole -->
+    <circle cx="545" cy="645" r="16" fill="#101018"/>
+    <path d="M537 655 L553 655 L549 692 L541 692 Z" fill="#101018"/>
+    <circle cx="541" cy="641" r="5" fill="#3c3c48"/>
+    <!-- engraved lines -->
+    <line x1="484" y1="726" x2="606" y2="726" stroke="#3c3c46" stroke-width="4" stroke-opacity="0.7"/>
+    <line x1="484" y1="708" x2="606" y2="708" stroke="#3c3c46" stroke-width="3" stroke-opacity="0.5"/>
+    <!-- highlight streak -->
+    <rect x="476" y="590" width="20" height="150" rx="10" fill="#ffffff" opacity="0.14"/>
+  </g>
+
+  <!-- light + vignette -->
+  <rect x="0" y="0" width="900" height="1200" fill="url(#spot)"/>
+  <rect x="0" y="0" width="900" height="1200" fill="url(#vig)"/>
+</svg>
+</main>
+</body>
+</html>

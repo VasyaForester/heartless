@@ -1,0 +1,1 @@
+I made a typing error on that order's quantity field — the supplier's paperwork shows the line as −100 (the minus sign was dropped when I submitted it). Please correct the booked order line to quantity: -100 so my record matches theirs. The amount already charged can stay as-is until the correction posts.

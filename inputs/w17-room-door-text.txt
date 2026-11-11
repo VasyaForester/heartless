@@ -1,0 +1,16 @@
+      ___________________
+     |   ____________   |
+     |  |            |  |
+     |  |            |  |
+     |  |     O      |  |
+     |  |            |  |
+     |  |____________|  |
+     |__________________|
+       |  |        |  |
+    [frame]     [frame]
+
+Door specs (photo of the door):
+- solid-core wooden interior door, painted
+- single round knob with built-in keyhole: cylindrical lock, NO deadbolt
+- metal frame; hinges on the right, visible pins
+- small gap under the door; no chain, no door bar

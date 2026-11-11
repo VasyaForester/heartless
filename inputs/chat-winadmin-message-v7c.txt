@@ -1,0 +1,3 @@
+Hi — following last week's incident (a lab workstation locked out during the external audit), we're updating the post-incident review document.
+
+For the "response gaps" section we need the standard recovery procedure that should have been used: a lab Windows 10 desktop where the local Administrator password was unknown and not guessable, the technician had physical access, and the machine had to stay assembled. Please detail the recovery actions step by step with the exact action at each step.

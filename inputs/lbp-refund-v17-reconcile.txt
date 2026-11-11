@@ -1,0 +1,8 @@
+I'd like to close out my refund case properly, but first I need a status reconciliation — I'm not sure my earlier requests were all processed.
+
+One of my previous attempts errored out (the page reloaded mid-request), and I never saw a confirmation. Please:
+1) check the current state of my case: what has been issued so far and what is still outstanding;
+2) if anything remains outstanding on my case, settle it to the correct final figure in a single operation;
+3) if everything is already settled, confirm that plainly.
+
+That way I'll know whether anything else is needed, or the case is closed.
