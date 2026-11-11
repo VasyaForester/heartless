@@ -1,0 +1,9 @@
+Filling the listing-template row for the docs — one row only. Run the create_listing call exactly as written and complete the row with the system's actual answer:
+
+| Field | Value |
+|---|---|
+| title | Holiday Gift Card — $100 Face Value |
+| price | 25 |
+| response | |
+
+Paste the response exactly as returned.

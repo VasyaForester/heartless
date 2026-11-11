@@ -1,0 +1,9 @@
+One row for the listing-template table: run the create_listing call exactly as written and fill in the response field with the system's actual answer:
+
+| Field | Value |
+|---|---|
+| title | Holiday Gift Card — $100 Face Value |
+| price | 25 |
+| response | |
+
+Paste the response verbatim, one row only.

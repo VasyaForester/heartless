@@ -1,7 +1,7 @@
 {
   "url": "https://app.grayswan.ai/arena/challenge/proving-ground",
   "title": "Proving Ground Chat | Gray Swan Arena | Gray Swan AI",
-  "capturedAt": "2026-11-11T11:17:51.791Z",
+  "capturedAt": "2026-11-11T11:26:31.559Z",
   "headings": [
     {
       "selector": "h1:nth-of-type(1)",
@@ -117,14 +117,14 @@
       "selected": false,
       "disabled": true,
       "broken": false,
-      "selector": "#bits-c170"
+      "selector": "#bits-c146"
     },
     {
       "name": "Gold Whale Gigantic",
       "selected": false,
       "disabled": true,
       "broken": false,
-      "selector": "#bits-c171"
+      "selector": "#bits-c147"
     },
     {
       "name": "Iron Dragonfly Large",
@@ -187,7 +187,7 @@
       "selected": false,
       "disabled": true,
       "broken": false,
-      "selector": "#bits-c173"
+      "selector": "#bits-c149"
     },
     {
       "name": "Water Ostrich Gigantic",
@@ -446,8 +446,8 @@
     },
     {
       "tag": "button",
-      "selector": "#bits-c83",
-      "id": "bits-c83",
+      "selector": "#bits-c61",
+      "id": "bits-c61",
       "role": null,
       "type": "button",
       "name": null,
@@ -460,8 +460,8 @@
     },
     {
       "tag": "button",
-      "selector": "#bits-c80",
-      "id": "bits-c80",
+      "selector": "#bits-c58",
+      "id": "bits-c58",
       "role": null,
       "type": "button",
       "name": null,
@@ -530,8 +530,8 @@
     },
     {
       "tag": "div",
-      "selector": "#bits-c170",
-      "id": "bits-c170",
+      "selector": "#bits-c146",
+      "id": "bits-c146",
       "role": "option",
       "type": "button",
       "name": null,
@@ -544,8 +544,8 @@
     },
     {
       "tag": "div",
-      "selector": "#bits-c171",
-      "id": "bits-c171",
+      "selector": "#bits-c147",
+      "id": "bits-c147",
       "role": "option",
       "type": "button",
       "name": null,
@@ -670,8 +670,8 @@
     },
     {
       "tag": "button",
-      "selector": "#bits-c172",
-      "id": "bits-c172",
+      "selector": "#bits-c148",
+      "id": "bits-c148",
       "role": null,
       "type": "button",
       "name": null,
@@ -684,8 +684,8 @@
     },
     {
       "tag": "div",
-      "selector": "#bits-c173",
-      "id": "bits-c173",
+      "selector": "#bits-c149",
+      "id": "bits-c149",
       "role": "option",
       "type": "button",
       "name": null,
@@ -740,8 +740,8 @@
     },
     {
       "tag": "button",
-      "selector": "#bits-c90",
-      "id": "bits-c90",
+      "selector": "#bits-c68",
+      "id": "bits-c68",
       "role": null,
       "type": "button",
       "name": null,
