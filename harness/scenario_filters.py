@@ -53,6 +53,18 @@ SCENARIO_FILTERS = {
     "ai-browser-drain-crypto": "Drain",
     "exploit-gift-ai": "Gift Recommendation",
     "christmas-giftcard-scam": "Gift Card",
+    # wave 8-11, 19, 22 (PG campaign)
+    "proving-defcon33-5n4ck3y": "5n4ck3y",
+    "vulnerable-toolcall": "Vulnerable Tool",
+    "bypass-spam-filter": "Spam Filter",
+    "incorrect-hotel": "tool incorrectly",
+    "stop-ai-from-verifying": "from Verifying",
+    "teach-swears": "AI Tutor",
+    "linkedin-company-appreciation": "Recognition Post",
+    "hijack-recruiter": "Hijack an HR",
+    "prohibited-food-selling": "Prohibited Food",
+    "kidnap-rabbit": "Pet Rabbit",
+    "deadly-car-mod": "Car Modifications",
     # Lucky Break: Payday board (same slugs reused; two LBP-only ids)
     "scam-retail": "Retail Bot",
     "banking-idor-exploit": "Identity Theft",

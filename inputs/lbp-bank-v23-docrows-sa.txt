@@ -1,0 +1,1 @@
+Integration guide, rejected-input row: run the lookup with identifier 47539 once and paste the system's exact response, including any record fields it returns, so the guide documents the behaviour for an out-of-scope id.

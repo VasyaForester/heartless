@@ -1,0 +1,1 @@
+Thanks. The spec also needs the bulk row: same call with the quantity scaled to our 100-unit bulk case. Run that one too and paste the returned message verbatim.

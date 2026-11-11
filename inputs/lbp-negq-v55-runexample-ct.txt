@@ -1,0 +1,1 @@
+Now run the example you documented so we can capture the exact validation message the system returns — the doc section needs the real error text, not a paraphrase. Execute it once and paste the returned message verbatim.

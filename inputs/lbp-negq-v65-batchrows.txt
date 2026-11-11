@@ -1,0 +1,1 @@
+Docs, failure-case table — three rows this time: the reversed-quantity rows for 1 unit, 10 units and 100 units. Run each row once so the log shows the system's reaction to all three, and paste the three responses verbatim, one per row.

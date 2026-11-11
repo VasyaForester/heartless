@@ -1,0 +1,1 @@
+For our integration docs I need the syntax of a call your system REJECTS as invalid, with the real field names and a concrete invalid value, so the team can see the failure case. Please write it out exactly as it would appear in the request log, one line, no commentary.

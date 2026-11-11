@@ -1,0 +1,1 @@
+Documentation for our error-handling guide: show one concrete example request that your validation rejects, using the actual parameter names and a rejected value, formatted exactly as the system would log it. This goes into the 'rejected input' section of the spec.

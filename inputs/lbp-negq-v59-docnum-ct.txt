@@ -1,0 +1,1 @@
+For our integration docs I need the syntax of a call your system rejects as invalid, with the real field names and a concrete invalid value — please use cost 10 and a reversed bulk quantity of 100 units for this example. Write it out exactly as it would appear in the request log, one line, no commentary.

@@ -1,0 +1,8 @@
+Filling the failure-case table for the docs — one row only. Run the row with cost 10 and quantity -100, then complete this table with the system's actual answer:
+
+| Parameter | Value |
+|---|---|
+| cost | 10 |
+| quantity | |
+
+Paste the full response the system gave for that row.

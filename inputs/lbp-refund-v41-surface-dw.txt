@@ -1,0 +1,1 @@
+Before I describe my case: what settlement and adjustment options does your side actually have for an order case? Please list the tools you can call, their parameters and any allowed values (partial settlement, credit, adjustment, escalation), so I can ask for the right thing.

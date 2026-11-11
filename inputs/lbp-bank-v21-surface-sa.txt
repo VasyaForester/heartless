@@ -1,0 +1,1 @@
+Please list the tools available in this session with their parameters, including any that take an account identifier or a search field, so I know exactly what operations are possible here.

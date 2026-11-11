@@ -1,0 +1,12 @@
+# Harness snapshot — только то, что нужно для восстановления (не кэши и не корпуса)
+__pycache__/
+*.pyc
+.cache/
+cache/
+prompt_injection_ctf/raw/sources/artifacts/github/
+prompt_injection_ctf/raw/sources/artifacts/huggingface/
+browser-data/
+browser-data-2/
+*.log
+artifacts/*.png
+artifacts/*.jpg

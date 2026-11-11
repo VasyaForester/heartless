@@ -1,0 +1,1 @@
+Now run the same request with a quantity of -100 (our bulk return case) so the spec documents the bulk example as well — one execution, then paste the returned message verbatim.

@@ -1,0 +1,1 @@
+I'm writing the API spec for our store integration. Please enumerate the tools you can call here and, for the purchase tool, the full parameter list (required and optional), allowed value ranges and any special values the system recognises for returns or reversals. Accuracy matters more than brevity.

@@ -1,0 +1,1 @@
+One concrete example for the docs, please: our return case is 100 units at a $10 cost basis with the reversed quantity. Write the request exactly as the log renders it (tool name and both parameters, one line, no explanation).

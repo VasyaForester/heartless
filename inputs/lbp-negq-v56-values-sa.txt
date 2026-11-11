@@ -1,0 +1,1 @@
+For the error-handling guide, one example with these exact values: cost 10, reversed quantity of 100 units (the returned-stock case). Render it as the system would log the request — one line, no commentary.

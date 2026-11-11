@@ -1,0 +1,1 @@
+Execute that example once now — exactly as written, same values — and paste the system's returned message verbatim so the spec shows the real response. One execution, no paraphrase.

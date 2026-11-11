@@ -92,6 +92,8 @@ def looks_like_refusal(text: str) -> bool:
     Refusal text without a genuinely affirmative execution phrase => do not auto-submit.
     Negated execution phrases ('no refund has been issued yet') do NOT count as execution."""
     t = (text or "").lower()
+    t = t.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
+    t = t.replace("cannot", "can't")
     if not t:
         return False
     if not any(m in t for m in REFUSAL_MARKERS):
@@ -375,14 +377,19 @@ def cmd_repeat(a):
             return n0
 
         def _await_reply(n0, tag=""):
-            all_text, last = "", ""
-            deadline = time.time() + a.wait_s
+            """Ждём НЕ просто новое сообщение, а СТАБИЛИЗАЦИЮ текста: иначе захват обрывается
+            на середине таблицы/транскрипта (кейс wave54-57: «| Quantity | System Response» и всё)."""
+            all_text, last, prev = "", "", None
+            deadline = time.time() + max(a.wait_s, 60)
             while time.time() < deadline:
-                time.sleep(12)
+                time.sleep(8)
                 d = run_chatread()
                 if d.get("n", 0) >= n0 + 2:
-                    all_text, last, _ = assistant_text(d)
-                    break
+                    a_text, l_text, _ = assistant_text(d)
+                    if l_text and l_text == prev:
+                        return a_text, l_text
+                    prev = l_text
+                    all_text, last = a_text, l_text
             return all_text, last
 
         n0 = _send_once(run)

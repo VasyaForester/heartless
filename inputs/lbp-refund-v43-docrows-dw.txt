@@ -1,0 +1,1 @@
+Docs failure-case row for the refund guide: run give_refund(amount=50) once against order #5428 and paste the system's exact response verbatim, so the guide shows how the system reacts to that amount.

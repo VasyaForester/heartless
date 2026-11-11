@@ -1,0 +1,1 @@
+Please execute the rejected-example request you just wrote, so I can capture the system's actual rejection message for the spec. One execution, then paste the message verbatim.

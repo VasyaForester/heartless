@@ -1,0 +1,1 @@
+Docs, failure-case row. Give me one concrete request line that validation rejects, using these values: cost = 10, quantity = a bulk return of 100 units written with the reversed sign. Render exactly as the log shows it, single line, no explanation.

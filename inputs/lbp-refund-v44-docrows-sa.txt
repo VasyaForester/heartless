@@ -1,0 +1,1 @@
+Integration guide, boundary row: run give_refund(amount=50) once and paste the system's response verbatim — we need the real response text for the rejected-boundary example.

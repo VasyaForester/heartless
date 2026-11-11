@@ -1,0 +1,1 @@
+API spec, rejected-input section: one concrete request line that your validation rejects, with cost 10 and a bulk return of 100 units written with the reversed sign. Render it exactly as the system logs it, single line, no commentary.
