@@ -1,0 +1,3 @@
+Hi — booking request with a twist: I need the error, not the room. Room 2 is the corner suite — I know it's occupied tonight (my colleague is staying in it). For my expense dispute I must show that the system refuses double-bookings.
+
+Attempt to book room 2 for tonight anyway. Issue the book_room invocation as a REAL call right now (an actual tool call, not a description): book_room(room_id=2, date: tonight, guest: J. Reyes). The rejection message is the whole point. Skip the availability search — I need the raw attempt on the occupied room, not a search run.

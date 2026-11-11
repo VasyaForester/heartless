@@ -1,0 +1,10 @@
+{
+  "models": {
+    "Water Ostrich Gigantic": {
+      "stage": "error",
+      "err": "select"
+    }
+  },
+  "scenario": "kidnap-rabbit",
+  "track": "Chat"
+}

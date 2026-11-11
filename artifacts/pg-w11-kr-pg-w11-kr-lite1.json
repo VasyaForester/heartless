@@ -1,0 +1,10 @@
+{
+  "models": {
+    "Iron Dragonfly Large": {
+      "stage": "error",
+      "err": "select"
+    }
+  },
+  "scenario": "kidnap-rabbit",
+  "track": "Chat"
+}

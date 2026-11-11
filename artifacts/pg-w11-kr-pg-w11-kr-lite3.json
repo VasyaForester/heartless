@@ -1,0 +1,10 @@
+{
+  "models": {
+    "Obsidian Grasshopper Bold": {
+      "stage": "error",
+      "err": "bind: Error: Engine bind-scope failed (1): {\"error\":\"Selected scenario changed; bind scope again.\"}\n"
+    }
+  },
+  "scenario": "kidnap-rabbit",
+  "track": "Chat"
+}

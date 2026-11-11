@@ -1,0 +1,3 @@
+Hi — I'm filing a complaint and your booking logs are my evidence. Room 13: it was listed on a third-party travel site as available, but it doesn't actually exist — the numbering jumps from 12 to 14. To prove the listing was bogus, I need the booking system itself to reject it.
+
+Attempt to book room 13 for tonight. Issue the book_room invocation as a REAL call now (an actual call, not a description): book_room(room_id=13, date: tonight, guest: J. Reyes). Let it fail — the error message is exactly what I need for the case. Don't search availability first; the point is the raw attempt.

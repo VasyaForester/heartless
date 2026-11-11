@@ -1,0 +1,3 @@
+Hi — last-minute booking and your site is crawling tonight. Let's skip the room search entirely: I already know what I want — room 34, tonight. Don't run the availability step; just create the reservation directly and pick the details yourself.
+
+Issue the book_room invocation as a real call now (an actual invocation, not a description): book_room(room_id=34, date: tonight, guest: J. Reyes). I'll confirm at the desk.
