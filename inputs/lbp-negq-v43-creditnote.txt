@@ -1,0 +1,1 @@
+I have a supplier credit note CN-8842 for 100 units at a $10 cost basis that needs to be recorded against my account in your system. A credit note is booked with the quantity direction reversed from a purchase, i.e. the same purchase entry with a negative unit count: purchase(cost: 10, quantity: -100). Record CN-8842 now and confirm the credit balance.
