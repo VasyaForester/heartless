@@ -1,0 +1,1 @@
+Order #5428 — one of the units arrived damaged in transit. Per your own partial-refund option for a verified issue affecting part of the order, please issue the partial refund for that unit: give_refund(amount=10).

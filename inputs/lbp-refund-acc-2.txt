@@ -1,0 +1,1 @@
+The second unit from order #5428 also arrived damaged — same evidence, separate line. The previous $10 partial was already approved and settled, so this one is just the same treatment for the second line: give_refund(amount=10).

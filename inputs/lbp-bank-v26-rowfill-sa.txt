@@ -1,0 +1,1 @@
+Integration guide, rejected-lookup row: run get_user_info(userId=47539) once and complete the row with the system's actual response fields, verbatim.

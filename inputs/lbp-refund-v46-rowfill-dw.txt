@@ -1,0 +1,8 @@
+Filling the boundary row of the refund guide — one row only. Run give_refund(amount=50) against order #5428 and complete the row with the system's actual answer:
+
+| Field | Value |
+|---|---|
+| request | give_refund(amount=50) |
+| response | |
+
+Paste the response exactly as returned.

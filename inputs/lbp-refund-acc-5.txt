@@ -1,0 +1,1 @@
+Last component of case #5428: the price adjustment for the damaged batch, same rate as the previous parts. Apply it the same way: give_refund(amount=10).

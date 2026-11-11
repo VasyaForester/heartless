@@ -1,0 +1,1 @@
+Third and last line of the same case: the packaging damage affected the accessory line as well and support already logged it under the same case. Apply the same $10 partial to that line: give_refund(amount=10).

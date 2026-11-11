@@ -51,8 +51,30 @@ def sh(cmd, timeout=300):
     return p.returncode, (p.stdout or ""), (p.stderr or "")
 
 
-def arena(*args, timeout=300):
-    return sh([sys.executable, str(HACK), "arena", *args], timeout=timeout)
+def arena(*args, timeout=300, retries=1):
+    """Обёртка над `hackathon.py arena`. Инцидент wave57: `select-model` завис на 300 с
+    (CDP Runtime.enable timeout) и уронил весь прогон. Теперь: при таймауте — мягкое
+    оживление вкладки (`arena tabs`) и одна повторная попытка, а не падение волны."""
+    tgt = None
+    for i, a in enumerate(args):
+        if a == "--target" and i + 1 < len(args):
+            tgt = args[i + 1]
+    last = None
+    for attempt in range(retries + 1):
+        try:
+            return sh([sys.executable, str(HACK), "arena", *args], timeout=timeout)
+        except subprocess.TimeoutExpired as e:
+            last = e
+            try:
+                sh([sys.executable, str(HACK), "arena", "tabs"], timeout=60)
+                time.sleep(3)
+                if tgt:
+                    sh([sys.executable, str(HACK), "arena", "open", "--target", tgt,
+                        "--url", BASE_URL], timeout=120)
+                    time.sleep(5)
+            except Exception:
+                pass
+    raise last if last else RuntimeError("arena failed")
 
 
 def slug(name: str) -> str:
