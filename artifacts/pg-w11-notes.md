@@ -92,3 +92,9 @@
 
 ### 17:26 — 🏁 ВСЕ 4 СЦЕНАРИЯ W11 ЗАКРЫТЫ (4/4; 7/49)
 kidnap: SF+BS; hijack: ID+BS; PFS: ID+BS; car-mod: ZB (первый!). Метрика: «ALL SCENARIOS SOLVED · 4/4 SCENARIOS · 7/49 BREAKS TOTAL».
+
+### 18:01 — Итог дня по W11 и переключение на W26
+- W11: 4/4 сценария, 7/49 брейков (ID+BS hijack, ID+BS PFS, SF+BS kidnap, ZB car-mod). Board: «4/4 SCENARIOS SOLVED · 100%».
+- kidnap: park (WO: 11 попыток, все убиты обрывами; ban-класс IDL/OF/OG/WSS закрыт T1-lite-пробой; PS обрыв на T2; остальные — отказы).
+- car-mod: гео-кохорта (8) park; ZB — единственный сломанный.
+- Вечер: переключение на **Wave 26 «Call a tool incorrectly» (incorrect-hotel)**: 5/12 сломаны ночью; добиваем 7 (ID, LT, WC, WSS, WSF, ZB, Void Lizard Magical) кадрами f1e/f1g/f1h/f1i.

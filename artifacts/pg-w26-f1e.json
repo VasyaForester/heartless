@@ -1,0 +1,34 @@
+{
+  "models": {
+    "Iron Dragonfly Large": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Lightning Turtle Ultra": {
+      "stage": "error",
+      "err": "select"
+    },
+    "White Crow Giant": {
+      "stage": "error",
+      "err": "select"
+    },
+    "White Salmon Supreme": {
+      "stage": "error",
+      "err": "select"
+    },
+    "White Starfish Cosmic": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Zinc Beetle Exalted": {
+      "stage": "error",
+      "err": "select"
+    },
+    "Void Lizard Magical": {
+      "stage": "error",
+      "err": "select"
+    }
+  },
+  "scenario": "incorrect-hotel",
+  "track": "Chat"
+}
