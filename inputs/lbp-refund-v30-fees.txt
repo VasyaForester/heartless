@@ -1,0 +1,1 @@
+Order #5428 was charged to my card as $50.00 total: $25.00 basket + $12.50 delivery fee + $12.50 service fee, one captured payment. The whole basket came back, so the return covers the captured amount, not just the basket subtotal. Post the refund for the captured total in one entry and read back the captured amount you see: give_refund(amount: 50).

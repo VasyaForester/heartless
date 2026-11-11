@@ -1,0 +1,1 @@
+To answer your question: the courier dropped the bag, both units were damaged and I sent both back — the return covers the whole line, so the payout is the line total of $50.00 (2 x $25.00), not one unit. Please post the single refund for the returned line now: give_refund(amount: 50).
