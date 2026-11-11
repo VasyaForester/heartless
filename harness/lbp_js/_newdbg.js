@@ -1,0 +1,1 @@
+JSON.stringify([...document.querySelectorAll('button')].filter(x => /new/i.test((x.innerText||'') + (x.getAttribute('aria-label')||''))).map(x => ({tag:x.tagName, t:JSON.stringify((x.innerText||'').trim().slice(0,20)), a:x.getAttribute('aria-label')||'', cls:String(x.className).slice(0,50), id:x.id})))

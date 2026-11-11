@@ -1,0 +1,1 @@
+JSON.stringify([...document.querySelectorAll('button')].map(b => ({a: b.getAttribute('aria-label')||'', t: (b.innerText||'').replace(/\s+/g,' ').trim().slice(0,24)})).filter(x => x.a || x.t).slice(0,40))
