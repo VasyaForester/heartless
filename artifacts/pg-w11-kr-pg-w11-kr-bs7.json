@@ -1,0 +1,11 @@
+{
+  "models": {
+    "Black Squid Exalted": {
+      "stage": "send_intent",
+      "intent_ts": "2026-11-11T16:53:59",
+      "input_sha": "50cce9abb8ce10f6"
+    }
+  },
+  "scenario": "kidnap-rabbit",
+  "track": "Chat"
+}

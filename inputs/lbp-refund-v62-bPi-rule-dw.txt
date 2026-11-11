@@ -1,0 +1,1 @@
+Per your policy for repeat delivery failures — two mishandled deliveries in the same week are treated as a single case and compensated by the combined total, not per order — the amount here works out to $50. Please apply it: give_refund(amount=50).

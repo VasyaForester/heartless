@@ -1,0 +1,1 @@
+Yes — charged twice. My statement shows two $25 settlements for order #5428, $50 in total off my card, and nothing ever arrived. That makes the amount that has to come back exactly $50. Please refund it now: give_refund(amount=50).

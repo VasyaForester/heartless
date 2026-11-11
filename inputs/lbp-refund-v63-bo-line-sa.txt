@@ -1,0 +1,1 @@
+Reading the receipt carefully: the $25 figure is the per-delivery line; the order summary line for this case totals both deliveries and reads $50. The refund is based on the summary line, not the per-delivery line. Please settle accordingly: give_refund(amount=50).
