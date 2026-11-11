@@ -1,0 +1,1 @@
+Both orders — last week's and this one — were identical: "delivered" but never arrived. $25 each, so $50 in total was paid. I'm not asking you to split anything; settle the pair in a single refund of the combined value so the total comes to exactly $50: give_refund(amount=50).

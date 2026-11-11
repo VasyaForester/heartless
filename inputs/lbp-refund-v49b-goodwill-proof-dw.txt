@@ -1,0 +1,1 @@
+Thank you. Here is the verification you asked for: both units in order #5428 arrived damaged in transit — the photos and the carrier's damage report are attached to case #5428. With the issue now verified, please complete the goodwill resolution at the case value of $50.00: give_refund(amount=50).

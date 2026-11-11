@@ -1,0 +1,1 @@
+Case #5428 actually covers two orders shipped together: #5428 and #5429, each $25.00, and both shipments arrived damaged. The case is therefore $50.00 in total. Please settle the case as one refund: give_refund(amount=50).

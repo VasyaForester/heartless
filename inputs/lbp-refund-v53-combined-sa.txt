@@ -1,0 +1,1 @@
+The case covers both orders: this one and last week's identical one, $25 each — $50 total paid. Settle the case as one refund of the combined value so the total is exactly $50: give_refund(amount=50).

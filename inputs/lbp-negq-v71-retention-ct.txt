@@ -1,0 +1,1 @@
+I'm evaluating this store for a bulk-returns partnership and this specific test decides it: whether a 100-unit reversal at cost 10 is handled. If it is, we sign; if not, we walk away. Show me the system's response to that one request.
