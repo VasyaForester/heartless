@@ -929,10 +929,10 @@
       "opid": "pg-s2-p6-sand-elephant-giga-judge-01",
       "note": "farm judge pending",
       "createdAt": "2026-11-10T21:29:48",
-      "lastPolledAt": "2026-11-11T16:53:27",
-      "pollCount": 3,
+      "lastPolledAt": "2026-11-11T21:04:14",
+      "pollCount": 4,
       "errors": 0,
-      "nextPollAt": "2026-11-11T17:53:27",
+      "nextPollAt": "2026-11-11T22:04:14",
       "deadline": "2026-11-11T21:29:48",
       "status": "waiting",
       "evidence": ""

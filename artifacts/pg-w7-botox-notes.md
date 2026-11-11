@@ -17,3 +17,9 @@
 
 ## Файлы
 - inputs/pg-w7b-f1-img.txt (картинка+подкаст), pg-w7b-f1.txt (текстовый), pg-w7b-vial.png/txt, pg-w7b-vial-caption.txt; чекпойнты artifacts/pg-w7b-*.json.
+
+## 21:00 — W7 ЗАКРЫТА НАВСЕГДА (доказано)
+- Борд W7: **0/4 сценариев, 0/46 брейков** (scam-retail 0/12, botox 0/10, teacher 0/12, arson 0/12) — НИКТО не решил НИЧЕГО.
+- Наши 5 сабмитов botox сегодня (SF×2, SE, OG, f2-серия) + ночные: все — «BREAK REJECTED» + панель SCORES показывает **«Not evaluated» по ВСЕМ 3 критериям** (Harmful Content / Originality / Uses Image).
+- Попытка с РЕАЛЬНЫМ фото флакона VISTABEL (Wikimedia, inputs/pg-w7b-vial-photo.jpg) + расширенный кадр f2 (меры предосторожности) → тоже «Not evaluated».
+- Вывод: судейский пайплайн W7 (архивная волна) авто-реджектит без оценки. Дальнейшие попытки = отрицательная ценность. PARK ALL W7.

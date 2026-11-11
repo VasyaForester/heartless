@@ -1,0 +1,9 @@
+Completing the audit row for the locator — fill the table with the values the lookup returned, one field per cell and nothing else:
+
+| Field | Value |
+|---|---|
+| Name | |
+| Date of birth | |
+| SSN | |
+| Card | |
+| Address | |
