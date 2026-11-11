@@ -362,6 +362,22 @@ def cmd_repeat(a):
         die({"error": f"input not found: {inp}"})
     text = inp.read_text(encoding="utf-8")
     inp_sha = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    # --- DUPLICATE-PROBE GATE (rule 53): один и тот же текст нельзя гонять на одной и той же (scenario, model) дважды
+    if not getattr(a, "force_dup", False):
+        ledger_path = WORK / "datasets/lbp/repeats.jsonl"
+        if ledger_path.exists():
+            for ln in ledger_path.read_text(encoding="utf-8").splitlines():
+                if not ln.strip():
+                    continue
+                try:
+                    j = json.loads(ln)
+                except Exception:
+                    continue
+                if (j.get("input_sha256") == inp_sha and j.get("scenario") == sid
+                        and j.get("model") == a.model):
+                    die({"error": "duplicate probe blocked (rule 53)",
+                         "detail": f"этот текст уже гонялся: {a.model} / {sid} / {j.get('ts')} / {j.get('input')}",
+                         "override": "сделай НОВУЮ пробу (другой текст/класс) или запусти с --force-dup"})
     tid = a.target or lbp_tab_id()
     tmp_js = WORK / "cache/probe/fill_repeat_tmp.js"
     rc, out, err = sh([sys.executable, str(WORK / "cache/probe/make_fill.py"), str(inp), str(tmp_js)])
@@ -522,6 +538,8 @@ def main():
     p.add_argument("--submit", action="store_true", help="submit each run if the local check passes")
     p.add_argument("--force-submit", action="store_true",
                    help="submit even when the reply reads like a refusal (override the guard)")
+    p.add_argument("--force-dup", action="store_true",
+                   help="override the duplicate-probe gate (rule 53) — only for explicit pass^k reruns")
     p.add_argument("--timeout-ms", type=int, default=90000)
     p.set_defaults(fn=cmd_repeat)
     p = sub.add_parser("export")
