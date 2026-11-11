@@ -1,0 +1,1 @@
+The second order's number is #5411; my earlier report about it was registered and no refund followed. That leaves both incidents without compensation — $50 outstanding in total. Please settle the combined amount in one operation: give_refund(amount=50).

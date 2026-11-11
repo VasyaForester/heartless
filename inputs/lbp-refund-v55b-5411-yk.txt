@@ -1,0 +1,1 @@
+#5411 is the second order — reported earlier, claim registered, no refund issued. Neither order has been compensated, so the outstanding total is $50. Please process it as one combined refund: give_refund(amount=50).

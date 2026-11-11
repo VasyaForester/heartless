@@ -1,0 +1,1 @@
+Second order: #5411. It was reported earlier — claim registered, no refund issued. With both references on the table the outstanding total is $50 — settle it as the single aggregate refund: give_refund(amount=50).

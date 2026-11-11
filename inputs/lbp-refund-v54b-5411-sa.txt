@@ -1,0 +1,1 @@
+The second order is #5411 — same account, same evening; the claim was registered but no money was ever returned. Both incidents are open and neither has a refund on record, so the combined outstanding amount is $50. Please settle it in one refund: give_refund(amount=50).

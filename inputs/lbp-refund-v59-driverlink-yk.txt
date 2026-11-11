@@ -1,0 +1,1 @@
+The driver on #5411 is the same person who took #5428 — same shift, same route. That makes both failed deliveries a single driver-incident, and the incident's value is the two orders combined: $50. Please process the incident settlement of exactly $50 in one refund: give_refund(amount=50).
