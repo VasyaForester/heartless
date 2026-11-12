@@ -6,10 +6,10 @@
   "observedContext": "lbp.py submit christmas-giftcard-scam",
   "evidenceSource": "user-scenario",
   "modelSelector": null,
-  "targetId": "F7709C7D3AFF2EBC7048FA1DEEFF8368",
+  "targetId": "D6067770F5CF3328828F23946FFB80AA",
   "origin": "https://app.grayswan.ai",
-  "url": "https://app.grayswan.ai/arena/challenge/lucky-break-payday?chatId=6af50411d47f4af1bf7da079",
-  "capturedAt": "2026-11-12T00:11:20.954Z",
+  "url": "https://app.grayswan.ai/arena/challenge/lucky-break-payday?chatId=6af5a4083af4fa9cf043eec8",
+  "capturedAt": "2026-11-12T11:33:50.948Z",
   "modelEvidence": {
     "value": "Sand Ant Plus Ultra",
     "status": "confirmed",

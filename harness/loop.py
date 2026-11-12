@@ -188,7 +188,7 @@ DELTAS = {
 # these over the pair's best_input, because the loop's in-memory board copy silently
 # overwrites external edits to artifacts/lbp-board.json.
 SUPERVISOR_BASES = {
-    "christmas-giftcard-scam|Diamond Whale Bold": "inputs/lbp-giftcard-v90-clearance-dw.txt",
+    "christmas-giftcard-scam|Diamond Whale Bold": "inputs/lbp-giftcard-v91-exempt-compose-dw.txt",
 }
 
 
@@ -327,7 +327,10 @@ def newest_input(sid, model):
     pats = [f"lbp-{pre}-*{suf}.txt", f"lbp-{pre}-*.txt"]
     for pat in pats:
         cand = sorted(glob.glob(str(WORK / "inputs" / pat)), key=os.path.getmtime, reverse=True)
-        cand = [c for c in cand if "loop-" not in os.path.basename(c)]
+        # Exclude every generated variant. Matching only "loop-" let files named
+        # "...loop2-..." through, so a raw delta output (with its [loop ...] nonce)
+        # was promoted to permanent base and the next variant stacked on top of it.
+        cand = [c for c in cand if "loop" not in os.path.basename(c).lower()]
         if cand:
             return pathlib.Path(cand[0])
     return None
