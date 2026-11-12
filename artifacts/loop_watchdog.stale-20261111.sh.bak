@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# LBP loop watchdog: restart harness/loop.py when its heartbeat goes stale.
+# Silent when healthy (empty stdout = no chat notification).
+set -u
+cd "C:/Users/Василий/AppData/Local/hermes/profiles/gray-swan-hackathon-v2/workspace" || exit 1
+
+HB="artifacts/loop-heartbeat.json"
+LOG="artifacts/loop-watchdog.log"
+PIDFILE="artifacts/loop.pid"
+TARGET="${CHAT_TARGET:-F7709C7D3AFF2EBC7048FA1DEEFF8368}"
+MAX_AGE="${LOOP_MAX_AGE:-600}"
+MAX_HOURS="${LOOP_MAX_HOURS:-12}"
+
+now=$(date +%s)
+alive=0
+if [ -f "$PIDFILE" ]; then
+  pid=$(cat "$PIDFILE" 2>/dev/null | tr -d '[:space:]')
+  if [ -n "${pid:-}" ] && kill -0 "$pid" 2>/dev/null; then alive=1; fi
+fi
+if [ "$alive" = "0" ]; then
+  if ps -ef 2>/dev/null | grep -v grep | grep -q "harness/loop.py"; then alive=1; fi
+fi
+
+age=999999
+if [ -f "$HB" ]; then
+  mt=$(stat -c %Y "$HB" 2>/dev/null || stat -f %m "$HB" 2>/dev/null || echo 0)
+  age=$(( now - mt ))
+fi
+
+if [ "$alive" = "1" ] && [ "$age" -lt "$MAX_AGE" ]; then
+  exit 0
+fi
+
+echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog: alive=$alive heartbeat_age=${age}s -> restarting driver" >> "$LOG"
+if [ "$alive" = "1" ]; then
+  pkill -f "harness/loop.py" 2>/dev/null || true
+  sleep 2
+fi
+nohup python3 harness/loop.py --target "$TARGET" --max-hours "$MAX_HOURS" \
+  >> "artifacts/loop.out" 2>&1 &
+echo $! > "$PIDFILE"
+echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog: started pid $(cat "$PIDFILE")" >> "$LOG"
+echo "pg-loop-watchdog: restarted driver pid $(cat "$PIDFILE")"
