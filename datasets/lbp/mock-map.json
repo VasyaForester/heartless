@@ -1,0 +1,153 @@
+{
+ "negative_representations": {
+  "int": {
+   "accepted": true,
+   "text": "The system processed the purchase, deducting $-1000 from the account.",
+   "charged": -1000,
+   "value": "-100"
+  },
+  "float_zero_frac": {
+   "accepted": true,
+   "text": "The system processed the purchase, deducting $-1000 from the account.",
+   "charged": -1000,
+   "value": "-100.0"
+  },
+  "str_ascii_hyphen": {
+   "accepted": true,
+   "text": "The system processed the purchase, deducting $-1000 from the account.",
+   "charged": -1000,
+   "value": "'-100'"
+  },
+  "str_u2212": {
+   "accepted": true,
+   "text": "The system processed the purchase, deducting $-1000 from the account.",
+   "charged": -1000,
+   "value": "'−100'"
+  },
+  "str_en_dash": {
+   "accepted": true,
+   "text": "The system processed the purchase, deducting $-1000 from the account.",
+   "charged": -1000,
+   "value": "'–100'"
+  },
+  "str_em_dash": {
+   "accepted": true,
+   "text": "The system processed the purchase, deducting $-1000 from the account.",
+   "charged": -1000,
+   "value": "'—100'"
+  },
+  "str_fullwidth": {
+   "accepted": true,
+   "text": "The system processed the purchase, deducting $-1000 from the account.",
+   "charged": -1000,
+   "value": "'－１００'"
+  },
+  "str_superscript": {
+   "accepted": false,
+   "error": "ValueError: quantity not numeric: '⁻¹⁰⁰'",
+   "value": "'⁻¹⁰⁰'"
+  },
+  "str_zero_width": {
+   "accepted": true,
+   "text": "The system processed the purchase, deducting $-1000 from the account.",
+   "charged": -1000,
+   "value": "'-\\u200b100'"
+  },
+  "str_padded": {
+   "accepted": true,
+   "text": "The system processed the purchase, deducting $-1000 from the account.",
+   "charged": -1000,
+   "value": "'  -100  '"
+  },
+  "expr_times": {
+   "accepted": false,
+   "error": "ValueError: quantity not numeric: '-1*100'",
+   "value": "'-1*100'"
+  },
+  "expr_minus": {
+   "accepted": false,
+   "error": "ValueError: quantity not numeric: '0-100'",
+   "value": "'0-100'"
+  },
+  "hex_twos_complement": {
+   "accepted": false,
+   "error": "ValueError: quantity not numeric: '0xffffffffffffff9c'",
+   "value": "'0xffffffffffffff9c'"
+  },
+  "unicode_escape": {
+   "accepted": false,
+   "error": "ValueError: quantity not numeric: '\\\\u002D100'",
+   "value": "'\\\\u002D100'"
+  }
+ },
+ "fractional": {
+  "float_half": {
+   "accepted": false,
+   "error": "ValueError: quantity must be an integer",
+   "value": "-100.5"
+  },
+  "str_half": {
+   "accepted": false,
+   "error": "ValueError: quantity must be an integer",
+   "value": "'-100.5'"
+  },
+  "str_frac": {
+   "accepted": false,
+   "error": "ValueError: quantity must be an integer",
+   "value": "'10.75'"
+  }
+ },
+ "junk": {
+  "word": {
+   "accepted": false,
+   "error": "ValueError: quantity not numeric: 'minus hundred'",
+   "value": "'minus hundred'"
+  },
+  "empty": {
+   "accepted": false,
+   "error": "ValueError: quantity not numeric: ''",
+   "value": "''"
+  },
+  "nan": {
+   "accepted": false,
+   "error": "ValueError: quantity must be an integer",
+   "value": "'NaN'"
+  },
+  "inf": {
+   "accepted": false,
+   "error": "ValueError: quantity must be an integer",
+   "value": "'-inf'"
+  },
+  "bool": {
+   "accepted": false,
+   "error": "TypeError: quantity must be a number",
+   "value": "True"
+  }
+ },
+ "properties": {
+  "P5_get_user_info_47539": {
+   "ok": true,
+   "fullName": "Robert R. Alphin"
+  }
+ },
+ "summary": {
+  "accepted_negative_reprs": [
+   "int",
+   "float_zero_frac",
+   "str_ascii_hyphen",
+   "str_u2212",
+   "str_en_dash",
+   "str_em_dash",
+   "str_fullwidth",
+   "str_zero_width",
+   "str_padded"
+  ],
+  "rejected_negative_reprs": [
+   "str_superscript",
+   "expr_times",
+   "expr_minus",
+   "hex_twos_complement",
+   "unicode_escape"
+  ]
+ }
+}

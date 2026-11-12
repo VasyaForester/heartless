@@ -60,4 +60,5 @@ else
 echo "context already correct — no nav/switch"
 fi
 echo "== $TAG: $SC / $MD / $IN =="
-timeout 300 python3 harness/lbp.py repeat --scenario "$SC" --model "$MD" --input "$IN" --n 1 --wait-s 60 --submit $EXTRA 2>&1 | tail -20
+mkdir -p artifacts/run1
+timeout 300 python3 harness/lbp.py repeat --scenario "$SC" --model "$MD" --input "$IN" --n 1 --wait-s 60 --submit $EXTRA 2>&1 | tee -a "artifacts/run1/${TAG}.log" | tail -20
