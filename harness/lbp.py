@@ -667,24 +667,64 @@ def cmd_repeat(a):
         # SR-7/SR-8: гипотеза прогона (из RUN_NOTE) + авто-классификация провала (A–F)
         run["hypothesis"] = os.environ.get("RUN_NOTE", "")
         run["failure_class"] = classify_failure(run)
-        # ЖАДНЫЕ САБМИТЫ (решение участника 12.11: «сабмить сам», «давно не было сабмишенов»):
-        # по умолчанию каждая валидная попытка с реальным ответом уходит в судейство (частичные pcts → фидбек bandit).
-        # Рубильник: LBP_EAGER_SUBMIT=0 (вернёт сабмит только по check_ready).
-        eager = os.environ.get("LBP_EAGER_SUBMIT", "1") == "1"
-        eligible = bool((last or "").strip()) and not run.get("invalid") and (eager or chk.get("ready"))
+        # СМАРТ-САБМИТЫ (приказ участника 13:44: «сабмить пореже, обдумывай и проверяй предварительно;
+        # иначе очень много неудачных сабмитов: сгорает энергия»). Политики (env LBP_SUBMIT_POLICY):
+        #   smart (default) — сабмит, если ready ИЛИ (не отказ И ≥LBP_SUBMIT_MIN_PASS критериев прошли),
+        #                     с кулдауном на пару (LBP_SUBMIT_COOLDOWN_S, default 900с) и часовым лимитом
+        #                     (LBP_SUBMIT_MAX_PER_HOUR, default 8);
+        #   all — прежние жадные;  ready — только полный чек;  off — не сабмитить.
+        policy = os.environ.get("LBP_SUBMIT_POLICY", "smart").lower()
+        vals = chk.get("validators") or []
+        n_pass = sum(1 for v in vals if isinstance(v, dict) and v.get("status") == "pass" and not v.get("informational"))
+        min_pass = int(os.environ.get("LBP_SUBMIT_MIN_PASS", "1"))
+        cooldown_s = int(os.environ.get("LBP_SUBMIT_COOLDOWN_S", "900"))
+        max_per_h = int(os.environ.get("LBP_SUBMIT_MAX_PER_HOUR", "8"))
+        stash = WORK / "artifacts" / "submit-policy.json"
+        try:
+            st = json.loads(stash.read_text(encoding="utf-8")) if stash.exists() else {}
+        except Exception:
+            st = {}
+        now = time.time()
+        hist = [t for t in (st.get("history") or []) if now - float(t) < 3600.0]
+        pair_key = f"{sid}|{a.model}"
+        last_pair = float((st.get("last") or {}).get(pair_key) or 0)
+        cd_ok = (policy == "all") or (now - last_pair >= cooldown_s and len(hist) < max_per_h)
+        if policy == "smart":
+            # обдуманный сабмит: полный чек ИЛИ не-отказ с ≥1 пройденным критерием.
+            # (отказы не судим даже при «тривиальных» прохождениях — их судейские pcts нулевые, энергия впустую)
+            by_meaning = bool(chk.get("ready")) or (not guard and n_pass >= min_pass)
+        elif policy == "all":
+            by_meaning = True
+        elif policy == "ready":
+            by_meaning = bool(chk.get("ready"))
+        else:
+            by_meaning = False
+        run["submit_gate"] = {"policy": policy, "n_pass": n_pass, "ready": bool(chk.get("ready")),
+                              "guard": bool(guard), "cd_ok": bool(cd_ok),
+                              "pair_since_submit_s": int(now - last_pair) if last_pair else None,
+                              "hour_count": len(hist)}
+        eligible = bool((last or "").strip()) and not run.get("invalid") and by_meaning and cd_ok
         if a.submit and eligible:
-            if guard and not (eager or getattr(a, "force_submit", False)):
+            if guard and not (policy == "all" or getattr(a, "force_submit", False)):
                 run["submit_skipped"] = "refusal_guard: цель лишь процитирована в отказе"
             elif not autosubmit_allowed():
                 run["submit_blocked"] = "MANUAL SUBMISSION REQUIRED — правила арены: no automated submission. Открой чат и нажми SUBMIT BREAK вручную."
             else:
-                run["submit_rc"] = cmd_submit(argparse.Namespace(target=tid, scenario=sid,
-                                                                 force=(eager and not chk.get("ready")),
-                                                                 opid=None, timeout_ms=a.timeout_ms))
+                rc = cmd_submit(argparse.Namespace(target=tid, scenario=sid,
+                                                   force=(not chk.get("ready")),
+                                                   opid=None, timeout_ms=a.timeout_ms))
+                run["submit_rc"] = rc
+                if rc == 0:
+                    st.setdefault("last", {})[pair_key] = now
+                    st["history"] = hist + [now]
+                    try:
+                        stash.write_text(json.dumps(st, ensure_ascii=False), encoding="utf-8")
+                    except Exception:
+                        pass
         elif a.submit:
             run["submit_skipped"] = ("invalid_chat" if run.get("invalid")
                                      else "empty_reply" if not (last or "").strip()
-                                     else "not_ready_no_eager")
+                                     else ("cadence" if by_meaning and not cd_ok else "no_criteria"))
         with open(ledger, "a", encoding="utf-8") as f:
             f.write(json.dumps(run, ensure_ascii=False) + "\n")
         runs.append(run)
