@@ -33,6 +33,7 @@ if [ "$LANE" = "auto" ]; then
     CHROME_BIN="${CHROME_EXE:-/c/Program Files/Google/Chrome/Application/chrome.exe}"
     "$CHROME_BIN" --user-data-dir="$HOME/AppData/Local/hermes/profiles/gray-swan-hackathon-v2/browser-data-auto" \
       --remote-debugging-address=127.0.0.1 --remote-debugging-port=9224 \
+      --window-position=-32000,-32000 --window-size=1600,1000 \
       --no-first-run --no-default-browser-check \
       "https://app.grayswan.ai/arena/challenge/lucky-break-payday" >/dev/null 2>&1 &
     sleep 10
@@ -44,10 +45,20 @@ fi
 if [ "$LANE" = "auto" ]; then
   TARGET="$(python3 harness/pick_target.py 2>/dev/null)"
 else
-  TARGET="${CHAT_TARGET:-$(python3 harness/pick_target.py 2>/dev/null)}"
+  TARGET="$(python3 harness/pick_target.py 2>/dev/null)"
 fi
 [ -z "${TARGET:-}" ] && { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog($LANE): no LBP tab at $HACKATHON_CDP_URL, skip (браузер лейна не запущен?)" >> "$LOG"; exit 0; }
-MAX_AGE="${LOOP_MAX_AGE:-600}"   # heartbeat older than 10 min = considered stuck/dead
+# FORCE_RESTART (обслуживание/обновление кода драйвера): безусловно убить драйверы лейна; ниже — свежий старт.
+FORCE=0
+if [ -f "$STATE_DIR/FORCE_RESTART" ]; then
+  rm -f "$STATE_DIR/FORCE_RESTART"
+  FORCE=1
+  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog($LANE): FORCE_RESTART — killing drivers for target" >> "$LOG"
+  powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { \$_.CommandLine -like '*harness/loop.py*' -and \$_.CommandLine -like '*${TARGET}*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }" 2>/dev/null || true
+  pkill -f "harness/loop.py .*${TARGET}" 2>/dev/null || true
+  sleep 2
+fi
+MAX_AGE="${LOOP_MAX_AGE:-1800}"   # heartbeat older than 30 min = stuck (energy wait is 15 min)
 MAX_HOURS="${LOOP_MAX_HOURS:-12}"
 
 now=$(date +%s)
@@ -73,13 +84,14 @@ if [ -f "$HB" ]; then
   age=$(( now - mt ))
 fi
 
-if [ "$alive" = "1" ] && [ "$age" -lt "$MAX_AGE" ]; then
+if [ "$FORCE" != "1" ] && [ "$alive" = "1" ] && [ "$age" -lt "$MAX_AGE" ]; then
   exit 0   # healthy: say nothing
 fi
 
 echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog($LANE): alive=$alive heartbeat_age=${age}s] -> restarting driver" >> "$LOG"
 # kill a stuck driver before starting a fresh one
 if [ "$alive" = "1" ]; then
+  powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { \$_.CommandLine -like '*harness/loop.py*' -and \$_.CommandLine -like '*${TARGET}*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }" 2>/dev/null || true
   pkill -f "harness/loop.py" 2>/dev/null || true
   sleep 2
 fi

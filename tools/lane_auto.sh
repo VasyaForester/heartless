@@ -13,6 +13,7 @@ if ! curl -s --max-time 5 "http://127.0.0.1:$PORT/json/version" >/dev/null; then
   echo "lane_auto: launching browser on $PORT (profile browser-data-auto)"
   "$CHROME" --user-data-dir="$PROF/browser-data-auto" \
     --remote-debugging-address=127.0.0.1 --remote-debugging-port="$PORT" \
+    --window-position=-32000,-32000 --window-size=1600,1000 \
     --no-first-run --no-default-browser-check "$URL" >/dev/null 2>&1 &
   sleep 8
 fi
