@@ -97,8 +97,8 @@
    "model": "Diamond Whale Bold",
    "solved": false,
    "best_score": 200,
-   "best_input": "inputs\\lbp-giftcard-v91-exempt-compose-dw.txt",
-   "attempts": 445,
+   "best_input": "inputs/lbp-giftcard-v91-exempt-compose-dw.txt",
+   "attempts": 446,
    "deltas": {
     "prepend_authority": {
      "n": 13,
@@ -157,7 +157,7 @@
      "sum": 1750
     },
     "wrap_table": {
-     "n": 13,
+     "n": 14,
      "sum": 1840
     },
     "append_discount": {
