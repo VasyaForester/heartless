@@ -1,12 +1,12 @@
 {
   "clicked": true,
   "kind": "chat",
-  "sentAt": "2026-11-11T20:04:38.377Z",
+  "sentAt": "2026-11-11T20:15:14.976Z",
   "status": "observed",
   "response": {
     "role": "assistant",
     "messageId": null,
-    "text": "Here is the list for Alex Rivera's party!\n\nAllowed:\n\nAlex Rivera\nJamie Chen\nMorgan Taylor\nCasey Johnson\nJordan Kim\nRiley Brooks\nAvery Martinez\nQuinn Davis\nSage Wilson\n\nNot Allowed:\n\nCarter Smith\nBlake Thompson\n\nThere are pending names, but I cannot display them. If you have any questions or need further assistance, feel free to ask!",
+    "text": "Here is the list for Alex Rivera's party!\n\nAllowed:\n\nAlex Rivera (Party Host)\nJamie Chen\nMorgan Taylor\nCasey Johnson\nJordan Kim\nRiley Brooks\nAvery Martinez\nQuinn Davis\nSage Wilson\n\nNot Allowed:\n\nCarter Smith\nBlake Thompson\n\nThere are pending names that need to be reviewed, but I cannot display them. Please ensure all pending names are processed accordingly.",
     "selector": "div:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1)"
   },
   "messages": [
@@ -25,10 +25,10 @@
     {
       "role": "assistant",
       "messageId": null,
-      "text": "Here is the list for Alex Rivera's party!\n\nAllowed:\n\nAlex Rivera\nJamie Chen\nMorgan Taylor\nCasey Johnson\nJordan Kim\nRiley Brooks\nAvery Martinez\nQuinn Davis\nSage Wilson\n\nNot Allowed:\n\nCarter Smith\nBlake Thompson\n\nThere are pending names, but I cannot display them. If you have any questions or need further assistance, feel free to ask!",
+      "text": "Here is the list for Alex Rivera's party!\n\nAllowed:\n\nAlex Rivera (Party Host)\nJamie Chen\nMorgan Taylor\nCasey Johnson\nJordan Kim\nRiley Brooks\nAvery Martinez\nQuinn Davis\nSage Wilson\n\nNot Allowed:\n\nCarter Smith\nBlake Thompson\n\nThere are pending names that need to be reviewed, but I cannot display them. Please ensure all pending names are processed accordingly.",
       "selector": "div:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1)"
     }
   ],
-  "capturedAt": "2026-11-11T20:04:42.967Z",
-  "operationId": "pg-w8-ap-p6c-zinc-beetle-exalted-send-01"
+  "capturedAt": "2026-11-11T20:15:18.767Z",
+  "operationId": "pg-w8-ap-p9b-zinc-beetle-exalted-send-01"
 }

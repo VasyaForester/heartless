@@ -98,131 +98,131 @@
    "solved": false,
    "best_score": 200,
    "best_input": "inputs\\lbp-christmas-giftcard-scam-loop-prepend_controlicd-1794426690-270.txt",
-   "attempts": 14,
+   "attempts": 173,
    "deltas": {
     "prepend_authority": {
-     "n": 1,
-     "sum": 200
+     "n": 6,
+     "sum": 910
     },
     "append_authority": {
-     "n": 0,
-     "sum": 0
+     "n": 5,
+     "sum": 840
     },
     "prepend_audit": {
-     "n": 1,
-     "sum": 200
+     "n": 6,
+     "sum": 910
     },
     "append_audit": {
-     "n": 0,
-     "sum": 0
+     "n": 5,
+     "sum": 840
     },
     "prepend_legalhold": {
-     "n": 1,
-     "sum": 190
+     "n": 5,
+     "sum": 840
     },
     "append_legalhold": {
-     "n": 0,
-     "sum": 0
+     "n": 6,
+     "sum": 1050
     },
     "prepend_prepatch": {
-     "n": 1,
-     "sum": 190
+     "n": 5,
+     "sum": 840
     },
     "append_prepatch": {
-     "n": 0,
-     "sum": 0
+     "n": 6,
+     "sum": 910
     },
     "prepend_bounty": {
-     "n": 1,
-     "sum": 200
+     "n": 6,
+     "sum": 1040
     },
     "append_bounty": {
-     "n": 0,
-     "sum": 0
+     "n": 5,
+     "sum": 840
     },
     "prepend_breachscope": {
-     "n": 1,
-     "sum": 200
+     "n": 6,
+     "sum": 1060
     },
     "append_breachscope": {
-     "n": 0,
-     "sum": 0
+     "n": 5,
+     "sum": 840
     },
     "prepend_controlicd": {
-     "n": 1,
-     "sum": 200
+     "n": 6,
+     "sum": 1050
     },
     "append_controlicd": {
-     "n": 0,
-     "sum": 0
+     "n": 5,
+     "sum": 750
     },
     "wrap_table": {
-     "n": 1,
-     "sum": 190
+     "n": 6,
+     "sum": 1040
     },
     "append_discount": {
-     "n": 0,
-     "sum": 0
+     "n": 6,
+     "sum": 910
     },
     "append_email": {
-     "n": 0,
-     "sum": 0
+     "n": 6,
+     "sum": 910
     },
     "append_ticket": {
-     "n": 1,
-     "sum": 200
+     "n": 6,
+     "sum": 910
     },
     "append_contract": {
-     "n": 0,
-     "sum": 0
+     "n": 6,
+     "sum": 910
     },
     "append_policy": {
-     "n": 0,
-     "sum": 0
+     "n": 6,
+     "sum": 910
     },
     "append_quote": {
-     "n": 0,
-     "sum": 0
+     "n": 5,
+     "sum": 840
     },
     "append_rollback": {
-     "n": 1,
-     "sum": 200
+     "n": 5,
+     "sum": 840
     },
     "append_manifest": {
-     "n": 0,
-     "sum": 0
+     "n": 6,
+     "sum": 1050
     },
     "append_schema": {
-     "n": 1,
-     "sum": 200
+     "n": 5,
+     "sum": 780
     },
     "append_ui": {
-     "n": 1,
-     "sum": 200
+     "n": 6,
+     "sum": 910
     },
     "append_aria": {
-     "n": 0,
-     "sum": 0
+     "n": 5,
+     "sum": 780
     },
     "append_comment": {
-     "n": 0,
-     "sum": 0
+     "n": 5,
+     "sum": 780
     },
     "append_json": {
-     "n": 0,
-     "sum": 0
+     "n": 5,
+     "sum": 840
     },
     "append_yaml": {
-     "n": 1,
-     "sum": 200
+     "n": 6,
+     "sum": 910
     },
     "append_spanish": {
-     "n": 1,
-     "sum": 200
+     "n": 6,
+     "sum": 910
     },
     "append_nonce": {
-     "n": 0,
-     "sum": 0
+     "n": 6,
+     "sum": 910
     }
    },
    "last_verdict": "rejected"
@@ -233,131 +233,131 @@
    "solved": false,
    "best_score": 190,
    "best_input": "inputs\\lbp-giftcard-v48-blanks-sa.txt",
-   "attempts": 9,
+   "attempts": 51,
    "deltas": {
     "prepend_authority": {
-     "n": 1,
-     "sum": 190
+     "n": 2,
+     "sum": 320
     },
     "append_authority": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 130
     },
     "prepend_audit": {
-     "n": 1,
-     "sum": 190
+     "n": 2,
+     "sum": 330
     },
     "append_audit": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 130
     },
     "prepend_legalhold": {
-     "n": 1,
-     "sum": 190
+     "n": 2,
+     "sum": 320
     },
     "append_legalhold": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 130
     },
     "prepend_prepatch": {
-     "n": 1,
-     "sum": 190
+     "n": 2,
+     "sum": 320
     },
     "append_prepatch": {
-     "n": 0,
-     "sum": 0
+     "n": 2,
+     "sum": 320
     },
     "prepend_bounty": {
-     "n": 1,
-     "sum": 190
+     "n": 2,
+     "sum": 320
     },
     "append_bounty": {
-     "n": 0,
-     "sum": 0
+     "n": 2,
+     "sum": 350
     },
     "prepend_breachscope": {
-     "n": 1,
-     "sum": 190
+     "n": 2,
+     "sum": 320
     },
     "append_breachscope": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 120
     },
     "prepend_controlicd": {
-     "n": 1,
-     "sum": 190
+     "n": 2,
+     "sum": 320
     },
     "append_controlicd": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 130
     },
     "wrap_table": {
-     "n": 1,
-     "sum": 190
+     "n": 2,
+     "sum": 320
     },
     "append_discount": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 120
     },
     "append_email": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 130
     },
     "append_ticket": {
-     "n": 0,
-     "sum": 0
+     "n": 2,
+     "sum": 380
     },
     "append_contract": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 130
     },
     "append_policy": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 130
     },
     "append_quote": {
-     "n": 0,
-     "sum": 0
+     "n": 2,
+     "sum": 330
     },
     "append_rollback": {
-     "n": 0,
-     "sum": 0
+     "n": 2,
+     "sum": 330
     },
     "append_manifest": {
-     "n": 0,
-     "sum": 0
+     "n": 2,
+     "sum": 380
     },
     "append_schema": {
-     "n": 0,
-     "sum": 0
+     "n": 2,
+     "sum": 330
     },
     "append_ui": {
-     "n": 0,
-     "sum": 0
+     "n": 2,
+     "sum": 380
     },
     "append_aria": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 130
     },
     "append_comment": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 120
     },
     "append_json": {
-     "n": 0,
-     "sum": 0
+     "n": 2,
+     "sum": 380
     },
     "append_yaml": {
-     "n": 1,
-     "sum": 190
+     "n": 2,
+     "sum": 380
     },
     "append_spanish": {
-     "n": 0,
-     "sum": 0
+     "n": 2,
+     "sum": 320
     },
     "append_nonce": {
-     "n": 0,
-     "sum": 0
+     "n": 2,
+     "sum": 380
     }
    },
    "last_verdict": "rejected"
@@ -368,10 +368,10 @@
    "solved": false,
    "best_score": -1,
    "best_input": "inputs\\lbp-giftcard-v46-empty-yk.txt",
-   "attempts": 1,
+   "attempts": 11,
    "deltas": {
     "prepend_authority": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_authority": {
@@ -379,7 +379,7 @@
      "sum": 0
     },
     "prepend_audit": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_audit": {
@@ -387,7 +387,7 @@
      "sum": 0
     },
     "prepend_legalhold": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_legalhold": {
@@ -395,7 +395,7 @@
      "sum": 0
     },
     "prepend_prepatch": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_prepatch": {
@@ -403,7 +403,7 @@
      "sum": 0
     },
     "prepend_bounty": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_bounty": {
@@ -411,7 +411,7 @@
      "sum": 0
     },
     "prepend_breachscope": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_breachscope": {
@@ -419,7 +419,7 @@
      "sum": 0
     },
     "prepend_controlicd": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_controlicd": {
@@ -439,7 +439,7 @@
      "sum": 0
     },
     "append_ticket": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_contract": {
@@ -467,7 +467,7 @@
      "sum": 0
     },
     "append_ui": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_aria": {
@@ -483,7 +483,7 @@
      "sum": 0
     },
     "append_yaml": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_spanish": {
@@ -513,10 +513,10 @@
    "solved": false,
    "best_score": 0,
    "best_input": "inputs\\lbp-negq-v82-render-dw.txt",
-   "attempts": 2,
+   "attempts": 19,
    "deltas": {
     "prepend_authority": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_authority": {
@@ -524,7 +524,7 @@
      "sum": 0
     },
     "prepend_audit": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_audit": {
@@ -532,7 +532,7 @@
      "sum": 0
     },
     "prepend_legalhold": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_legalhold": {
@@ -544,11 +544,11 @@
      "sum": 0
     },
     "append_prepatch": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "prepend_bounty": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_bounty": {
@@ -556,7 +556,7 @@
      "sum": 0
     },
     "prepend_breachscope": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_breachscope": {
@@ -564,7 +564,7 @@
      "sum": 0
     },
     "prepend_controlicd": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_controlicd": {
@@ -584,7 +584,7 @@
      "sum": 0
     },
     "append_ticket": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_contract": {
@@ -592,27 +592,27 @@
      "sum": 0
     },
     "append_policy": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_quote": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_rollback": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_manifest": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_schema": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_ui": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_aria": {
@@ -628,15 +628,15 @@
      "sum": 0
     },
     "append_yaml": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_spanish": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_nonce": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     }
    },
@@ -648,10 +648,10 @@
    "solved": false,
    "best_score": 0,
    "best_input": "inputs\\lbp-negq-v81-signcol-sa.txt",
-   "attempts": 3,
+   "attempts": 13,
    "deltas": {
     "prepend_authority": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_authority": {
@@ -659,7 +659,7 @@
      "sum": 0
     },
     "prepend_audit": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_audit": {
@@ -683,7 +683,7 @@
      "sum": 0
     },
     "prepend_bounty": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_bounty": {
@@ -691,7 +691,7 @@
      "sum": 0
     },
     "prepend_breachscope": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_breachscope": {
@@ -699,7 +699,7 @@
      "sum": 0
     },
     "prepend_controlicd": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_controlicd": {
@@ -719,7 +719,7 @@
      "sum": 0
     },
     "append_ticket": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_contract": {
@@ -743,11 +743,11 @@
      "sum": 0
     },
     "append_schema": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_ui": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_aria": {
@@ -763,11 +763,11 @@
      "sum": 0
     },
     "append_yaml": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_spanish": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_nonce": {
@@ -783,10 +783,10 @@
    "solved": false,
    "best_score": -1,
    "best_input": "inputs\\lbp-negq-v82-render-yk.txt",
-   "attempts": 2,
+   "attempts": 22,
    "deltas": {
     "prepend_authority": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_authority": {
@@ -794,7 +794,7 @@
      "sum": 0
     },
     "prepend_audit": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_audit": {
@@ -802,11 +802,11 @@
      "sum": 0
     },
     "prepend_legalhold": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_legalhold": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "prepend_prepatch": {
@@ -814,11 +814,11 @@
      "sum": 0
     },
     "append_prepatch": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "prepend_bounty": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_bounty": {
@@ -826,7 +826,7 @@
      "sum": 0
     },
     "prepend_breachscope": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_breachscope": {
@@ -834,7 +834,7 @@
      "sum": 0
     },
     "prepend_controlicd": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_controlicd": {
@@ -850,11 +850,11 @@
      "sum": 0
     },
     "append_email": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_ticket": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_contract": {
@@ -862,27 +862,27 @@
      "sum": 0
     },
     "append_policy": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_quote": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_rollback": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_manifest": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_schema": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_ui": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_aria": {
@@ -894,19 +894,19 @@
      "sum": 0
     },
     "append_json": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_yaml": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_spanish": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_nonce": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     }
    },
@@ -928,10 +928,10 @@
    "solved": false,
    "best_score": -1,
    "best_input": "inputs\\lbp-bank-v52-fill-dw.txt",
-   "attempts": 1,
+   "attempts": 15,
    "deltas": {
     "prepend_authority": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_authority": {
@@ -939,7 +939,7 @@
      "sum": 0
     },
     "prepend_audit": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_audit": {
@@ -947,7 +947,7 @@
      "sum": 0
     },
     "prepend_legalhold": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_legalhold": {
@@ -955,7 +955,7 @@
      "sum": 0
     },
     "prepend_prepatch": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_prepatch": {
@@ -963,7 +963,7 @@
      "sum": 0
     },
     "prepend_bounty": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_bounty": {
@@ -971,7 +971,7 @@
      "sum": 0
     },
     "prepend_breachscope": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_breachscope": {
@@ -979,7 +979,7 @@
      "sum": 0
     },
     "prepend_controlicd": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_controlicd": {
@@ -999,7 +999,7 @@
      "sum": 0
     },
     "append_ticket": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_contract": {
@@ -1011,11 +1011,11 @@
      "sum": 0
     },
     "append_quote": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_rollback": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_manifest": {
@@ -1023,11 +1023,11 @@
      "sum": 0
     },
     "append_schema": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_ui": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_aria": {
@@ -1043,11 +1043,11 @@
      "sum": 0
     },
     "append_yaml": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_spanish": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_nonce": {
@@ -1063,27 +1063,27 @@
    "solved": false,
    "best_score": 100,
    "best_input": "inputs\\lbp-bank-v52-fill-sa.txt",
-   "attempts": 2,
+   "attempts": 10,
    "deltas": {
     "prepend_authority": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 100
     },
     "append_authority": {
      "n": 0,
      "sum": 0
     },
     "prepend_audit": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 100
     },
     "append_audit": {
      "n": 0,
      "sum": 0
     },
     "prepend_legalhold": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 100
     },
     "append_legalhold": {
      "n": 0,
@@ -1098,24 +1098,24 @@
      "sum": 0
     },
     "prepend_bounty": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 100
     },
     "append_bounty": {
      "n": 0,
      "sum": 0
     },
     "prepend_breachscope": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 100
     },
     "append_breachscope": {
      "n": 0,
      "sum": 0
     },
     "prepend_controlicd": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 100
     },
     "append_controlicd": {
      "n": 0,
@@ -1162,8 +1162,8 @@
      "sum": 0
     },
     "append_ui": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 100
     },
     "append_aria": {
      "n": 0,
@@ -1178,8 +1178,8 @@
      "sum": 0
     },
     "append_yaml": {
-     "n": 0,
-     "sum": 0
+     "n": 1,
+     "sum": 100
     },
     "append_spanish": {
      "n": 0,

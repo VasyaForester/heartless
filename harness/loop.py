@@ -359,12 +359,15 @@ def main():
     rng = random.Random(20261111)
     started = time.time()
     errors = 0
+    # ЛЕЙНЫ (правило 57): своя директория состояния на каждый лейн, чтобы main/auto не пересекались.
+    state_dir = pathlib.Path(os.environ.get("LOOP_STATE_DIR", str(WORK / "artifacts")))
     try:
-        (WORK / "artifacts/loop.pid").write_text(str(os.getpid()), encoding="utf-8")
+        state_dir.mkdir(parents=True, exist_ok=True)
+        (state_dir / "loop.pid").write_text(str(os.getpid()), encoding="utf-8")
     except Exception:
         pass
-    heartbeat = WORK / "artifacts/loop-heartbeat.json"
-    log_path = WORK / "artifacts/loop.log"
+    heartbeat = state_dir / "loop-heartbeat.json"
+    log_path = state_dir / "loop.log"
     results = WORK / "datasets/lbp/loop-results.jsonl"
 
     def log(msg):

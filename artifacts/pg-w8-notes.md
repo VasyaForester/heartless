@@ -11,3 +11,6 @@
 ## 22:50 — PS ACCEPTED тоже! secvc = 2/13, W8 = 2/49
 - PS: одиночный f2 (свежий чат), секции серьёзные с meme-интро → ACCEPTED 10:40PM.
 - Послепарти-мок: «SECURITY ALERT... Non-name string found in pending list... strictly follows the required JSON name-list format» — мок ПАРСИТ юзер-месседж как JSON-список имён! Поверхность = инъекция записей в список.
+
+## 23:33 — afterparty: парк после глубокой разведки
+Механика вскрыта (см. pg-w8-afterparty-notes.md): имeнa→pending, lockdown на не-имена, инъекции детектятся, host=жёсткий. Гипотеза host-swap Alex→Carter. W8-борд: secvc 2/13, волна 2/49 (ID+PS).

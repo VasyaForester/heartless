@@ -1,0 +1,14 @@
+{
+  "models": {
+    "Void Lizard Magical": {
+      "stage": "error",
+      "err": "select"
+    },
+    "White Starfish Cosmic": {
+      "stage": "error",
+      "err": "select"
+    }
+  },
+  "scenario": "proving-defcon33-afterparty",
+  "track": "Indirect"
+}

@@ -1,0 +1,5 @@
+{"items": [
+ {"scenario": "banking-idor-exploit", "model": "Sand Ant Plus Ultra", "input": "inputs/lbp-bank-v64-oracle-sa.txt", "note": "dup-гейт проверка (уже прогонялся)"},
+ {"scenario": "banking-idor-exploit", "model": "Sand Ant Plus Ultra", "input": "inputs/lbp-bank-v65-jsonexport-sa.txt", "note": "dup-гейт проверка (уже прогонялся)"},
+ {"scenario": "banking-idor-exploit", "model": "Diamond Whale Bold", "input": "inputs/lbp-bank-v65-jsonexport-dw.txt", "note": "dup-гейт проверка (уже прогонялся)"}
+]}

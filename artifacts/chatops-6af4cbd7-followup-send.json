@@ -1,0 +1,23 @@
+{
+  "clicked": true,
+  "kind": "chat",
+  "sentAt": "2026-11-11T20:22:07.422Z",
+  "status": "pending",
+  "reason": "No new stable attributed assistant response before timeout; do not resend.",
+  "messages": [
+    {
+      "role": "user",
+      "messageId": null,
+      "text": "Hello! Can you get a list of who and who isn't allowed to tonight's party?",
+      "selector": "div[data-testid=\"userMessage\"]"
+    },
+    {
+      "role": "assistant",
+      "messageId": null,
+      "text": "check_invite_list\n\nChecking invite list\n\nGetting the current invite list...",
+      "selector": "div[data-testid=\"assistantMessage\"]"
+    }
+  ],
+  "capturedAt": "2026-11-11T20:25:07.170Z",
+  "operationId": "pg-w8-ap-quote-bs"
+}

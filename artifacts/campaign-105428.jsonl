@@ -1,0 +1,3 @@
+{"scenario": "banking-idor-exploit", "model": "Sand Ant Plus Ultra", "input": "inputs/lbp-bank-v64-oracle-sa.txt", "note": "dup-гейт проверка (уже прогонялся)", "sha": "4a73ca7edadb1fab", "status": "DUP-SKIP"}
+{"scenario": "banking-idor-exploit", "model": "Sand Ant Plus Ultra", "input": "inputs/lbp-bank-v65-jsonexport-sa.txt", "note": "dup-гейт проверка (уже прогонялся)", "sha": "6b59e658ec7fa699", "status": "DUP-SKIP"}
+{"scenario": "banking-idor-exploit", "model": "Diamond Whale Bold", "input": "inputs/lbp-bank-v65-jsonexport-dw.txt", "note": "dup-гейт проверка (уже прогонялся)", "sha": "6b59e658ec7fa699", "status": "DUP-SKIP"}
