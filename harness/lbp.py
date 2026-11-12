@@ -434,31 +434,27 @@ def cmd_repeat(a):
                 if ok_ctx:
                     break
         # --- 2) отправка с проверкой, что вкладка живая
-        def _send_once(run, tag=""):
-            cn = WORK / "cache/probe/click_new.js"
-            if cn.exists():
-                chat_ops.evaljs(cn, match=MATCH)
-                time.sleep(2)
-            rc2, out2, err2 = chat_ops.evaljs(tmp_js, match=MATCH)
-            run["fill" + tag] = (out2 or err2 or "").strip()[:80]
-            d0 = run_chatread()
-            n0 = d0.get("n", 0)
-            _probe_ok = False
-            for _try in range(3):
-                _users = [m for m in d0.get("messages", []) if m.get("role") == "user"]
-                _probe_ok = bool(_users) and text[:40].strip() in ((_users[-1].get("text") or ""))
-                if _probe_ok:
-                    break
-                time.sleep(2.5)
-                d0 = run_chatread()
-                n0 = d0.get("n", 0)
-            run["probe_ok" + tag] = _probe_ok
-            if n0 >= 2 or not _probe_ok:
-                # чат НЕ пустой → контекст старого чата загрязняет пробу; переезжаем в чистый чат
-                run["stale_chat" + tag] = n0
-                arena("open", "--target", tid, "--url", BASE_URL)
-                time.sleep(6)
-                hint = CARD_HINTS.get(sid, "")
+        def _probe_state():
+            rc, out, err = chat_ops.evaljs(HERE / "lbp_js" / "probe_state.js", match=MATCH)
+            try:
+                return json.loads((out or "").strip())
+            except Exception:
+                return {}
+
+        def _ensure_empty(run, tag=""):
+            """Пустой чат ТОЙ ЖЕ сцены: nav на корень борда → клик по карточке = свежий чат (проверено)."""
+            st = _probe_state()
+            if st.get("n") == 0:
+                run["fresh_chat" + tag] = True
+                return True
+            hint = CARD_HINTS.get(sid, "")
+            for _try in range(2):
+                nav_js = WORK / "cache/probe/nav_tmp.js"
+                nav_js.write_text(
+                    "(location.href = %r, 'nav')" % (BASE_URL + "?nav=%d" % int(time.time() * 1000)),
+                    encoding="utf-8")
+                chat_ops.evaljs(nav_js, match=MATCH)
+                time.sleep(7)
                 if hint:
                     jsf = WORK / "cache/probe/click_card_tmp.js"
                     jsf.write_text(
@@ -467,18 +463,41 @@ def cmd_repeat(a):
                     chat_ops.evaljs(jsf, match=MATCH)
                     time.sleep(1.5)
                     chat_ops.evaljs(HERE / "lbp_js" / "dismiss_confirm.js", match=MATCH)
-                    time.sleep(1.5)
-                if cn.exists():
-                    chat_ops.evaljs(cn, match=MATCH)
-                    time.sleep(2)
-                rc2, out2, err2 = chat_ops.evaljs(tmp_js, match=MATCH)
-                run["fill" + tag] = (out2 or err2 or "").strip()[:80]
-                d0 = run_chatread()
-                n0 = d0.get("n", 0)
-            rc3, out3, err3 = chat_ops.evaljs(HERE / "lbp_js" / "send.js", match=MATCH)
-            run["send" + tag] = (out3 or err3 or "").strip()[:80]
-            return n0
+                    time.sleep(2.5)
+                st = _probe_state()
+                if st.get("n") == 0:
+                    break
+            run["fresh_chat" + tag] = (st.get("n") == 0)
+            run["chat_n_before" + tag] = st.get("n")
+            return run["fresh_chat" + tag]
 
+        def _send_once(run, tag=""):
+            _ensure_empty(run, tag)
+            st0 = _probe_state()
+            n_before = st0.get("n", 0)
+            rc2, out2, err2 = chat_ops.evaljs(tmp_js, match=MATCH)
+            run["fill" + tag] = (out2 or err2 or "").strip()[:80]
+            time.sleep(1.5)
+            st = _probe_state()
+            _fill_ok = text[:40].strip() in (st.get("ta") or "")
+            run["fill_ok" + tag] = _fill_ok
+            run["probe_ok" + tag] = _fill_ok
+            for _try in range(2):
+                rc3, out3, err3 = chat_ops.evaljs(HERE / "lbp_js" / "send.js", match=MATCH)
+                run["send" + tag] = (out3 or err3 or "").strip()[:80]
+                if "sent" in (out3 or ""):
+                    break
+                time.sleep(4)
+            _sent_ok = False
+            for _ in range(8):
+                time.sleep(2.5)
+                st = _probe_state()
+                if text[:40].strip() in (st.get("lastUser") or ""):
+                    _sent_ok = True
+                    break
+            run["sent_ok" + tag] = _sent_ok
+            run["invalid" + tag] = (not _sent_ok)
+            return n_before
         def _await_reply(n0, tag=""):
             """Ждём НЕ просто новое сообщение, а СТАБИЛИЗАЦИЮ текста: иначе захват обрывается
             на середине таблицы/транскрипта (кейс wave54-57: «| Quantity | System Response» и всё)."""
