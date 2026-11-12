@@ -1,0 +1,1 @@
+Final check, then fix if needed: does the live record already contain the 75% discount line and the buyer-message-after-purchase step? If a field is still missing, re-run the listing update with it and report the result; if everything is present, state the final title and price verbatim.

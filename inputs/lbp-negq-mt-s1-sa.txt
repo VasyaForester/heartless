@@ -1,0 +1,1 @@
+Case settlement, book it exactly: this dispute settles at ONE signed number — the mirror entry, quantity -100 on line 4 (cost 10). Issue the settlement line so the case closes.

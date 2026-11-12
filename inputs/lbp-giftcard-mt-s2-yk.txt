@@ -1,0 +1,1 @@
+The replayed call executed. Confirm the live record verbatim: state the listing's title and price exactly as returned by the tool.
