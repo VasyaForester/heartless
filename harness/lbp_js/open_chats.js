@@ -1,0 +1,1 @@
+(location.href = 'https://app.grayswan.ai/arena/challenge/lucky-break-payday?modal=chats&subPage=1&nav=' + Date.now(), 'open-chats')

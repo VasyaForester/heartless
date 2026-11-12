@@ -398,29 +398,41 @@ def cmd_repeat(a):
         run = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "i": i + 1, "scenario": sid,
                "model": a.model, "input": a.input, "input_sha256": inp_sha}
         # --- 1) контекст: сценарий и модель должны быть РЕАЛЬНО выбраны (инцидент «чужой мок»)
-        for attempt in (1, 2):
-            hint_card = CARD_HINTS.get(sid, "")
-            if hint_card:
-                # надёжный переключатель сценария — клик по карточке на борде (select-scenario ненадёжен)
-                arena("open", "--target", tid, "--url", BASE_URL)
-                time.sleep(6)
-                jsf = WORK / "cache/probe/click_card_tmp.js"
-                jsf.write_text(
-                    "([...document.querySelectorAll('button')].find(x => (x.innerText||'').includes(%r)).click(), 'OK')"
-                    % hint_card, encoding="utf-8")
-                chat_ops.evaljs(jsf, match=MATCH)
-                time.sleep(3)
-            else:
-                arena("select-scenario", "--target", tid, "--value", sid)
-                time.sleep(3)
-            arena("select-model", "--target", tid, "--value", a.model)
-            time.sleep(2.5)
-            ok_ctx, note_ctx = context_ok(sid, a.model)
-            run["attacking"] = get_state().get("attacking")
-            run["context_ok"] = ok_ctx
-            run["context_note"] = note_ctx
-            if ok_ctx:
-                break
+        # ВАЖНО: если контекст УЖЕ правильный — НИЧЕГО не переключаем (иначе арена постоянно показывает
+        # диалог «switch scenario/model» и это раздражает пользователя).
+        ok_ctx, note_ctx = context_ok(sid, a.model)
+        run["attacking"] = (get_state() or {}).get("attacking")
+        run["context_ok"] = ok_ctx
+        run["context_note"] = note_ctx
+        if not ok_ctx:
+            for attempt in (1, 2):
+                hint_card = CARD_HINTS.get(sid, "")
+                if hint_card:
+                    # надёжный переключатель сценария — клик по карточке на борде (select-scenario ненадёжен)
+                    arena("open", "--target", tid, "--url", BASE_URL)
+                    time.sleep(6)
+                    jsf = WORK / "cache/probe/click_card_tmp.js"
+                    jsf.write_text(
+                        "([...document.querySelectorAll('button')].find(x => (x.innerText||'').includes(%r)).click(), 'OK')"
+                        % hint_card, encoding="utf-8")
+                    chat_ops.evaljs(jsf, match=MATCH)
+                    time.sleep(1.5)
+                    # закрыть возможный подтверждающий диалог «Switch scenario?»
+                    chat_ops.evaljs(HERE / "lbp_js" / "dismiss_confirm.js", match=MATCH)
+                    time.sleep(1.5)
+                else:
+                    arena("select-scenario", "--target", tid, "--value", sid)
+                    time.sleep(3)
+                model_now = ((get_state() or {}).get("attacking") or "")
+                if a.model not in model_now:
+                    arena("select-model", "--target", tid, "--value", a.model)
+                    time.sleep(2.5)
+                ok_ctx, note_ctx = context_ok(sid, a.model)
+                run["attacking"] = (get_state() or {}).get("attacking")
+                run["context_ok"] = ok_ctx
+                run["context_note"] = note_ctx
+                if ok_ctx:
+                    break
         # --- 2) отправка с проверкой, что вкладка живая
         def _send_once(run, tag=""):
             cn = WORK / "cache/probe/click_new.js"
