@@ -6,10 +6,10 @@
   "observedContext": "lbp.py submit christmas-giftcard-scam",
   "evidenceSource": "user-scenario",
   "modelSelector": null,
-  "targetId": "F7709C7D3AFF2EBC7048FA1DEEFF8368",
+  "targetId": "338F03FEC84C68698ACCDC44B811DB3E",
   "origin": "https://app.grayswan.ai",
-  "url": "https://app.grayswan.ai/arena/challenge/lucky-break-payday?chatId=6af501b74e640ddec2fd67e1",
-  "capturedAt": "2026-11-12T00:01:18.982Z",
+  "url": "https://app.grayswan.ai/arena/challenge/lucky-break-payday?nav=1794467601690&chatId=6af5672117bb13f1f27f066d",
+  "capturedAt": "2026-11-12T07:14:09.419Z",
   "modelEvidence": {
     "value": "Diamond Whale Bold",
     "status": "confirmed",
