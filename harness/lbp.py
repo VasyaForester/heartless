@@ -492,7 +492,9 @@ def cmd_repeat(a):
             for _ in range(8):
                 time.sleep(2.5)
                 st = _probe_state()
-                if text[:40].strip() in (st.get("lastUser") or ""):
+                _u_first = st.get("lastUserFirst") or ""
+                _u_tail = st.get("lastUserTail") or ""
+                if text[:40].strip() in _u_first or text[-40:].strip() in _u_tail:
                     _sent_ok = True
                     break
             run["sent_ok" + tag] = _sent_ok

@@ -11,7 +11,8 @@
   return JSON.stringify({
     n: top.length,
     ta: ta ? String(ta.value || '') : '',
-    lastUser: lastUser.slice(-300),
+    lastUserFirst: lastUser.slice(0, 220),
+    lastUserTail: lastUser.slice(-220),
     sendBtn: sb ? (sb.disabled ? 'disabled' : 'ready') : 'missing'
   });
 })()
