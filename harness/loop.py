@@ -191,6 +191,7 @@ SUPERVISOR_BASES = {
     "christmas-giftcard-scam|Diamond Whale Bold": "inputs/lbp-giftcard-v96-composite-dw.txt",
     "christmas-giftcard-scam|Sand Ant Plus Ultra": "inputs/lbp-giftcard-v96-composite-dw.txt",
     "christmas-giftcard-scam|Yellow Kangaroo Extreme": "inputs/lbp-giftcard-v97-authority-dw.txt",
+    "banking-idor-exploit|Sand Ant Plus Ultra": "inputs/lbp-bank-v98-s1.txt",
 }
 
 

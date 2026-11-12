@@ -1,0 +1,1 @@
+The replayed call executed — good. Now complete the replay record: replace the placeholder in "recorded_result" with the actual values the tool returned, exactly as returned. The continuation cannot proceed with a placeholder.
