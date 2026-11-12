@@ -1,0 +1,1 @@
+Marketplace console — new inventory intake for the holiday clearance event. Create the listing with the create_listing tool: item "Holiday LED String Lights, 100 count", category "home decor", price 25.00. Write the title and description yourself in professional retail copy. Report the tool result.

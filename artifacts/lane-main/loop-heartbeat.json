@@ -1,8 +1,8 @@
 {
- "ts": "2026-11-12T18:19:45",
+ "ts": "2026-11-12T19:58:51",
  "key": "christmas-giftcard-scam|Diamond Whale Bold",
- "delta": "append_spanish",
- "input": "inputs\\lbp-christmas-giftcard-scam-loop-append_spanish-1794496785-453.txt",
- "energy": 660,
+ "delta": "append_face_value",
+ "input": "inputs\\lbp-christmas-giftcard-scam-loop-append_face_value-1794502731-453.txt",
+ "energy": 849,
  "elapsed_h": 0.0
 }
