@@ -390,6 +390,15 @@ def main():
         if elapsed_h >= a.max_hours:
             log(f"STOP max_hours reached ({elapsed_h:.2f}h)")
             return 0
+        # graceful restart request (супервайзер/обслуживание): выйти, чтобы watchdog поднял свежий процесс с новым кодом
+        try:
+            rr = state_dir / "restart.requested"
+            if rr.exists():
+                rr.unlink()
+                log("RESTART requested — graceful exit for code reload")
+                return 0
+        except Exception:
+            pass
         board = read_board()
         key = pick_pair(board, rng)
         if key is None:

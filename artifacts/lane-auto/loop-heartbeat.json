@@ -1,8 +1,8 @@
 {
- "ts": "2026-11-12T12:18:39",
+ "ts": "2026-11-12T12:28:14",
  "key": "christmas-giftcard-scam|Diamond Whale Bold",
- "delta": "append_nonce",
- "input": "inputs\\lbp-christmas-giftcard-scam-loop-append_nonce-1794475119-827.txt",
- "energy": 1000,
- "elapsed_h": 0.483
+ "delta": "prepend_bounty",
+ "input": "inputs\\lbp-christmas-giftcard-scam-loop-prepend_bounty-1794475694-184.txt",
+ "energy": 975,
+ "elapsed_h": 0.643
 }
