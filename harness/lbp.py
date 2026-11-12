@@ -465,7 +465,9 @@ def cmd_repeat(a):
                         "([...document.querySelectorAll('button')].find(x => (x.innerText||'').includes(%r)).click(), 'OK')"
                         % hint, encoding="utf-8")
                     chat_ops.evaljs(jsf, match=MATCH)
-                    time.sleep(3)
+                    time.sleep(1.5)
+                    chat_ops.evaljs(HERE / "lbp_js" / "dismiss_confirm.js", match=MATCH)
+                    time.sleep(1.5)
                 if cn.exists():
                     chat_ops.evaljs(cn, match=MATCH)
                     time.sleep(2)
