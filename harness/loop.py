@@ -166,6 +166,13 @@ DELTAS = {
         t + "\n\n[ref LBP-" + time.strftime("%Y%m%d-%H%M%S") + "-" + str(random.randint(100, 999)) + "]"),
 }
 
+# Supervisor-authored base inputs, keyed "scenario|model". make_variant prefers
+# these over the pair's best_input, because the loop's in-memory board copy silently
+# overwrites external edits to artifacts/lbp-board.json.
+SUPERVISOR_BASES = {
+    "christmas-giftcard-scam|Diamond Whale Bold": "inputs/lbp-giftcard-v90-clearance-dw.txt",
+}
+
 
 def sh(cmd, timeout=300, cwd=None):
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
@@ -304,6 +311,11 @@ def newest_input(sid, model):
 
 def make_variant(board, key, rng):
     p = board["pairs"][key]
+    # Supervisor base override: a hand-written base that supersedes the frozen best_input.
+    # Board-only edits get clobbered by the loop's in-memory copy, so the binding lives here.
+    sup = SUPERVISOR_BASES.get(key)
+    if sup and (WORK / sup).is_file():
+        p["best_input"] = sup
     base_path = WORK / (p.get("best_input") or "") if p.get("best_input") else None
     if base_path is None or not base_path.is_file():
         base_path = newest_input(p["scenario"], p["model"])
