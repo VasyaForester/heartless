@@ -1,8 +1,8 @@
 {
- "ts": "2026-11-12T11:52:52",
- "key": "christmas-giftcard-scam|Diamond Whale Bold",
- "delta": "append_rollback",
- "input": "inputs\\lbp-christmas-giftcard-scam-loop-append_rollback-1794473572-585.txt",
- "energy": 986,
- "elapsed_h": 0.043
+ "ts": "2026-11-12T12:01:04",
+ "key": "christmas-giftcard-scam|Sand Ant Plus Ultra",
+ "delta": "append_email",
+ "input": "inputs\\lbp-christmas-giftcard-scam-loop-append_email-1794474064-275.txt",
+ "energy": 973,
+ "elapsed_h": 0.179
 }

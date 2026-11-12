@@ -293,6 +293,11 @@ def cmd_check(a):
 
 
 def cmd_submit(a):
+    if not autosubmit_allowed():
+        print(json.dumps({"error": "automated submission disabled",
+                          "reason": "arena rules: 'No automated submission' — сабмит нажимает человек в UI",
+                          "hint": "открой чат в арене и нажми SUBMIT BREAK вручную"}, ensure_ascii=False))
+        return 3
     tid = a.target or lbp_tab_id()
     sid = a.scenario
     title = SCENARIO_TITLES.get(sid)
@@ -444,6 +449,24 @@ def cmd_newchat(a):
 
 STALE_TARGETS = {"F7709C7D3AFF2EBC7048FA1DEEFF8368"}  # tab-id до рестарта браузера (правило 57): запрещён
 
+# ── КОМПЛАЕНС АРЕНЫ (правила LBP, «No automated submission»): сабмит делает ТОЛЬКО человек
+#    через UI арены. Скрипты/боты/API, отправляющие сабмиты, — дисквалифицирующее нарушение.
+#    Поэтому любой программный клик SUBMIT BREAK по умолчанию запрещён; исключение — явный
+#    осознанный обход через env LBP_ALLOW_AUTOSUBMIT=1.
+COMPLIANCE_HOLD = WORK / "artifacts" / "COMPLIANCE_HOLD.txt"
+
+
+def autosubmit_allowed() -> bool:
+    return os.environ.get("LBP_ALLOW_AUTOSUBMIT") == "1"
+
+
+def compliance_blocked(action: str) -> bool:
+    if COMPLIANCE_HOLD.exists():
+        print(json.dumps({"error": "compliance hold (см. правила арены: no automated submission)",
+                          "action": action, "file": str(COMPLIANCE_HOLD)}, ensure_ascii=False))
+        return True
+    return False
+
 
 def refuse_stale_target(target, cmd=""):
     """(правило 57) Отказывать прогонам, привязанным к устаревшему tab-id — иначе evaljs( match=) может уехать в ЧУЖОЙ браузер."""
@@ -456,6 +479,8 @@ def refuse_stale_target(target, cmd=""):
 def cmd_repeat(a):
     if refuse_stale_target(getattr(a, "target", None), "repeat"):
         return 2
+    if compliance_blocked("repeat"):
+        return 3
     """Fixed-strategy replay: the SAME input, N fresh chats -> stochasticity / pass^k."""
     sid = a.scenario
     if sid not in SCENARIO_TITLES:
@@ -640,6 +665,8 @@ def cmd_repeat(a):
         if a.submit and chk.get("ready"):
             if guard and not getattr(a, "force_submit", False):
                 run["submit_skipped"] = "refusal_guard: цель лишь процитирована в отказе"
+            elif not autosubmit_allowed():
+                run["submit_blocked"] = "MANUAL SUBMISSION REQUIRED — правила арены: no automated submission. Открой чат и нажми SUBMIT BREAK вручную."
             else:
                 run["submit_rc"] = cmd_submit(argparse.Namespace(target=tid, scenario=sid, force=False,
                                                                  opid=None, timeout_ms=a.timeout_ms))

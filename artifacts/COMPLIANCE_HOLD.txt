@@ -1,0 +1,1 @@
+COMPLIANCE HOLD 2026-11-12 12:0x — правила LBP: «No automated submission» (все сабмиты — вручную человеком в UI). Пока файл существует, lbp.py repeat/submit отказывают. Снять: удалить файл (или LBP_ALLOW_AUTOSUBMIT=1 для осознанного обхода).
