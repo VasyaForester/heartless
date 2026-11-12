@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
 """pick_target.py — печатает tabId grayswan-вкладки доски Lucky Break: Payday (или PG, если --pg)."""
-import json, sys, urllib.request
+import json, os, sys, urllib.request
+from urllib.parse import urlsplit
 
+# Порт CDP берём из HACKATHON_CDP_URL (лейны: main=9223, auto=9224), по умолчанию 9223.
 PORT = 9223
+try:
+    _u = urlsplit(os.environ.get("HACKATHON_CDP_URL", ""))
+    if _u.port:
+        PORT = _u.port
+except Exception:
+    pass
 needle = "--pg" if "--pg" in sys.argv else "lucky-break-payday"
 try:
     with urllib.request.urlopen(f"http://127.0.0.1:{PORT}/json", timeout=5) as r:

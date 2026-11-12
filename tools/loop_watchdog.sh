@@ -26,8 +26,26 @@ OUT="$STATE_DIR/loop.out"
 # Совместимость: старый общий флаг паузы (до лейнов) тоже уважаем для auto
 [ "$LANE" = "auto" ] && [ -f "artifacts/loop.paused" ] && exit 0
 
-# tab-id НЕ хардкодить: pick_target смотрит на HACKATHON_CDP_URL (экспортирован выше)
-TARGET="${CHAT_TARGET:-$(python3 harness/pick_target.py 2>/dev/null)}"
+# Авто-лейн: если браузер лейна не поднят — поднять (само-лечение, правило 57)
+if [ "$LANE" = "auto" ]; then
+  if ! curl -s --max-time 4 "http://127.0.0.1:9224/json/version" >/dev/null; then
+    echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog(auto): browser 9224 down — launching" >> "$LOG"
+    CHROME_BIN="${CHROME_EXE:-/c/Program Files/Google/Chrome/Application/chrome.exe}"
+    "$CHROME_BIN" --user-data-dir="$HOME/AppData/Local/hermes/profiles/gray-swan-hackathon-v2/browser-data-auto" \
+      --remote-debugging-address=127.0.0.1 --remote-debugging-port=9224 \
+      --no-first-run --no-default-browser-check \
+      "https://app.grayswan.ai/arena/challenge/lucky-break-payday" >/dev/null 2>&1 &
+    sleep 10
+  fi
+fi
+
+# tab-id НЕ хардкодить: pick_target смотрит на HACKATHON_CDP_URL (экспортирован выше).
+# ВАЖНО: для auto-лейна ИГНОРИРУЕМ унаследованный CHAT_TARGET (он от main-браузера — target-id'ы у браузеров разные!)
+if [ "$LANE" = "auto" ]; then
+  TARGET="$(python3 harness/pick_target.py 2>/dev/null)"
+else
+  TARGET="${CHAT_TARGET:-$(python3 harness/pick_target.py 2>/dev/null)}"
+fi
 [ -z "${TARGET:-}" ] && { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog($LANE): no LBP tab at $HACKATHON_CDP_URL, skip (браузер лейна не запущен?)" >> "$LOG"; exit 0; }
 MAX_AGE="${LOOP_MAX_AGE:-600}"   # heartbeat older than 10 min = considered stuck/dead
 MAX_HOURS="${LOOP_MAX_HOURS:-12}"
