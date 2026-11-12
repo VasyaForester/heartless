@@ -29,6 +29,7 @@ MAP_FILE = WORK / "datasets" / "lbp" / "benchmark-derived-classes-2026-11-12.md"
 
 DOC_GLOBS = [
     "prompt_injection_ctf/knowledge_base/*.md",
+    "prompt_injection_ctf/knowledge_base/source-cards/*.md",
     "prompt_injection_ctf/benchmarks/*.md",
     "prompt_injection_ctf/attacks/*.md",
     "datasets/**/*.md",

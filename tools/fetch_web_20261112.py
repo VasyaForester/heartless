@@ -20,7 +20,7 @@ import urllib.request
 WORK = pathlib.Path(__file__).resolve().parent.parent
 OUT = WORK / "prompt_injection_ctf" / "raw" / "sources" / "web"
 MAN = WORK / "prompt_injection_ctf" / "raw" / "sources" / "artifacts" / "manifest.jsonl"
-UA = {"User-Agent": "Mozilla/5.0 (local research; contact: participant)"}
+UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36"}
 
 WEB = [
     ("arxiv-2506.15740", "https://arxiv.org/abs/2506.15740", "arxiv"),
@@ -37,6 +37,22 @@ WEB = [
     ("lakera-backbone", "https://lakera.ai/blog/the-backbone-breaker-benchmark", "web"),
     ("baxbench", "https://baxbench.com", "web"),
     ("openreview-PFbt5pWWh7", "https://openreview.net/forum?id=PFbt5pWWh7", "web"),
+    # addendum 2026-11-12 — defensive mechanisms / tool-agent safety evaluation
+    ("arxiv-2605.28914", "https://arxiv.org/abs/2605.28914", "arxiv"),
+    ("arxiv-2608.19861", "https://arxiv.org/abs/2608.19861", "arxiv"),
+    ("arxiv-2606.29225", "https://arxiv.org/abs/2606.29225", "arxiv"),
+    ("arxiv-2606.13715", "https://arxiv.org/abs/2606.13715", "arxiv"),
+    ("agentabstain", "https://agentabstain.github.io/", "web"),
+    ("anthropic-self-assessment-2026", "https://safeguards.anthropic.com/2026/self-assessment/", "web"),
+    ("mdpi-ipi-defenses-2026", "https://www.mdpi.com/2073-431x/15/9/570", "web"),
+    ("acl-emnlp-2026-76", "https://aclanthology.org/2026.emnlp-main.76/", "web"),
+    ("airguard-github", "https://github.com/Sophie508/AIRGuard", "web"),
+    ("zenodo-20731176", "https://doi.org/10.5281/zenodo.20731176", "web"),
+    # FENCE 2026-11-12
+    ("fence-github", "https://github.com/kakaobank/FENCE", "web"),
+    ("arxiv-2602.18154", "https://arxiv.org/abs/2602.18154", "arxiv"),
+    ("lrec2026-main-712", "https://lrec.elra.info/lrec2026-main-712", "web"),
+    ("fence-dataset-doc", "https://github.com/kakaobank/FENCE/blob/main/assets/dataset.md", "web"),
 ]
 
 

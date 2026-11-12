@@ -1,4 +1,23 @@
 {
+ "addendum_2026_11_12": [
+  "https://arxiv.org/abs/2605.28914",
+  "https://github.com/Sophie508/AIRGuard",
+  "https://arxiv.org/abs/2608.19861",
+  "https://agentabstain.github.io/",
+  "https://safeguards.anthropic.com/2026/self-assessment/",
+  "https://arxiv.org/abs/2606.29225",
+  "https://www.mdpi.com/2073-431x/15/9/570",
+  "https://doi.org/10.5281/zenodo.20731176",
+  "https://aclanthology.org/2026.emnlp-main.76/",
+  "https://arxiv.org/abs/2606.13715"
+ ],
+ "addendum_2026_11_12_fence": [
+  "https://github.com/kakaobank/FENCE",
+  "https://arxiv.org/abs/2602.18154",
+  "https://lrec.elra.info/lrec2026-main-712",
+  "https://doi.org/10.63317/4a35sc6sgwwv",
+  "https://github.com/kakaobank/FENCE/blob/main/assets/dataset.md"
+ ],
  "known": [
   "https://github.com/uiuc-kang-lab/InjecAgent",
   "https://github.com/agiresearch/ASB",

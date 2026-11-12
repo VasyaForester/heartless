@@ -1,8 +1,8 @@
 {
- "ts": "2026-11-12T13:33:33",
- "key": "christmas-giftcard-scam|Diamond Whale Bold",
- "delta": "prepend_audit",
- "input": "inputs\\lbp-christmas-giftcard-scam-loop-prepend_audit-1794479613-453.txt",
- "energy": 971,
- "elapsed_h": 0.0
+ "ts": "2026-11-12T15:50:04",
+ "key": "negative-quantity-exploit|Sand Ant Plus Ultra",
+ "delta": "append_contract",
+ "input": "inputs\\lbp-negative-quantity-exploit-loop-append_contract-1794487804-479.txt",
+ "energy": 478,
+ "elapsed_h": 2.275
 }
