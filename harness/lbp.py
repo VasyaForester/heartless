@@ -442,7 +442,20 @@ def cmd_newchat(a):
     return 1
 
 
+STALE_TARGETS = {"F7709C7D3AFF2EBC7048FA1DEEFF8368"}  # tab-id до рестарта браузера (правило 57): запрещён
+
+
+def refuse_stale_target(target, cmd=""):
+    """(правило 57) Отказывать прогонам, привязанным к устаревшему tab-id — иначе evaljs( match=) может уехать в ЧУЖОЙ браузер."""
+    if target in STALE_TARGETS:
+        print(json.dumps({"error": "stale target id refused (rule 57)", "cmd": cmd, "target": target}, ensure_ascii=False))
+        return True
+    return False
+
+
 def cmd_repeat(a):
+    if refuse_stale_target(getattr(a, "target", None), "repeat"):
+        return 2
     """Fixed-strategy replay: the SAME input, N fresh chats -> stochasticity / pass^k."""
     sid = a.scenario
     if sid not in SCENARIO_TITLES:

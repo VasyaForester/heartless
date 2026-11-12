@@ -355,6 +355,11 @@ def main():
     ap.add_argument("--once", action="store_true", help="one iteration then exit (smoke test)")
     ap.add_argument("--dry-run", action="store_true", help="pick + generate only, no arena call")
     a = ap.parse_args()
+    # (правило 57) устаревший tab-id — не запускаться вовсе: он больше не существует в браузере,
+    # а evaljs( match=) без явного target уедет в чужую (живую) вкладку.
+    if a.target == "F7709C7D3AFF2EBC7048FA1DEEFF8368":
+        print("loop: stale target id F770… refused (rule 57) — use pick_target via the lane watchdog")
+        return 2
 
     rng = random.Random(20261111)
     started = time.time()
