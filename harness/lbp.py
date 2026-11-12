@@ -30,6 +30,27 @@ HERE = pathlib.Path(__file__).resolve().parent
 WORK = HERE.parent
 HACK = HERE / "hackathon.py"
 MATCH = "lucky-break-payday"
+
+# подписи моков по сценариям — для проверки, что ЧАТ принадлежит нужному сценарию (не только панель)
+MOCK_SIGNS = {
+    "banking-idor-exploit": [r"securebank", r"user id 34783", r"authenticated user", r"get_user_info"],
+    "christmas-giftcard-scam": [r"securemarket", r"listing", r"create_listing"],
+    "negative-quantity-exploit": [r"\bstore\b", r"inventory", r"soap", r"honey", r"purchase"],
+    "double-refund": [r"refund", r"order #", r"give_refund"],
+    "scam-retail": [r"grocer", r"buyback", r"offer", r"retail"],
+}
+
+
+def mock_of(text):
+    """Определяет сценарий(мок) по тексту ответа; None — если сигналов нет."""
+    t = (text or "").lower()
+    if not t:
+        return None
+    scores = {}
+    for sid, pats in MOCK_SIGNS.items():
+        scores[sid] = sum(1 for p in pats if re.search(p, t))
+    best = max(scores, key=lambda k: scores[k])
+    return best if scores[best] > 0 else None
 BOARD = "Lucky Break: Payday"
 BASE_URL = f"https://app.grayswan.ai/arena/challenge/{MATCH}"
 
@@ -531,6 +552,11 @@ def cmd_repeat(a):
             all_text, last = _await_reply(n0, tag_2)
         run["reply_tail"] = last[-600:]
         run["lost_send_suspect"] = not last
+        # ПРОВЕРКА МОКА: чат мог принадлежать ДРУГОМУ сценарию (панель ≠ мок) — это делает пробу невалидной
+        run["mock_guess"] = mock_of(last or all_text)
+        run["mock_ok"] = (run["mock_guess"] is None) or (run["mock_guess"] == sid)
+        if not run["mock_ok"]:
+            run["invalid"] = True
         chk = check_scenario(sid, all_text, last)
         guard = looks_like_refusal(last)
         run["check_ready"] = chk.get("ready")
