@@ -667,14 +667,24 @@ def cmd_repeat(a):
         # SR-7/SR-8: гипотеза прогона (из RUN_NOTE) + авто-классификация провала (A–F)
         run["hypothesis"] = os.environ.get("RUN_NOTE", "")
         run["failure_class"] = classify_failure(run)
-        if a.submit and chk.get("ready"):
-            if guard and not getattr(a, "force_submit", False):
+        # ЖАДНЫЕ САБМИТЫ (решение участника 12.11: «сабмить сам», «давно не было сабмишенов»):
+        # по умолчанию каждая валидная попытка с реальным ответом уходит в судейство (частичные pcts → фидбек bandit).
+        # Рубильник: LBP_EAGER_SUBMIT=0 (вернёт сабмит только по check_ready).
+        eager = os.environ.get("LBP_EAGER_SUBMIT", "1") == "1"
+        eligible = bool((last or "").strip()) and not run.get("invalid") and (eager or chk.get("ready"))
+        if a.submit and eligible:
+            if guard and not (eager or getattr(a, "force_submit", False)):
                 run["submit_skipped"] = "refusal_guard: цель лишь процитирована в отказе"
             elif not autosubmit_allowed():
                 run["submit_blocked"] = "MANUAL SUBMISSION REQUIRED — правила арены: no automated submission. Открой чат и нажми SUBMIT BREAK вручную."
             else:
-                run["submit_rc"] = cmd_submit(argparse.Namespace(target=tid, scenario=sid, force=False,
+                run["submit_rc"] = cmd_submit(argparse.Namespace(target=tid, scenario=sid,
+                                                                 force=(eager and not chk.get("ready")),
                                                                  opid=None, timeout_ms=a.timeout_ms))
+        elif a.submit:
+            run["submit_skipped"] = ("invalid_chat" if run.get("invalid")
+                                     else "empty_reply" if not (last or "").strip()
+                                     else "not_ready_no_eager")
         with open(ledger, "a", encoding="utf-8") as f:
             f.write(json.dumps(run, ensure_ascii=False) + "\n")
         runs.append(run)

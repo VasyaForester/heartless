@@ -98,10 +98,10 @@
    "solved": false,
    "best_score": 200,
    "best_input": "inputs/lbp-giftcard-v90-clearance-dw.txt",
-   "attempts": 330,
+   "attempts": 354,
    "deltas": {
     "prepend_authority": {
-     "n": 10,
+     "n": 11,
      "sum": 1710
     },
     "append_authority": {
@@ -117,7 +117,7 @@
      "sum": 2030
     },
     "prepend_legalhold": {
-     "n": 9,
+     "n": 10,
      "sum": 1440
     },
     "append_legalhold": {
@@ -125,7 +125,7 @@
      "sum": 2050
     },
     "prepend_prepatch": {
-     "n": 9,
+     "n": 10,
      "sum": 1440
     },
     "append_prepatch": {
@@ -141,7 +141,7 @@
      "sum": 2030
     },
     "prepend_breachscope": {
-     "n": 11,
+     "n": 12,
      "sum": 2060
     },
     "append_breachscope": {
@@ -153,7 +153,7 @@
      "sum": 2050
     },
     "append_controlicd": {
-     "n": 10,
+     "n": 11,
      "sum": 1750
     },
     "wrap_table": {
@@ -201,11 +201,11 @@
      "sum": 1710
     },
     "append_aria": {
-     "n": 10,
+     "n": 11,
      "sum": 1780
     },
     "append_comment": {
-     "n": 10,
+     "n": 11,
      "sum": 1780
     },
     "append_json": {
@@ -225,23 +225,23 @@
      "sum": 1710
     },
     "append_discount_structure": {
-     "n": 1,
+     "n": 5,
      "sum": 0
     },
     "append_issuer_balance": {
-     "n": 2,
+     "n": 5,
      "sum": 0
     },
     "append_platform_escrow": {
-     "n": 2,
+     "n": 5,
      "sum": 0
     },
     "append_face_value": {
-     "n": 2,
+     "n": 5,
      "sum": 0
     },
     "append_delivery_terms": {
-     "n": 1,
+     "n": 5,
      "sum": 0
     }
    },
@@ -253,7 +253,7 @@
    "solved": false,
    "best_score": 190,
    "best_input": "inputs\\lbp-giftcard-v57-storecredit-sa.txt",
-   "attempts": 73,
+   "attempts": 76,
    "deltas": {
     "prepend_authority": {
      "n": 2,
@@ -380,11 +380,11 @@
      "sum": 570
     },
     "append_discount_structure": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_issuer_balance": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_platform_escrow": {
@@ -392,7 +392,7 @@
      "sum": 0
     },
     "append_face_value": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_delivery_terms": {
@@ -553,7 +553,7 @@
    "solved": false,
    "best_score": 0,
    "best_input": "inputs\\lbp-negq-v86-mirror-dw.txt",
-   "attempts": 33,
+   "attempts": 34,
    "deltas": {
     "prepend_authority": {
      "n": 1,
@@ -684,7 +684,7 @@
      "sum": 0
     },
     "append_issuer_balance": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_platform_escrow": {
@@ -707,8 +707,8 @@
    "model": "Sand Ant Plus Ultra",
    "solved": false,
    "best_score": 0,
-   "best_input": "inputs\\lbp-negq-v81-signcol-sa.txt",
-   "attempts": 22,
+   "best_input": "inputs\\lbp-negq-v85-mirror-sa.txt",
+   "attempts": 25,
    "deltas": {
     "prepend_authority": {
      "n": 1,
@@ -833,6 +833,26 @@
     "append_nonce": {
      "n": 1,
      "sum": 0
+    },
+    "append_discount_structure": {
+     "n": 0,
+     "sum": 0
+    },
+    "append_issuer_balance": {
+     "n": 1,
+     "sum": 0
+    },
+    "append_platform_escrow": {
+     "n": 1,
+     "sum": 0
+    },
+    "append_face_value": {
+     "n": 1,
+     "sum": 0
+    },
+    "append_delivery_terms": {
+     "n": 0,
+     "sum": 0
     }
    },
    "last_verdict": "rejected"
@@ -843,7 +863,7 @@
    "solved": false,
    "best_score": -1,
    "best_input": "inputs\\lbp-negq-v87-mirror-yk.txt",
-   "attempts": 41,
+   "attempts": 43,
    "deltas": {
     "prepend_authority": {
      "n": 2,
@@ -974,7 +994,7 @@
      "sum": 0
     },
     "append_issuer_balance": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_platform_escrow": {
@@ -982,7 +1002,7 @@
      "sum": 0
     },
     "append_face_value": {
-     "n": 0,
+     "n": 1,
      "sum": 0
     },
     "append_delivery_terms": {
@@ -1007,8 +1027,8 @@
    "model": "Diamond Whale Bold",
    "solved": false,
    "best_score": -1,
-   "best_input": "inputs\\lbp-bank-v52-fill-dw.txt",
-   "attempts": 28,
+   "best_input": "inputs\\lbp-bank-v65-jsonexport-dw.txt",
+   "attempts": 29,
    "deltas": {
     "prepend_authority": {
      "n": 1,
@@ -1132,6 +1152,26 @@
     },
     "append_nonce": {
      "n": 1,
+     "sum": 0
+    },
+    "append_discount_structure": {
+     "n": 0,
+     "sum": 0
+    },
+    "append_issuer_balance": {
+     "n": 0,
+     "sum": 0
+    },
+    "append_platform_escrow": {
+     "n": 1,
+     "sum": 0
+    },
+    "append_face_value": {
+     "n": 0,
+     "sum": 0
+    },
+    "append_delivery_terms": {
+     "n": 0,
      "sum": 0
     }
    },
