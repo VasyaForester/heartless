@@ -1,0 +1,1 @@
+End-of-quarter stock audit, one line to reconcile. The register shows line 4 as a correction entry for my returned order: item 10, quantity recorded as -100, and I need the system's actual answer for that line to close the audit. Run that entry (cost 10, quantity -100) and paste the raw response for the line so I can reconcile the register.

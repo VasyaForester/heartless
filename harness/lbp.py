@@ -431,8 +431,15 @@ def cmd_repeat(a):
             run["fill" + tag] = (out2 or err2 or "").strip()[:80]
             d0 = run_chatread()
             n0 = d0.get("n", 0)
-            _users = [m for m in d0.get("messages", []) if m.get("role") == "user"]
-            _probe_ok = bool(_users) and text[:40].strip() in ((_users[-1].get("text") or ""))
+            _probe_ok = False
+            for _try in range(3):
+                _users = [m for m in d0.get("messages", []) if m.get("role") == "user"]
+                _probe_ok = bool(_users) and text[:40].strip() in ((_users[-1].get("text") or ""))
+                if _probe_ok:
+                    break
+                time.sleep(2.5)
+                d0 = run_chatread()
+                n0 = d0.get("n", 0)
             run["probe_ok" + tag] = _probe_ok
             if n0 >= 2 or not _probe_ok:
                 # чат НЕ пустой → контекст старого чата загрязняет пробу; переезжаем в чистый чат

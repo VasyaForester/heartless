@@ -1,1 +1,1 @@
-([...document.querySelectorAll('button')].find(x => (x.innerText||'').includes('Fraudulent Christmas')).click(), 'OK')
+([...document.querySelectorAll('button')].find(x => (x.innerText||'').includes('Exploit the System')).click(), 'OK')
