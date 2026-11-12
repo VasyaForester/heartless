@@ -37,6 +37,21 @@ PY
   case "$MODELNOW" in *"$MD"*) echo "model ok";; *) python3 harness/lbp.py switch --scenario "$SC" --model "$MD" >/dev/null 2>&1; sleep 2;; esac
 fi
 
+# --- ГЕЙТ: старт разрешён только в пустом чате (правила 55/56) ---
+echo "heal: $(python3 harness/lbp.py newchat --scenario "$SC" 2>/dev/null)"
+NSTART=$(python3 - <<'PY'
+import sys, json; sys.path.insert(0,'harness'); import chat_ops
+rc,out,err = chat_ops.evaljs('harness/lbp_js/probe_state.js', match='lucky-break-payday')
+try: print(json.loads(out or '{}').get('n', -1))
+except Exception: print(-1)
+PY
+)
+echo "chat_n_start=$NSTART"
+if [ "$NSTART" != "0" ]; then
+  echo "ABORT: чат не пуст (n=$NSTART) — контекст загрязнён (правила 55/56). Нужен hard-nav+карточка на чистый чат."
+  exit 3
+fi
+
 # --- шаги лестницы ---
 STEP=0
 for IN in "$@"; do
@@ -48,9 +63,16 @@ import sys, time, json, pathlib
 sys.path.insert(0,'harness'); import chat_ops
 step, fillpath = sys.argv[1], sys.argv[2]
 rc,out,err = chat_ops.evaljs('harness/lbp_js/probe_state.js', match='lucky-break-payday')
-print("probe_before:", (out or '').strip()[:90])
+before = {}
+try: before = json.loads(out or '{}')
+except Exception: pass
+print("probe_before:", (out or '').strip()[:120])
 chat_ops.evaljs(fillpath, match='lucky-break-payday'); time.sleep(1)
-rc,out,err = chat_ops.evaljs('harness/lbp_js/send.js', match='lucky-break-payday'); print("send:", (out or err or '').strip()[:30])
+rc,out,err = chat_ops.evaljs('harness/lbp_js/send.js', match='lucky-break-payday')
+sent = (out or err or '').strip()
+print("send:", sent[:30])
+if 'sent' not in sent.lower():
+    print("ABORT_STEP: не отправлено"); sys.exit(2)
 time.sleep(62)
 rc,out,err = chat_ops.evaljs('harness/lbp_js/chatread.js', match='lucky-break-payday')
 try:
@@ -61,7 +83,11 @@ msgs=d.get("messages") or []
 print("n:", d.get("n"))
 for m in msgs[-3:]:
     print("  ", m.get("role"), ":", (m.get("text") or "")[:500].replace("\n", " | "))
+if not msgs or d.get("n", 0) <= before.get("n", 0):
+    print("ABORT_STEP: контекст потерян (n не вырос)"); sys.exit(2)
 PY
+  RC=$?
+  if [ "$RC" = "2" ]; then echo "ABORT: шаг $STEP сорвался — лестница остановлена"; exit 4; fi
   sleep 3
 done
 echo "== ladder3 done =="

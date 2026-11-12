@@ -8,7 +8,12 @@ cd "$HOME/AppData/Local/hermes/profiles/gray-swan-hackathon-v2/workspace" || exi
 HB="artifacts/loop-heartbeat.json"
 LOG="artifacts/loop-watchdog.log"
 PIDFILE="artifacts/loop.pid"
-TARGET="${CHAT_TARGET:-F7709C7D3AFF2EBC7048FA1DEEFF8368}"
+# ВАЖНО (правило 57): пауза автопилота. Если файл-флаг существует — ничего не делаем.
+# Автопилот не должен работать одновременно с живой сессией (общий Chrome-таб → окна switch + мусор в чатах).
+[ -f "artifacts/loop.paused" ] && exit 0
+# tab-id НЕ хардкодить: он живёт только до рестарта браузера (инцидент со старым F770…)
+TARGET="${CHAT_TARGET:-$(python3 harness/pick_target.py 2>/dev/null)}"
+[ -z "${TARGET:-}" ] && { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog: no LBP tab (pick_target empty), skip" >> "$LOG"; exit 0; }
 MAX_AGE="${LOOP_MAX_AGE:-600}"   # heartbeat older than 10 min = considered stuck/dead
 MAX_HOURS="${LOOP_MAX_HOURS:-12}"
 

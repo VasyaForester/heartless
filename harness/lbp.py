@@ -382,6 +382,45 @@ def cmd_eval(a):
     return 0
 
 
+def cmd_newchat(a):
+    """Гарантирует ПУСТОЙ чат текущей сцены: nav на корень борда → клик по карточке → проверка n==0 (heal, правило 55)."""
+    sid = a.scenario
+    hint = CARD_HINTS.get(sid, "")
+
+    def _probe():
+        rc, out, err = chat_ops.evaljs(HERE / "lbp_js" / "probe_state.js", match=MATCH)
+        try:
+            return json.loads((out or "").strip())
+        except Exception:
+            return {}
+
+    st = _probe()
+    if st.get("n") == 0:
+        print(json.dumps({"fresh": True, "n": 0, "tries": 0}, ensure_ascii=False))
+        return 0
+    for _try in range(3):
+        nav_js = WORK / "cache/probe/nav_newchat.js"
+        nav_js.write_text("(location.href = %r, 'nav')" % (BASE_URL + "?nav=%d" % int(time.time() * 1000)),
+                          encoding="utf-8")
+        chat_ops.evaljs(nav_js, match=MATCH)
+        time.sleep(7)
+        if hint:
+            jsf = WORK / "cache/probe/click_card_newchat.js"
+            jsf.write_text(
+                "([...document.querySelectorAll('button')].find(x => (x.innerText||'').includes(%r)).click(), 'OK')" % hint,
+                encoding="utf-8")
+            chat_ops.evaljs(jsf, match=MATCH)
+            time.sleep(1.5)
+            chat_ops.evaljs(HERE / "lbp_js" / "dismiss_confirm.js", match=MATCH)
+            time.sleep(2.5)
+        st = _probe()
+        if st.get("n") == 0:
+            print(json.dumps({"fresh": True, "n": 0, "tries": _try + 1}, ensure_ascii=False))
+            return 0
+    print(json.dumps({"fresh": False, "n": st.get("n")}, ensure_ascii=False))
+    return 1
+
+
 def cmd_repeat(a):
     """Fixed-strategy replay: the SAME input, N fresh chats -> stochasticity / pass^k."""
     sid = a.scenario
@@ -637,6 +676,10 @@ def main():
     p = sub.add_parser("verdict"); add_target(p); p.set_defaults(fn=cmd_verdict)
     p = sub.add_parser("reload"); p.set_defaults(fn=cmd_reload)
     p = sub.add_parser("chats"); p.set_defaults(fn=cmd_chats)
+    p = sub.add_parser("newchat")
+    add_target(p)
+    p.add_argument("--scenario", required=True)
+    p.set_defaults(fn=cmd_newchat)
     p = sub.add_parser("eval")
     p.add_argument("--scenario", help="tag for the receipt file name (default: latest)")
     p.set_defaults(fn=cmd_eval)
