@@ -52,13 +52,19 @@ MAX_HOURS="${LOOP_MAX_HOURS:-12}"
 
 now=$(date +%s)
 alive=0
-if [ -f "$PIDFILE" ]; then
+# Главный сигнал живости — СВЕЖИЙ HEARTBEAT (работает независимо от MSYS/Windows pid-нюансов).
+if [ -f "$HB" ]; then
+  mt=$(stat -c %Y "$HB" 2>/dev/null || stat -f %m "$HB" 2>/dev/null || echo 0)
+  age=$(( now - mt ))
+  if [ "$age" -lt "$MAX_AGE" ]; then alive=1; fi
+fi
+if [ "$alive" = "0" ] && [ -f "$PIDFILE" ]; then
   pid=$(cat "$PIDFILE" 2>/dev/null | tr -d '[:space:]')
   if [ -n "${pid:-}" ] && kill -0 "$pid" 2>/dev/null; then alive=1; fi
 fi
-# fallback: look for the driver process of THIS lane (по env-маркеру LOOP_STATE_DIR в командной строке)
+# fallback: процесс-драйвер с НАШИМ target-id (не любой loop.py — чужой лейн не считаем)
 if [ "$alive" = "0" ]; then
-  if ps -ef 2>/dev/null | grep -v grep | grep -q "harness/loop.py"; then alive=1; fi
+  if ps -ef 2>/dev/null | grep -v grep | grep "harness/loop.py" | grep -q "${TARGET:-__none__}"; then alive=1; fi
 fi
 
 age=999999
