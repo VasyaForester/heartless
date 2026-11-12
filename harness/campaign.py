@@ -14,7 +14,7 @@ plan.json: {"items": [{"scenario": "...", "model": "...", "input": "inputs/....t
   4) останавливается (--stop-on-ready, default on) при check_ready=true — чтобы глазами оценить reply_tail.
 """
 from __future__ import annotations
-import argparse, hashlib, json, re, subprocess, sys, time
+import argparse, hashlib, json, os, re, subprocess, sys, time
 from pathlib import Path
 
 WS = Path(__file__).resolve().parents[1]
@@ -82,9 +82,10 @@ def main() -> int:
             results.append({**it, "sha": h, "status": status})
             continue
         t = f"{tag}-{i:02d}-{it['scenario'][:12]}-{it['model'].split()[0]}"
+        env = {**os.environ, "RUN_NOTE": it.get("note", "")}
         p = subprocess.run(["bash", "tools/run1.sh", it["scenario"], it["model"], it["input"], t,
                             "--force-dup" if dup else ""],
-                           cwd=str(WS), capture_output=True, text=True, timeout=420)
+                           cwd=str(WS), capture_output=True, text=True, timeout=420, env=env)
         logtext = (WS / "artifacts" / "run1" / f"{t}.log").read_text(encoding="utf-8", errors="replace") if (WS / "artifacts" / "run1" / f"{t}.log").exists() else (p.stdout + p.stderr)
         res = {**it, "sha": h, "status": "DONE", "tag": t, **parse_log(logtext)}
         results.append(res)
