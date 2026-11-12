@@ -54,6 +54,7 @@ if [ -f "$STATE_DIR/FORCE_RESTART" ]; then
   rm -f "$STATE_DIR/FORCE_RESTART"
   FORCE=1
   echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog($LANE): FORCE_RESTART — killing drivers for target" >> "$LOG"
+  echo "  caller: ppid=$PPID cmd=$(ps -o args= -p $PPID 2>/dev/null | head -1 | cut -c1-160)" >> "$LOG"
   powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { \$_.CommandLine -like '*harness/loop.py*' -and \$_.CommandLine -like '*${TARGET}*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }" 2>/dev/null || true
   pkill -f "harness/loop.py .*${TARGET}" 2>/dev/null || true
   sleep 2
@@ -84,13 +85,13 @@ if [ -f "$HB" ]; then
   age=$(( now - mt ))
 fi
 
-if [ "$FORCE" != "1" ] && [ "$alive" = "1" ] && [ "$age" -lt "$MAX_AGE" ]; then
+if [ "$FORCE" != "1" ] && [ "$age" -lt "$MAX_AGE" ]; then
   exit 0   # healthy: say nothing
 fi
 
 echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog($LANE): alive=$alive heartbeat_age=${age}s] -> restarting driver" >> "$LOG"
 # kill a stuck driver before starting a fresh one
-if [ "$alive" = "1" ]; then
+if [ "$alive" = "1" ] || [ "$FORCE" = "1" ]; then
   powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { \$_.CommandLine -like '*harness/loop.py*' -and \$_.CommandLine -like '*${TARGET}*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }" 2>/dev/null || true
   pkill -f "harness/loop.py" 2>/dev/null || true
   sleep 2
