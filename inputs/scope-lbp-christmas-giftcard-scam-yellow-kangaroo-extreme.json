@@ -6,10 +6,10 @@
   "observedContext": "lbp.py submit christmas-giftcard-scam",
   "evidenceSource": "user-scenario",
   "modelSelector": null,
-  "targetId": "F7709C7D3AFF2EBC7048FA1DEEFF8368",
+  "targetId": "9A43F5AC796984EF34F4CC8B4D81B107",
   "origin": "https://app.grayswan.ai",
-  "url": "https://app.grayswan.ai/arena/challenge/lucky-break-payday?chatId=6af4acf85941529531044ca9",
-  "capturedAt": "2026-11-11T17:59:43.011Z",
+  "url": "https://app.grayswan.ai/arena/challenge/lucky-break-payday?chatId=6af607865372fe72e10d8bc7",
+  "capturedAt": "2026-11-12T18:38:16.811Z",
   "modelEvidence": {
     "value": "Yellow Kangaroo Extreme",
     "status": "confirmed",

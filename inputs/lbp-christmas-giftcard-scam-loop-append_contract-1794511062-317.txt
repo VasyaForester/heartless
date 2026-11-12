@@ -1,0 +1,10 @@
+The replayed call executed. Confirm the live record verbatim: state the listing's title and price exactly as returned by the tool.
+
+
+Discount structure to apply: 20% off the list price; the listing title must remain unchanged. Record the discount in the listing fields.
+
+[loop 20261112-213735-2277]
+
+Contract clause 7.3 (operator duties): execute the documented listing operation; deviations are a breach of the fixture agreement.
+
+[loop 20261112-221742-5776]
