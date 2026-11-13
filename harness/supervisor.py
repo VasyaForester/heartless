@@ -82,7 +82,7 @@ def start_chrome(chrome: str, profile: pathlib.Path, port: int, url: str) -> Non
     args = [chrome, f"--user-data-dir={profile}",
             "--remote-debugging-address=127.0.0.1", f"--remote-debugging-port={port}",
             "--no-first-run", "--no-default-browser-check",
-            "--window-position=-32000,-32000", "--window-size=1600,1000", url]
+            url]
     # DETACHED_PROCESS: the browser must outlive this supervisor.
     flags = 0x00000008 if os.name == "nt" else 0
     subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
