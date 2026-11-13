@@ -80,6 +80,19 @@ def mark_awaiting(conn, lease, attempt_id: str, *, judge_ref: str | None = None)
                      judge_ref=judge_ref, judge_status="pending")
 
 
+def mark_unjudged(conn, lease, attempt_id: str,
+                  reason: str = "no judge attributed to this operation") -> None:
+    """The probe ran but produced no verdict of its own.
+
+    Not terminal: `judge_ledger.reconcile_unjudged` will pick up a late verdict
+    if one ever binds to this operation id.  Replaces the old behaviour of
+    pushing the attempt into the terminal `judge_failed` (which destroyed the
+    reward channel — 104/114 live attempts on 2026-11-13).
+    """
+    store.transition(conn, lease, attempt_id, "unjudged", judge_status="unjudged",
+                     payload={"reason": reason})
+
+
 def mark_judge(conn, lease, attempt_id: str, result: dict) -> None:
     """Persist a correlated judge.  Only a verified judge can reach `judged`."""
     store.record_judge(

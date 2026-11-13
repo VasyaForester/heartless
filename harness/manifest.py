@@ -92,6 +92,25 @@ def load() -> dict | None:
         return None
 
 
+def validate_split(man: dict, *, board_name: str | None = None, lane: str | None = None,
+                   cdp: str | None = None) -> tuple[list[str], list[str]]:
+    """Separate FATAL mismatches from recoverable drift.
+
+    Fatal (fail closed): board, lane, cdp — running a lane against another
+    board's manifest must never happen.
+    Recoverable: the board profile file changed since the manifest was written.
+    This distinction is not cosmetic: on 2026-11-13 a profile edit turned into a
+    permanent fail-closed crash loop (driver exit 2 every 10 s, 16:58-17:0x)
+    because the supervisor only builds the manifest at its OWN start.  The
+    supervisor now re-baselines per driver start and this path only warns.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    for msg in validate(man, board_name=board_name, lane=lane, cdp=cdp):
+        (warnings if "profile hash changed" in msg else errors).append(msg)
+    return errors, warnings
+
+
 def validate(man: dict, *, board_name: str | None = None, lane: str | None = None,
              cdp: str | None = None) -> list[str]:
     """Return a list of mismatches (empty = consistent)."""

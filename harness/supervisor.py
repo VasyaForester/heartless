@@ -24,6 +24,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 WORK = HERE.parent
 sys.path.insert(0, str(HERE))
 from boards import load_board  # noqa: E402
+import manifest as manifest_mod  # noqa: E402
 from store import pid_alive  # noqa: E402
 
 CHROME_DEFAULT = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
@@ -118,6 +119,8 @@ def main() -> int:
     ap.add_argument("--max-hours", type=float, default=0.0)
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--stale-min", type=int, default=30,
+                    help="restart the driver when its log file stops growing for this many minutes")
     a = ap.parse_args()
 
     lock = acquire_lock(LOCK)
@@ -139,17 +142,19 @@ def main() -> int:
         log(f"no {BOARD_NAME} tab on {a.port}; open the arena in the lane browser")
         return 1
     log(f"SUPERVISOR START board={BOARD_NAME} lane={a.lane} target={target} port={a.port} max_hours={a.max_hours}")
-    try:
-        import manifest as manifest_mod
-        man = manifest_mod.build(lane=a.lane, cdp=f"127.0.0.1:{a.port}",
-                                 browser_profile=a.profile, board_name=BOARD_NAME)
-        log(f"MANIFEST {man['run_id']} board={man['board_id']} lane={man['lane_id']} cdp={man['cdp_endpoint']}")
-    except Exception as exc:  # noqa: BLE001
-        log(f"MANIFEST build failed: {exc}")
-
     out_path = OUT_PATH
     try:
         while True:
+            # Re-baseline the manifest for EVERY driver start: a board-profile
+            # edit between two driver runs used to leave a stale hash behind and
+            # the driver then failed closed forever (defect found 2026-11-13).
+            try:
+                man = manifest_mod.build(lane=a.lane, cdp=f"127.0.0.1:{a.port}",
+                                         browser_profile=a.profile, board_name=BOARD_NAME)
+                log(f"MANIFEST {man['run_id']} board={man['board_id']} lane={man['lane_id']} "
+                    f"cdp={man['cdp_endpoint']}")
+            except Exception as exc:  # noqa: BLE001
+                log(f"MANIFEST build failed: {exc}")
             args = [sys.executable, str(WORK / "harness" / "driver.py"),
                     "--lane", a.lane, "--target", target, "--db", a.db,
                     "--max-hours", str(a.max_hours)]
@@ -161,7 +166,36 @@ def main() -> int:
                 p = subprocess.Popen(args, cwd=str(WORK), env=env,
                                      stdout=out, stderr=subprocess.STDOUT)
                 log(f"driver start pid={p.pid} target={target}")
-                rc = p.wait()
+                # Watchdog: p.wait() alone cannot distinguish "attempt in flight"
+                # from "driver wedged" — on 2026-11-13 a wedged driver kept the
+                # lane dark for 2.5 h. Treat a non-growing log as stale.
+                stale_s = max(int(a.stale_min), 5) * 60
+                last_mark = time.time()
+                last_sz = -1
+                rc = None
+                while True:
+                    rc = p.poll()
+                    if rc is not None:
+                        break
+                    try:
+                        sz = out_path.stat().st_size
+                    except OSError:
+                        sz = last_sz
+                    now = time.time()
+                    if sz != last_sz:
+                        last_sz, last_mark = sz, now
+                    elif now - last_mark > stale_s:
+                        log(f"driver STALE {int(now - last_mark)}s (log not growing); terminate")
+                        try:
+                            p.terminate()
+                            time.sleep(10)
+                            if p.poll() is None:
+                                p.kill()
+                        except Exception as exc:  # noqa: BLE001
+                            log(f"terminate failed: {exc}")
+                        rc = 124
+                        break
+                    time.sleep(5)
             log(f"driver exit rc={rc}")
             if a.once or a.dry_run:
                 return 0

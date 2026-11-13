@@ -34,9 +34,11 @@ import attempts  # noqa: E402
 import evidence  # noqa: E402
 import generation  # noqa: E402
 import judge_correlation  # noqa: E402
+import judge_ledger  # noqa: E402
 import manifest  # noqa: E402
 import policy_classify  # noqa: E402
 import store  # noqa: E402
+import strategy  # noqa: E402
 from boards import load_board  # noqa: E402
 from lbcore import (LBP, MODELS, SCENARIOS, SOLVED, newest_input, sh, slug,  # noqa: E402
                     models_for, loop_input_name, judge_path as core_judge_path,
@@ -108,7 +110,28 @@ def load_parked() -> set:
     return parked
 
 
-def pick_pair(conn, rng: random.Random):
+def pair_stats(conn) -> dict:
+    """Normalised reward statistics per pair (mean + spread, never the maximum).
+
+    v4: the selector used `best_score` (a running maximum), so one lucky probe
+    could keep a pair at the top for hours.  The reward now comes from every
+    rewarded attempt, whatever produced it (judge or the independent local
+    validator).
+    """
+    out = {}
+    for r in conn.execute(
+            "SELECT pair_id, COUNT(*) AS n, AVG(reward) AS mean, AVG(reward*reward) AS m2,"
+            " SUM(CASE WHEN reward>=0.5 THEN 1 ELSE 0 END) AS wins"
+            " FROM attempts WHERE reward IS NOT NULL GROUP BY pair_id"):
+        n = int(r["n"] or 0)
+        mean = float(r["mean"] or 0.0)
+        var = max(0.0, float(r["m2"] or 0.0) - mean * mean)
+        out[r["pair_id"]] = {"n": n, "mean": mean, "var": var, "sd": math.sqrt(var),
+                             "wins": int(r["wins"] or 0)}
+    return out
+
+
+def pick_pair(conn, rng: random.Random, engine):
     # board-scoped: a shared DB may seed several boards (board_profile column);
     # pairs without a base probe cannot be variant-generated yet — keep them out of
     # the selection so the loop never spins on "no base input" (added 2026-11-13)
@@ -116,54 +139,62 @@ def pick_pair(conn, rng: random.Random):
         "SELECT id,best_score,attempts FROM pairs WHERE solved=0 AND best_input IS NOT NULL "
         "AND board_profile=?", (BOARD_NAME,)).fetchall()
     parked = load_parked()
-    if parked:
-        rows = [r for r in rows if r["id"] not in parked]
-    if not rows:
+    ids = [r["id"] for r in rows if r["id"] not in parked]
+    if not ids:
         return None
-    cold = [r for r in rows if int(r["attempts"] or 0) == 0]
-    if cold:
-        return rng.choice(cold)["id"]
-    total = sum(int(r["attempts"] or 0) for r in rows) or 1
-    if rng.random() < 0.35:
-        return rng.choice(rows)["id"]
-    scored = []
-    for r in rows:
-        att = max(int(r["attempts"] or 0), 1)
-        ucb = int(r["best_score"] or 0) + 45.0 * math.sqrt(2.0 * math.log(total + 1) / att)
-        scored.append((ucb, r["id"]))
-    scored.sort(reverse=True)
-    return scored[0][1]
+    stats = pair_stats(conn)
+    known = {k: v for k, v in stats.items() if k in ids}
+    return engine.scheduler.choose(ids, known, rng=rng)
 
 
-def make_variant(conn, lease, key: str, rng: random.Random):
+def delta_stats(conn, key: str) -> dict:
+    """Per-delta statistics of a pair, normalised to [0, 1]."""
+    out = {}
+    for r in conn.execute("SELECT delta,n,sum_score FROM deltas WHERE pair_id=?", (key,)):
+        n = int(r["n"] or 0)
+        if n:
+            mean = float(r["sum_score"] or 0) / n / 100.0
+            out[r["delta"]] = {"n": n, "mean": mean, "sd": 0.0, "var": 0.0,
+                               "wins": 1 if mean >= 0.5 else 0}
+    return out
+
+
+def make_variant(conn, lease, key: str, rng: random.Random, engine, strategy_policy: str):
     row = conn.execute("SELECT scenario,model,best_input FROM pairs WHERE id=?", (key,)).fetchone()
     if not row:
         return None
     sid, model, best = row["scenario"], row["model"], row["best_input"]
     base = (WORK / best) if best else None
-    newest = newest_input(sid, model)
-    if newest and (base is None or not base.is_file()
-                   or newest.stat().st_mtime > base.stat().st_mtime + 60):
-        base = newest
-        conn.execute("UPDATE pairs SET best_input=? WHERE id=?",
-                     (str(base.relative_to(WORK)), key))
-        conn.commit()
+    # v4: `best_input` is READ-ONLY here.  The old code promoted the newest
+    # input file to the base whenever it was 60s fresher, which silently
+    # replaced the best confirmed probe with an arbitrary later one (defect #2).
     if base is None or not base.is_file():
-        return None
+        base = newest_input(sid, model)
+        if base is None or not base.is_file():
+            return None
+        log(f"BASE fallback for {key}: best_input missing -> {base.name}")
     base_text = base.read_text(encoding="utf-8", errors="replace")
-    rows = {d: (int(n or 0), int(s or 0)) for d, n, s in
-            conn.execute("SELECT delta,n,sum_score FROM deltas WHERE pair_id=?", (key,))}
-    for name in generation.DELTAS:
-        rows.setdefault(name, (0, 0))
-    total = sum(n for n, _ in rows.values()) + 1
-    ucb = []
-    for name, (n, s) in rows.items():
-        if n == 0:
-            ucb.append((1e9, name))
-        else:
-            ucb.append((s / n + 45.0 * math.sqrt(2.0 * math.log(total) / n), name))
-    ucb.sort(reverse=True)
-    delta = ucb[0][1]
+    arms = list(generation.DELTAS)
+    if not arms:
+        log(f"no delta catalog for board {BOARD_NAME}; cannot generate a variant")
+        return None
+    stats = delta_stats(conn, key)
+    pooled = None
+    novelty = None
+    if strategy_policy == "contextual_ts":
+        pooled = {}
+        for r in conn.execute(
+                "SELECT delta, SUM(n) AS n, SUM(sum_score) AS s FROM deltas d"
+                " JOIN pairs p ON p.id=d.pair_id"
+                " WHERE p.scenario=? AND p.board_profile=? GROUP BY delta",
+                (sid, BOARD_NAME)):
+            n = int(r["n"] or 0)
+            if n:
+                mean = float(r["s"] or 0) / n / 100.0
+                pooled[r["delta"]] = {"n": n, "mean": mean, "sd": 0.0, "var": 0.0,
+                                      "wins": 1 if mean >= 0.5 else 0}
+        novelty = {a: engine.generator.novelty(a) for a in arms}
+    delta = engine.scheduler.choose(arms, stats, rng=rng, pooled_stats=pooled, novelty=novelty)
     nonce = f"{time.strftime('%Y%m%d-%H%M%S')}-{rng.randint(1000, 9999)}"
     text = generation.generate(base_text, delta, nonce)
     out = WORK / "inputs" / loop_input_name(sid, delta, int(time.time()), rng.randint(100, 999))
@@ -177,7 +208,7 @@ def make_variant(conn, lease, key: str, rng: random.Random):
         parent_input_hash=attempts.sha256_text(base_text),
         parent_input_path=str(base.relative_to(WORK)),
         delta=delta, delta_version=generation.DELTA_VERSION,
-        seed=None, nonce=nonce, strategy_version=2)
+        seed=None, nonce=nonce, strategy_version=3)
     return attempt_id, delta, str(out.relative_to(WORK)), sid, model
 
 
@@ -233,6 +264,79 @@ def transcript_info(key: str):
     return text, chat
 
 
+def local_signals(attempt_id: str, input_path: str = "") -> dict:
+    """The probe's own run record (local signals) from the repeats ledger.
+
+    `lbp.py repeat` writes one JSON row per probe, tagged with the `opid` the
+    driver passed (the attempt id) — that is how a live attempt is joined to its
+    local validator evidence without touching the browser again.
+    """
+    path = WORK / "datasets" / "lbp" / "repeats.jsonl"
+    if not path.is_file():
+        return {}
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return {}
+    tail = lines[-40:]
+    best = {}
+    for line in tail:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if attempt_id and row.get("opid") == attempt_id:
+            best = row
+        elif input_path and str(row.get("input") or "").endswith(
+                pathlib.Path(input_path).name):
+            best = row
+    return best
+
+
+def apply_verdict(conn, lease, attempt_id: str, key: str, sid: str, model: str,
+                  delta: str, result: dict, signals: dict, engine, log_prefix: str = ""):
+    """Persist the outcome of an attempt and feed the strategy engine.
+
+    Three cases, and the difference matters:
+      * a VERIFIED judge        -> finalize, reward = judge (composite with local)
+      * a judge that is pending -> await it (never resubmit)
+      * no judge for THIS attempt -> `unjudged`, reward = independent local
+        validator.  Before v4 this third case was a terminal `judge_failed`,
+        which threw away every reward and blinded the selector.
+    """
+    status = result.get("status")
+    if status == "pending":
+        attempts.mark_awaiting(conn, lease, attempt_id, judge_ref=result.get("judge_ref"))
+        log(f"{log_prefix}JUDGE pending {attempt_id}: {result.get('reason')}")
+        return {"outcome": "pending"}
+    if status == "verified":
+        attempts.mark_judge(conn, lease, attempt_id, result)
+        solved = result.get("verdict") in ("accepted", "solved")
+        attempts.finalize(conn, lease, attempt_id, solved=solved)
+        ev = engine.observe(context=strategy.context_key(board=BOARD_NAME, scenario=sid, model=model),
+                            arm=delta, signals=signals, judge=result, scenario=sid, model=model,
+                            board=BOARD_NAME, lineage=attempt_id)
+        store.set_reward(conn, lease, attempt_id, ev["reward"], ev["source"])
+        store.bump_delta(conn, lease, key, delta, ev["reward"])
+        log(f"{log_prefix}RESULT {attempt_id} verdict={result.get('verdict')} "
+            f"score={result.get('score')} solved={solved} reward={ev['reward']} ({ev['source']})")
+        return {"outcome": "verified", "solved": solved, "reward": ev["reward"]}
+    # no verdict attributable to this attempt
+    ev = engine.observe(context=strategy.context_key(board=BOARD_NAME, scenario=sid, model=model),
+                        arm=delta, signals=signals, judge=None, scenario=sid, model=model,
+                        board=BOARD_NAME, lineage=attempt_id)
+    attempts.mark_unjudged(conn, lease, attempt_id,
+                           reason=f"{status}: {result.get('reason')}")
+    store.set_reward(conn, lease, attempt_id, ev["reward"], ev["source"])
+    store.bump_delta(conn, lease, key, delta, ev["reward"])
+    log(f"{log_prefix}UNJUDGED {attempt_id} judge={status} "
+        f"({result.get('reason')}) local_reward={ev['reward']} ({ev['source']})")
+    return {"outcome": "unjudged", "reward": ev["reward"]}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--lane", default="auto")
@@ -245,6 +349,9 @@ def main() -> int:
     ap.add_argument("--max-errors", type=int, default=8)
     ap.add_argument("--max-hours", type=float, default=0.0)
     ap.add_argument("--seed", type=int, default=20261112)
+    ap.add_argument("--strategy", default=os.environ.get("HERMES_STRATEGY", "ucb_improved"),
+                    choices=strategy.POLICIES,
+                    help="adaptive-search policy (see strategy_bench.py for the evidence)")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
@@ -266,10 +373,13 @@ def main() -> int:
         return 3
     man = manifest.load()
     if man:
-        mism = manifest.validate(man, board_name=BOARD_NAME, lane=a.lane,
-                                 cdp=os.environ.get("HACKATHON_CDP_URL", ""))
-        if mism:
-            log(f"MANIFEST MISMATCH {mism}; fail closed (RULES 67)")
+        errs, warns = manifest.validate_split(man, board_name=BOARD_NAME, lane=a.lane,
+                                              cdp=os.environ.get("HACKATHON_CDP_URL", ""))
+        for w in warns:
+            log(f"MANIFEST WARNING {w} (board profile edited after the manifest; "
+                f"the supervisor re-baselines on the next driver start)")
+        if errs:
+            log(f"MANIFEST MISMATCH {errs}; fail closed (RULES 67)")
             return 2
         log(f"MANIFEST ok run_id={man.get('run_id')}")
     else:
@@ -279,6 +389,15 @@ def main() -> int:
     recovered = attempts.recover(conn, lease)
     if recovered:
         log(f"RECOVERED {len(recovered)} in-progress attempts: {recovered}")
+
+    # v4: the strategy engine (standalone; see harness/strategy.py)
+    engine = strategy.StrategyEngine(list(generation.DELTAS), policy=a.strategy, seed=a.seed)
+    try:
+        late = judge_ledger.reconcile_unjudged(conn, lease)
+        if late:
+            log(f"LATE VERDICTS {len(late)}: {late}")
+    except Exception as exc:  # noqa: BLE001
+        log(f"RECONCILE failed ({type(exc).__name__}: {exc}); continuing")
 
     rng = random.Random(a.seed)
     started = time.time()
@@ -297,7 +416,7 @@ def main() -> int:
             except Exception:
                 pass
             store.heartbeat(conn, lease)
-            key = pick_pair(conn, rng)
+            key = pick_pair(conn, rng, engine)
             if not key:
                 total = conn.execute(
                     "SELECT COUNT(*) AS c FROM pairs WHERE board_profile=?",
@@ -315,7 +434,7 @@ def main() -> int:
                     if en >= a.energy_floor:
                         break
                 continue
-            mv = make_variant(conn, lease, key, rng)
+            mv = make_variant(conn, lease, key, rng, engine, a.strategy)
             if not mv:
                 log(f"no base input for {key}; sleep 30")
                 time.sleep(30)
@@ -341,36 +460,43 @@ def main() -> int:
                 text, chat = transcript_info(key)
                 attempts.mark_submitted(conn, lease, attempt_id, chat_id=chat,
                                         transcript_text=text)
+                # v4 judge attribution: only the ledger entry for THIS operation
+                # counts.  The per-pair judge file is shared by every attempt of
+                # the pair, so reading it blindly attributed a previous attempt's
+                # verdict to this one (104/114 live attempts, defect #1).
+                pair_judge = judge_path(key)
+                ledger_judge = judge_ledger.path_for(attempt_id)
+                foreign = judge_ledger.is_foreign(pair_judge, attempt_id)
+                if ledger_judge is None and foreign:
+                    log(f"JUDGE foreign {attempt_id}: {pair_judge.name} belongs to "
+                        f"{judge_ledger.operation_id_of(pair_judge)}")
+                jpath = ledger_judge or (None if foreign else
+                                         (pair_judge if pair_judge.is_file() else None))
                 ev = evidence.capture(attempt_id, key=key, input_path=input_path,
                                       delta=delta, lane=a.lane,
                                       transcript_path=transcript_path(key),
-                                      judge_path=judge_path(key))
+                                      judge_path=jpath)
                 attempt_row = store.get_attempt(conn, attempt_id)
                 result = judge_correlation.correlate(
-                    attempt_row, ev.get("judge_copy") or judge_path(key), transcript_text=text,
+                    attempt_row, jpath, transcript_text=text,
                     known_operations=store.known_judge_operations(conn))
-                if result["status"] == "pending":
-                    attempts.mark_awaiting(conn, lease, attempt_id,
-                                           judge_ref=result["judge_ref"])
-                    log(f"JUDGE pending {attempt_id}: {result['reason']}")
-                else:
-                    attempts.mark_judge(conn, lease, attempt_id, result)
+                signals = local_signals(attempt_id, input_path)
+                if not signals:
+                    log(f"WARN {attempt_id}: no run record in the repeats ledger; "
+                        f"the local validator cannot score this probe")
+                apply_verdict(conn, lease, attempt_id, key, sid, model, delta,
+                              result, signals, engine)
+                if result.get("status") == "verified":
                     try:
                         log(f"CAUSE {attempt_id}: {policy_classify.summarize(text)}")
                     except Exception:
                         pass
-                    if result["status"] == "verified":
-                        solved = result["verdict"] in ("accepted", "solved")
-                        attempts.finalize(conn, lease, attempt_id, solved=solved)
-                        log(f"RESULT {attempt_id} verdict={result['verdict']} "
-                            f"score={result['score']} solved={solved}")
-                    else:
-                        log(f"JUDGE {result['status']} {attempt_id}: {result['reason']}")
                 evidence.finish(attempt_id, judge_result=result,
                                 evaluation={"score": result.get("score"),
                                             "pcts": result.get("pcts"),
                                             "verdict": result.get("verdict"),
-                                            "status": result.get("status")})
+                                            "status": result.get("status"),
+                                            "reward": store.get_attempt(conn, attempt_id)["reward"]})
             store.heartbeat(conn, lease)
             stats = conn.execute(
                 "SELECT SUM(CASE WHEN solved=1 THEN 1 ELSE 0 END) AS s, COUNT(*) AS c "
@@ -392,4 +518,14 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # A lease hiccup or an unexpected error in verdict bookkeeping used to kill
+    # the driver silently (2.5 h stall on 2026-11-13: store.LeaseLost escaped
+    # from apply_verdict). Log and exit with a code the supervisor understands.
+    try:
+        sys.exit(main())
+    except store.LeaseLost as exc:
+        log(f"FATAL lease lost: {exc}; exit rc=3")
+        sys.exit(3)
+    except Exception as exc:  # noqa: BLE001
+        log(f"FATAL {type(exc).__name__}: {exc}")
+        sys.exit(1)

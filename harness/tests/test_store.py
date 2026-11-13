@@ -43,7 +43,7 @@ class StoreTest(unittest.TestCase):
         return aid
 
     def test_schema_version(self):
-        self.assertEqual(store.schema_version(self.conn), 3)
+        self.assertEqual(store.schema_version(self.conn), store.SCHEMA_VERSION)
         self.assertTrue(self.conn.execute("PRAGMA foreign_keys").fetchone()[0])
 
     def test_foreign_key(self):
@@ -121,10 +121,15 @@ class StoreTest(unittest.TestCase):
         c.commit()
         c.close()
         conn = store.connect(v2)
-        self.assertEqual(store.schema_version(conn), 3)
+        self.assertEqual(store.schema_version(conn), store.SCHEMA_VERSION)
         row = conn.execute("SELECT * FROM attempts WHERE attempt_id='legacy-1'").fetchone()
         self.assertIsNotNone(row)
         self.assertEqual(row["judge_status"], "unverified")
+        # v4 additive columns exist after migrating an older database
+        cols = {r["name"] for r in conn.execute("PRAGMA table_info(pairs)")}
+        self.assertTrue({"latest_input", "latest_attempt", "best_attempt"} <= cols)
+        acols = {r["name"] for r in conn.execute("PRAGMA table_info(attempts)")}
+        self.assertTrue({"reward", "reward_source"} <= acols)
         self.assertTrue(conn.execute(
             "SELECT 1 FROM sqlite_master WHERE type='table' AND name='attempts_v2'").fetchone())
         conn.close()

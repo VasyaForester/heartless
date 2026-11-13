@@ -145,7 +145,12 @@ def bind(judge_path, opid: str, *, pair_key: str | None = None,
         tmp = dest.with_suffix(".tmp")
         tmp.write_bytes(data)
         tmp.replace(dest)  # atomic; an existing binding is never overwritten
-    sha = _sha_bytes(data)
+    # The binding's identity is the STORED artifact, not the file we were handed:
+    # a later submission rewrites the per-pair file, and the ledger must keep
+    # reporting the verdict that belongs to this operation.
+    stored = dest.read_bytes()
+    sha = _sha_bytes(stored)
+    raw = read_judge(dest) or raw
     row = {
         "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "opid": str(opid or got or ""),

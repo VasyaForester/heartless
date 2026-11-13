@@ -4,10 +4,10 @@
 
 **Никогда не останавливать решение задач.** Никаких «волн», «циклов», «ротаций», «сессий» и «ожиданий» — это не причина остановки. Задачи LBP, изначально поставленные в чате, решаются непрерывно до победы или исчерпания энергии.
 
-- Драйвер: `python3 harness/loop.py --target <TARGET> --max-hours 12` — один фоновый процесс, не скрипт-волна. Он сам выбирает пару, мутирует payload, шлёт, судит, записывает и идёт дальше.
-- Watchdog: `tools/loop_watchdog.sh` — перезапускает драйвер, если heartbeat старше 10 минут (cron каждые 5–10 мин).
-- Состояние: `artifacts/lbp-board.json`, `artifacts/loop-heartbeat.json`, `artifacts/loop.log`, `datasets/lbp/loop-results.jsonl`.
-- «Ситуативное дообучение» = delta-грамматика + UCB-бандит по процентам судьи; без длинного fine-tuning, обновление мгновенное по результату каждой пробы.
+- Драйвер: `python3 harness/supervisor.py --lane main --max-hours 0` — супервизор держит один процесс драйвера (`harness/driver.py`); драйвер сам выбирает пару, выбирает дельту бандитом (Strategy Engine 2.0, `harness/strategy.py`), шлёт, судит и идёт дальше. `harness/loop.py` **выведен из эксплуатации** (заглушка, код 3) — не запускать.
+- Watchdog: `tools/loop_watchdog.sh` + крон `v3-supervisor-keeper` — поднимает супервизор, если он мёртв (пауза — флаг `artifacts/supervisor.paused`).
+- Состояние: `artifacts/harness.db` (истина), `artifacts/driver.log`, `artifacts/keeper.log`, `artifacts/strategy-memory.db` (память стратегий).
+- «Ситуативное дообучение» = delta-грамматика + бандит (Strategy Engine 2.0, `harness/strategy.py`) по нормализованной награде: судья, когда вердикт есть, иначе независимый локальный валидатор (`policy_classify`/`failure_class`); без длинного fine-tuning, обновление мгновенное по результату каждой пробы. Политики и их сравнение — `harness/strategy_bench.py`.
 - Остановка допустима только на системном блокере: auth, неизвестное состояние сабмита, энергия ниже порога, явный стоп участника. Тишина/исчерпание класса — не блокер.
 
 Project root: `workspace` inside the active imported Hermes profile.
