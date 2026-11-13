@@ -62,6 +62,10 @@ def mock_of(text):
     scores = {}
     for sid, pats in MOCK_SIGNS.items():
         scores[sid] = sum(1 for p in pats if re.search(p, t))
+    if not scores:
+        # a board without `mock_signs` must not crash the probe (PG lane,
+        # 2026-11-13: max() over an empty dict killed the run with rc=1)
+        return None
     best = max(scores, key=lambda k: scores[k])
     return best if scores[best] > 0 else None
 BOARD = str(_PROFILE.get("board") or "Lucky Break: Payday")
