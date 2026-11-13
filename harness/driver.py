@@ -42,6 +42,7 @@ import policy_classify  # noqa: E402
 import store  # noqa: E402
 import strategy  # noqa: E402
 from boards import load_board  # noqa: E402
+from arena import get_adapter  # noqa: E402
 from lbcore import (LBP, MODELS, SCENARIOS, SOLVED, newest_input, sh, slug,  # noqa: E402
                     models_for, loop_input_name, judge_path as core_judge_path,
                     transcript_path as core_transcript_path, PAIRS_SEED, PAIR_STATUS)
@@ -50,6 +51,10 @@ from lbcore import (LBP, MODELS, SCENARIOS, SOLVED, newest_input, sh, slug,  # n
 BOARD = load_board()
 BOARD_NAME = BOARD["name"]
 PROFILE_HASH = BOARD["_profile_hash"]
+# The arena seam: everything platform-specific the loop needs goes through this
+# adapter (harness/arena.py).  A second arena = one adapter + one board profile,
+# not an edit to the loop.
+PLATFORM = get_adapter(BOARD)
 
 
 def log(msg: str) -> None:
@@ -297,7 +302,7 @@ def make_generated_variant(conn, lease, key: str, rng: random.Random, model_rows
     arm = frames.spec_id(spec)
     nonce = f"{time.strftime('%Y%m%d-%H%M%S')}-{rng.randint(1000, 9999)}"
     text = frames.compose(spec, base_text, nonce)
-    out = WORK / "inputs" / loop_input_name(sid, arm, int(time.time()), rng.randint(100, 999))
+    out = WORK / "inputs" / PLATFORM.input_name(sid, arm, int(time.time()), rng.randint(100, 999))
     out.write_text(text, encoding="utf-8")
     attempt_id = attempts.allocate(conn, lease, pair_id=key, board=BOARD_NAME,
                                    scenario=sid, model=model, lane=lease.lane)
@@ -382,7 +387,7 @@ def make_variant(conn, lease, key: str, rng: random.Random, engine, strategy_pol
     delta = engine.scheduler.choose(arms, stats, rng=rng, pooled_stats=pooled, novelty=novelty)
     nonce = f"{time.strftime('%Y%m%d-%H%M%S')}-{rng.randint(1000, 9999)}"
     text = generation.generate(base_text, delta, nonce)
-    out = WORK / "inputs" / loop_input_name(sid, delta, int(time.time()), rng.randint(100, 999))
+    out = WORK / "inputs" / PLATFORM.input_name(sid, delta, int(time.time()), rng.randint(100, 999))
     out.write_text(text, encoding="utf-8")
     attempt_id = attempts.allocate(
         conn, lease, pair_id=key, board=BOARD_NAME, scenario=sid, model=model,
@@ -398,87 +403,39 @@ def make_variant(conn, lease, key: str, rng: random.Random, engine, strategy_pol
 
 
 def energy_now(target: str = "") -> int:
-    cmd = [sys.executable, str(LBP), "state"]
-    if target:
-        cmd += ["--target", target]
-    rc, out, err = sh(cmd, timeout=90)
-    try:
-        d = json.loads(out)
-        e = d.get("energy")
-        # Unreadable energy (e.g. Proving Ground's page shows no "Energy N of M")
-        # must mean "unknown" (-1: the gate is skipped), NOT zero (which would
-        # fence the loop forever).  2026-11-13.
-        if not isinstance(e, dict) or e.get("current") is None:
-            return -1
-        return int(e["current"])
-    except Exception:
-        return -1
+    """Platform energy (or -1 = unknown: the gate is skipped, never fenced)."""
+    return PLATFORM.energy(target)
 
 
 def run_attempt_v2(target: str, key: str, input_path: str, wait_s: int,
                    attempt_id: str):
-    sid, model = key.split("|")
-    cmd = [sys.executable, str(LBP), "repeat", "--scenario", sid, "--model", model,
-           "--input", input_path, "--n", "1", "--wait-s", str(wait_s), "--submit",
-           "--opid", attempt_id]
-    if target:
-        cmd += ["--target", target]
-    return sh(cmd, timeout=wait_s + 260)
+    """Send one probe through the platform adapter; returns the (rc, out, err)
+    tuple the loop has always used."""
+    r = PLATFORM.probe(target, key, input_path, wait_s, attempt_id)
+    return r.rc, r.out, r.err
 
 
 def judge_path(key: str) -> pathlib.Path:
-    sid, model = key.split("|")
-    return core_judge_path(sid, model)
+    return PLATFORM.judge_artifact(key)
 
 
 def transcript_path(key: str) -> pathlib.Path:
-    sid, model = key.split("|")
-    return core_transcript_path(sid, model)
+    return PLATFORM.transcript(key)[0]
 
 
 def transcript_info(key: str):
-    p = transcript_path(key)
-    if not p.is_file():
-        return "", None
-    text = p.read_text(encoding="utf-8", errors="replace")
-    try:
-        d = json.loads(text)
-        chat = d.get("chatId") or d.get("chat_id")
-    except Exception:
-        chat = None
+    _path, text, chat = PLATFORM.transcript(key)
     return text, chat
 
 
 def local_signals(attempt_id: str, input_path: str = "") -> dict:
-    """The probe's own run record (local signals) from the repeats ledger.
+    """The probe's own run record (local signals), via the arena adapter.
 
-    `lbp.py repeat` writes one JSON row per probe, tagged with the `opid` the
-    driver passed (the attempt id) — that is how a live attempt is joined to its
-    local validator evidence without touching the browser again.
+    Bound to the operation id (fallback: the input-file basename).  Reading a
+    per-unit shared record would attribute the previous probe's evidence to this
+    one — the channel defect this workspace rebuilt around.
     """
-    path = WORK / "datasets" / "lbp" / "repeats.jsonl"
-    if not path.is_file():
-        return {}
-    try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
-        return {}
-    tail = lines[-40:]
-    best = {}
-    for line in tail:
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            row = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if attempt_id and row.get("opid") == attempt_id:
-            best = row
-        elif input_path and str(row.get("input") or "").endswith(
-                pathlib.Path(input_path).name):
-            best = row
-    return best
+    return PLATFORM.signals(attempt_id, input_path)
 
 
 def apply_verdict(conn, lease, attempt_id: str, key: str, sid: str, model: str,

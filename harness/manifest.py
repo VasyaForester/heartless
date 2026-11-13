@@ -55,6 +55,14 @@ def build(*, lane: str, cdp: str, browser_profile: str, board_name: str | None =
     board = load_board(board_name)
     board_file = WORK / "boards" / f"{board['name']}.json"
     prof_hash = hashlib.sha256(board_file.read_bytes()).hexdigest() if board_file.exists() else "unknown"
+    # Which arena adapter ran this manifest: a run is only reproducible if the
+    # platform seam is recorded, not just the board profile.
+    try:
+        from arena import get_adapter  # noqa: E402
+        _adapter = get_adapter(board)
+        _platform, _platform_iface = _adapter.name(), _adapter.version()
+    except Exception as exc:  # noqa: BLE001 — never block a run on bookkeeping
+        _platform, _platform_iface = f"unknown ({type(exc).__name__})", 0
 
     m = {
         "run_id": "run-" + time.strftime("%Y%m%d-%H%M%S"),
@@ -62,6 +70,8 @@ def build(*, lane: str, cdp: str, browser_profile: str, board_name: str | None =
         "board_url": board["url"],
         "board_profile_hash": prof_hash,
         "scenario_selector": board.get("scenario_selector"),
+        "platform": _platform,
+        "platform_interface_version": _platform_iface,
         "lane_id": lane,
         "cdp_endpoint": cdp,
         "browser_profile": str(browser_profile),
