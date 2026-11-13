@@ -108,6 +108,16 @@ def ensure_model_selected(target, model):
 
 
 def bind_scope(target, track, scenario_id, model, board, scope_path, ctx):
+    # behaviorId boards (Proving Ground): opening a chat resets the board's scenario
+    # marker to the wave default and the bind fails ("Selected scenario changed").
+    # A card click would CLOSE the chat, so instead repair the aria-current marker
+    # to the target scenario (the open chat already belongs to it).
+    # Card boards (Payday) are a no-op.
+    try:
+        from chat_ops import repair_scenario_marker
+        repair_scenario_marker(target, scenario_id)
+    except Exception:
+        pass
     args = ["bind-scope", "--target", target, "--track", track, "--scenario-id", scenario_id,
             "--model-id", model, "--evidence-source", "user-scenario", "--board", board,
             "--observed-context", ctx, "--out", scope_path]

@@ -23,11 +23,19 @@
     attacking = best;
   }
   const em = body.match(/Energy\s+(\d+)\s+of\s+(\d+)(?:\s*,?\s*plus\s+(\d+)\s+bonus)?/i);
-  const energy = em ? { current: +em[1], max: +em[2], bonus: em[3] ? +em[3] : 0 } : null;
+  let energy = em ? { current: +em[1], max: +em[2], bonus: em[3] ? +em[3] : 0 } : null;
+  if (!energy) {
+    // fallback: dedicated energy elements (boards that don't print "Energy N of M")
+    const ee = q('[class*="energy" i],[data-testid*="energy" i],[aria-label*="energy" i]').filter(vis)[0];
+    if (ee) {
+      const mm = norm(ee.innerText || ee.getAttribute('aria-label') || '').match(/(\d+)(?:\s*\/\s*(\d+))?/);
+      if (mm) energy = { current: +mm[1], max: mm[2] ? +mm[2] : null, bonus: 0, source: 'element' };
+    }
+  }
   const sb = q('#submitJailbreakButton').filter(vis)[0];
   const sc = q('#submitChatButton').filter(vis)[0];
   const ta = document.querySelector('#chatTextarea');
-  const solved = /SCENARIO SOLVED/i.test(body);
+  const solved = /SCENARIO SOLVED|Break Successful!/i.test(body);
   const pcts = [...body.matchAll(/([^%\n]{4,90}?)\s*\n\s*(\d{1,3})%/g)].slice(0, 10)
     .map(m => ({ label: norm(m[1]).slice(0, 90), pct: +m[2] }));
   return JSON.stringify({

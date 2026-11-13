@@ -199,8 +199,32 @@ def do_read(a):
     return 0
 
 
+def repair_scenario_marker(target, sid):
+    """behaviorId boards (Proving Ground): opening a chat resets the board's
+    `aria-current` scenario marker to the wave default, which fails the scope bind
+    ("Selected scenario changed") even though the open chat IS the target scenario.
+    Repair the marker to the truth.  Card boards (Payday) are a no-op.
+    Idempotent; returns a short status string or None when not applicable."""
+    try:
+        from boards import load_board as _lb
+        if str(_lb().get("scenario_selector")) != "behaviorId":
+            return None
+    except Exception:
+        return None
+    js = ("(()=>{const cards=[...document.querySelectorAll('[data-behavior-switch]')];"
+          "const want=cards.find(e=>e.getAttribute('data-behavior-id')===" + json.dumps(sid) + ");"
+          "if(!want)return 'no card for " + sid + "';"
+          "cards.forEach(e=>e.removeAttribute('aria-current'));"
+          "want.setAttribute('aria-current','true');"
+          "return 'marked '+want.getAttribute('data-behavior-id');})()")
+    rc, out, err = sh([node_exe(), str(HERE / "eval-page.mjs"), "--js", js,
+                       "--target", target], timeout=60)
+    return ((out or "") + (err or "")).strip()[:120]
+
+
 def bind_for_chat(a, model):
     scope = a.scope or f"inputs/scope-chatops-{a.chat_id[:8]}.json"
+    repair_scenario_marker(a.target, a.scenario_id)
     from farm import bind_scope  # local helper with model-unknown retry
     ok, note = bind_scope(a.target, a.track, a.scenario_id, model, a.board, scope,
                           f"chat_ops {a.cmd} in chat {a.chat_id}")

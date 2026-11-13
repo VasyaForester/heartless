@@ -370,6 +370,16 @@ def cmd_submit(a):
     rc, out, err = sh([sys.executable, str(HACK), "arena", "judge", "--scope", scope,
                        "--operation-id", opid, "--timeout-ms", str(a.timeout_ms),
                        "--out", str(jf)], timeout=a.timeout_ms // 1000 + 150)
+    # Bind the artifact to its operation id (judge_ledger).  The per-pair file
+    # is shared by every attempt of a pair, so without this binding the driver
+    # cannot tell "my judge" from "the previous attempt's judge" — that
+    # ambiguity is what kept 104/114 live attempts rewardless (2026-11-13).
+    try:
+        import judge_ledger
+        led = judge_ledger.bind(jf, opid, pair_key=f"{sid}|{model}",
+                                source=f"lbp.py submit {sid} {model}")
+    except Exception as exc:  # noqa: BLE001
+        led = {"bound": False, "reason": f"ledger error: {exc}"}
     verdict = None
     if jf.exists():
         try:
@@ -385,7 +395,7 @@ def cmd_submit(a):
         elif WIN_STRING in combined:
             verdict = "accepted"
     res = {"verdict": verdict, "opid": opid, "judge_file": str(jf),
-           "check_ready": chk["ready"], "model": model,
+           "judge_ledger": led, "check_ready": chk["ready"], "model": model,
            "transcript": str(snap_path), "transcript_sha256": snap_sha}
     if verdict in ("pending", None, "unknown"):
         res["note"] = "pending/unknown - do NOT resubmit; verify later"
@@ -558,7 +568,8 @@ def cmd_repeat(a):
     runs = []
     for i in range(a.n):
         run = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "i": i + 1, "scenario": sid,
-               "model": a.model, "input": a.input, "input_sha256": inp_sha}
+               "model": a.model, "input": a.input, "input_sha256": inp_sha,
+               "opid": getattr(a, "opid", None)}
         # --- 1) контекст: сценарий и модель должны быть РЕАЛЬНО выбраны (инцидент «чужой мок»)
         # ВАЖНО: если контекст УЖЕ правильный — НИЧЕГО не переключаем (иначе арена постоянно показывает
         # диалог «switch scenario/model» и это раздражает пользователя).

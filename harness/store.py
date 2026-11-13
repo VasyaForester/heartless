@@ -22,17 +22,26 @@ import time
 import uuid
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 LEASE_TTL = 1800
 
 # Explicit lifecycle.  `judged` is not final: only a verified judge may
 # finalize a pair.  `submission_uncertain` is terminal and must never trigger
 # a blind duplicate submission.
+#
+# v4 adds `unjudged`: the probe RAN but no judge was produced for it (the
+# submit gate skipped the submission, or the pair judge file belongs to an
+# earlier attempt).  It is NOT terminal — a late verdict may still arrive and
+# bind to it through the judge ledger (judge_ledger.py).  Before v4 every such
+# attempt fell into the terminal `judge_failed`, which destroyed the reward
+# channel: 104/114 live attempts ended there and the bandit learned nothing.
 TRANSITIONS = {
     "allocated": {"prepared", "execution_failed", "cancelled"},
     "prepared": {"submitted", "execution_failed", "cancelled"},
-    "submitted": {"awaiting_judge", "judged", "submission_uncertain", "execution_failed", "judge_failed"},
-    "awaiting_judge": {"judged", "judge_failed", "cancelled"},
+    "submitted": {"awaiting_judge", "judged", "unjudged", "submission_uncertain",
+                  "execution_failed", "judge_failed"},
+    "awaiting_judge": {"judged", "unjudged", "judge_failed", "cancelled"},
+    "unjudged": {"judged", "judge_failed"},
     "judged": {"finalized", "judge_failed"},
     "finalized": set(),
     "execution_failed": set(),
@@ -42,13 +51,15 @@ TRANSITIONS = {
 }
 TERMINAL = {"finalized", "execution_failed", "submission_uncertain",
             "judge_failed", "cancelled"}
+# Attempts that still may acquire a verdict later (never treated as settled).
+OPEN_STATES = {"prepared", "submitted", "awaiting_judge", "unjudged"}
 
 ALLOWED_FIELDS = {
     "execution_status", "judge_status", "chat_id", "submitted_at",
     "finished_at", "transcript_hash", "judge_ref", "judge_hash",
     "score", "pcts", "verdict", "input_path", "input_hash",
     "parent_input_hash", "delta", "delta_version", "seed", "nonce",
-    "strategy_version", "parent_input_path",
+    "strategy_version", "parent_input_path", "reward", "reward_source",
 }
 
 SCHEMA = """
@@ -65,6 +76,7 @@ CREATE TABLE IF NOT EXISTS pairs (
   scenario TEXT NOT NULL, model TEXT NOT NULL, model_version TEXT,
   solved INTEGER NOT NULL DEFAULT 0, solved_attempt TEXT,
   best_score INTEGER NOT NULL DEFAULT -1, best_input TEXT,
+  latest_input TEXT, latest_attempt TEXT, best_attempt TEXT,
   attempts INTEGER NOT NULL DEFAULT 0, last_verdict TEXT,
   version INTEGER NOT NULL DEFAULT 0
 );
@@ -83,7 +95,8 @@ CREATE TABLE IF NOT EXISTS attempts (
   score INTEGER, pcts TEXT, verdict TEXT,
   parent_input_hash TEXT, delta TEXT, delta_version INTEGER,
   seed INTEGER, nonce TEXT, strategy_version INTEGER,
-  input_path TEXT, parent_input_path TEXT
+  input_path TEXT, parent_input_path TEXT,
+  reward REAL, reward_source TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_attempts_pair ON attempts(pair_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_state ON attempts(state);
@@ -215,11 +228,46 @@ def _migrate_v2_to_v3(conn: sqlite3.Connection) -> None:
                  (str(SCHEMA_VERSION),))
 
 
+def _add_missing_columns(conn: sqlite3.Connection) -> list[str]:
+    """Additive, idempotent migration: never drops or rewrites a column.
+
+    v3 -> v4 adds the best/latest separation (advice 2026-11-13, critical #1:
+    `best_input` used to be overwritten by every attempt, so the search base
+    could degrade below the best confirmed probe) and the reward columns.
+    """
+    added = []
+    plans = {
+        "pairs": (
+            ("latest_input", "TEXT"),
+            ("latest_attempt", "TEXT"),
+            ("best_attempt", "TEXT"),
+        ),
+        "attempts": (
+            ("reward", "REAL"),
+            ("reward_source", "TEXT"),
+        ),
+    }
+    for table, cols in plans.items():
+        if not _table_exists(conn, table):
+            continue
+        have = _columns(conn, table)
+        for col, ddl in cols:
+            if col not in have:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {col} {ddl}")
+                added.append(f"{table}.{col}")
+    if "latest_input" in {a.split(".")[1] for a in added}:
+        # backfill: the last known input of a pair was whatever we used as base
+        conn.execute("UPDATE pairs SET latest_input=best_input WHERE latest_input IS NULL")
+    return added
+
+
 def migrate(conn: sqlite3.Connection) -> None:
     conn.execute("CREATE TABLE IF NOT EXISTS schema_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
     row = conn.execute("SELECT value FROM schema_meta WHERE key='version'").fetchone()
     version = int(row["value"]) if row else 0
     if version >= SCHEMA_VERSION:
+        # still repair a partially created schema (cheap, idempotent)
+        _add_missing_columns(conn)
         return
     conn.execute("BEGIN IMMEDIATE")
     try:
@@ -228,7 +276,8 @@ def migrate(conn: sqlite3.Connection) -> None:
         elif version == 0:
             _migrate_v2_to_v3(conn)
         else:
-            raise RuntimeError(f"unsupported schema version {version}")
+            _create_v3(conn)  # idempotent: CREATE TABLE IF NOT EXISTS
+        _add_missing_columns(conn)
         conn.execute("INSERT OR REPLACE INTO schema_meta(key,value) VALUES('version',?)",
                      (str(SCHEMA_VERSION),))
         conn.commit()
@@ -437,12 +486,27 @@ def finalize_attempt(conn: sqlite3.Connection, lease: Lease, attempt_id: str,
              json.dumps({"solved": solved, "score": row["score"]}, ensure_ascii=False)))
         best = int(row["score"]) if row["score"] is not None else -1
         new_best = max(int(row["p_best"] or -1), best)
+        # Critical fix (advice 2026-11-13 #1): `best_input` is the search base of
+        # the next variant.  Before v4 it was overwritten by EVERY attempt, so a
+        # weak probe could replace the best confirmed one and the search regressed.
+        # Now: latest_* always tracks the newest probe, best_* only advances on a
+        # real improvement of the objective metric.
+        improved = best > int(row["p_best"] or -1)
+        prev_best_input = conn.execute(
+            "SELECT best_input FROM pairs WHERE id=?", (row["pair_id"],)).fetchone()
+        best_input = row["input_path"] if improved else (prev_best_input["best_input"]
+                                                         if prev_best_input else None)
+        best_attempt = attempt_id if improved else None
         conn.execute(
             "UPDATE pairs SET attempts=attempts+1,last_verdict=?,solved=?,"
-            "solved_attempt=?,best_score=?,best_input=?,version=version+1 WHERE id=?",
+            "solved_attempt=?,best_score=?,best_input=?,"
+            "latest_input=?,latest_attempt=?,"
+            "best_attempt=COALESCE(?,best_attempt),version=version+1 WHERE id=?",
             (row["verdict"], 1 if solved else int(row["p_solved"] or 0),
              attempt_id if solved else row["p_solved_attempt"],
-             new_best, row["input_path"], row["pair_id"]))
+             new_best, best_input,
+             row["input_path"], attempt_id,
+             best_attempt, row["pair_id"]))
         if row["delta"]:
             conn.execute(
                 "INSERT INTO deltas(pair_id,delta,n,sum_score) VALUES(?,?,1,?)"
@@ -460,6 +524,57 @@ def finalize_attempt(conn: sqlite3.Connection, lease: Lease, attempt_id: str,
 def known_judge_operations(conn: sqlite3.Connection) -> dict[str, str]:
     return {r["operation_id"]: r["attempt_id"] for r in conn.execute(
         "SELECT operation_id,attempt_id FROM judges WHERE operation_id IS NOT NULL")}
+
+
+def judge_for_operation(conn: sqlite3.Connection, operation_id: str):
+    """The judge row bound to an operation id, if any (v4 attribution)."""
+    return conn.execute(
+        "SELECT * FROM judges WHERE operation_id=? ORDER BY created_at DESC LIMIT 1",
+        (operation_id,)).fetchone()
+
+
+def set_reward(conn: sqlite3.Connection, lease: Lease, attempt_id: str,
+               reward: float | None, source: str) -> None:
+    """Persist the bandit reward of an attempt (judge score or local proxy).
+
+    The reward is the ONLY channel the selector learns from, so it is stored
+    explicitly instead of being recomputed from a possibly-rotated judge file.
+    """
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        assert_owner(conn, lease)
+        conn.execute("UPDATE attempts SET reward=?,reward_source=? WHERE attempt_id=?",
+                     (None if reward is None else float(reward), source, attempt_id))
+        event(conn, "attempt_reward", {"attempt_id": attempt_id, "reward": reward,
+                                       "source": source})
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+
+
+def bump_delta(conn: sqlite3.Connection, lease: Lease, pair_id: str, delta: str,
+               reward: float | None) -> None:
+    """Update per-(pair, delta) statistics from any rewarded attempt.
+
+    `finalize_attempt` only runs for verified judges; on this arena almost no
+    probe reaches one, so the statistics would stay frozen at the seed.  The
+    selector needs the counts from every rewarded probe (v4).
+    """
+    if not delta:
+        return
+    value = int(round(float(reward) * 100)) if reward is not None else 0
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        assert_owner(conn, lease)
+        conn.execute(
+            "INSERT INTO deltas(pair_id,delta,n,sum_score) VALUES(?,?,1,?)"
+            " ON CONFLICT(pair_id,delta) DO UPDATE SET n=n+1,sum_score=sum_score+excluded.sum_score",
+            (pair_id, delta, value))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
 
 
 def get_attempt(conn: sqlite3.Connection, attempt_id: str):

@@ -109,10 +109,12 @@ def load_parked() -> set:
 
 
 def pick_pair(conn, rng: random.Random):
+    # board-scoped: a shared DB may seed several boards (board_profile column);
     # pairs without a base probe cannot be variant-generated yet — keep them out of
     # the selection so the loop never spins on "no base input" (added 2026-11-13)
     rows = conn.execute(
-        "SELECT id,best_score,attempts FROM pairs WHERE solved=0 AND best_input IS NOT NULL").fetchall()
+        "SELECT id,best_score,attempts FROM pairs WHERE solved=0 AND best_input IS NOT NULL "
+        "AND board_profile=?", (BOARD_NAME,)).fetchall()
     parked = load_parked()
     if parked:
         rows = [r for r in rows if r["id"] not in parked]
@@ -186,7 +188,13 @@ def energy_now(target: str = "") -> int:
     rc, out, err = sh(cmd, timeout=90)
     try:
         d = json.loads(out)
-        return int((d.get("energy") or {}).get("current") or 0)
+        e = d.get("energy")
+        # Unreadable energy (e.g. Proving Ground's page shows no "Energy N of M")
+        # must mean "unknown" (-1: the gate is skipped), NOT zero (which would
+        # fence the loop forever).  2026-11-13.
+        if not isinstance(e, dict) or e.get("current") is None:
+            return -1
+        return int(e["current"])
     except Exception:
         return -1
 
@@ -291,7 +299,9 @@ def main() -> int:
             store.heartbeat(conn, lease)
             key = pick_pair(conn, rng)
             if not key:
-                total = conn.execute("SELECT COUNT(*) AS c FROM pairs").fetchone()["c"]
+                total = conn.execute(
+                    "SELECT COUNT(*) AS c FROM pairs WHERE board_profile=?",
+                    (BOARD_NAME,)).fetchone()["c"]
                 log(f"all {total} pairs solved — nothing left")
                 return 0
             en = energy_now(target)
@@ -364,7 +374,7 @@ def main() -> int:
             store.heartbeat(conn, lease)
             stats = conn.execute(
                 "SELECT SUM(CASE WHEN solved=1 THEN 1 ELSE 0 END) AS s, COUNT(*) AS c "
-                "FROM pairs").fetchone()
+                "FROM pairs WHERE board_profile=?", (BOARD_NAME,)).fetchone()
             log(f"BOARD {int(stats['s'] or 0)}/{int(stats['c'] or 0)}")
             if errors >= a.max_errors:
                 log(f"BACKOFF {errors} consecutive failures — sleep 300, not stopping")
