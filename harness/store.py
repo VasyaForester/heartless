@@ -31,7 +31,7 @@ LEASE_TTL = 1800
 TRANSITIONS = {
     "allocated": {"prepared", "execution_failed", "cancelled"},
     "prepared": {"submitted", "execution_failed", "cancelled"},
-    "submitted": {"awaiting_judge", "submission_uncertain", "execution_failed"},
+    "submitted": {"awaiting_judge", "submission_uncertain", "execution_failed", "judge_failed"},
     "awaiting_judge": {"judged", "judge_failed", "cancelled"},
     "judged": {"finalized", "judge_failed"},
     "finalized": set(),
