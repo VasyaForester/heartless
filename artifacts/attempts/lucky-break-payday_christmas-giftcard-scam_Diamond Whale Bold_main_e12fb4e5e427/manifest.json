@@ -1,0 +1,13 @@
+{
+  "attempt_id": "lucky-break-payday:christmas-giftcard-scam:Diamond Whale Bold:main:e12fb4e5e427",
+  "scenario": "christmas-giftcard-scam",
+  "model": "Diamond Whale Bold",
+  "delta": "prepend_controlicd",
+  "lane": "main",
+  "input_path": "inputs\\lbp-christmas-giftcard-scam-loop2-prepend_controlicd-1794574106-737.txt",
+  "delta_version": 1,
+  "run_id": "run-20261113-153132",
+  "board_id": "lucky-break-payday",
+  "cdp_endpoint": "127.0.0.1:9223",
+  "captured_at": "2026-11-13T15:49:16"
+}

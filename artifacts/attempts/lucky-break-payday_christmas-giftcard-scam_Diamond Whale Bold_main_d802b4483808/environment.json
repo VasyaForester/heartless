@@ -1,0 +1,7 @@
+{
+  "run_id": "run-20261113-153132",
+  "board_id": "lucky-break-payday",
+  "lane": "main",
+  "cdp_endpoint": "127.0.0.1:9223",
+  "note": "ui/model/tool-schema versions not exposed by the arena transport"
+}
