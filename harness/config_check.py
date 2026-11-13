@@ -42,6 +42,8 @@ sys.path.insert(0, str(HERE))
 
 RULES = WORK / "RULES.md"
 CLAUDE = WORK / "CLAUDE.md"
+README = WORK / "README.md"
+TREE = WORK / "HARNESS-TREE.md"
 DEFAULT_BOARD_DOCUMENTED = "lucky-break-payday"
 
 # RULES 61: live infrastructure — never deleted, must exist
@@ -206,7 +208,7 @@ def check_strategy_engine() -> dict:
 
 def check_docs_claims() -> dict:
     """Registry claims about files must match the filesystem."""
-    text = _read(RULES) + "\n" + _read(CLAUDE)
+    text = _read(RULES) + "\n" + _read(CLAUDE) + "\n" + _read(README)
     problems = []
     referenced = set(re.findall(r"harness/([A-Za-z0-9_]+\.py)", text))
     for name in sorted(referenced):
@@ -220,6 +222,64 @@ def check_docs_claims() -> dict:
     return _result("docs_claims", not problems, "; ".join(problems))
 
 
+def check_readme() -> dict:
+    """The public README must stay a description of THIS repository.
+
+    A README rots the way the review found CLAUDE.md rotting (it still pointed
+    at a retired entry point), so the claims that can be checked mechanically
+    are checked: every entry point it names exists, the two commands it presents
+    as Definition of Done exist, and the module table is not missing a live
+    module of the loop.
+    """
+    problems = []
+    text = _read(README)
+    if not text.strip():
+        return _result("readme", False, "README.md is missing or empty")
+    for path in re.findall(r"(harness/[A-Za-z0-9_]+\.py|tools/[A-Za-z0-9_]+\.(?:sh|py)|"
+                           r"boards/[A-Za-z0-9_*.]+\.json)", text):
+        if "*" in path:
+            continue
+        if not (WORK / path).is_file():
+            problems.append(f"README names {path}, which does not exist")
+    for cmd in ("harness/run_offline_tests.py", "harness/config_check.py"):
+        if cmd in text and not (WORK / cmd).is_file():
+            problems.append(f"README presents {cmd} but the file is missing")
+    for module in ("driver.py", "arena.py", "store.py", "strategy.py", "supervisor.py"):
+        if module not in text:
+            problems.append(f"README module table does not mention {module}")
+    docs = ("RULES.md", "CLAUDE.md", "HARNESS-TREE.md")
+    for doc in docs:
+        if doc not in text:
+            problems.append(f"README does not point at {doc}")
+        elif not (WORK / doc).is_file():
+            problems.append(f"README points at {doc}, which does not exist")
+    return _result("readme_matches_repo", not problems, "; ".join(problems))
+
+
+def check_tree_claims() -> dict:
+    """HARNESS-TREE.md must not describe the retired contour as the live one.
+
+    The review found exactly this rot (CLAUDE.md still pointed at loop.py, the
+    loop had moved to supervisor.py).  The tree doc had the same defect: it
+    labelled loop.py LIVE and called the v2 loop "not live".  These checks make
+    the claim mechanical instead of trusting the next editor.
+    """
+    problems = []
+    text = _read(TREE)
+    if not text.strip():
+        return _result("tree_doc", False, "HARNESS-TREE.md is missing or empty")
+    for line in text.splitlines():
+        if "loop.py" in line and "LIVE" in line and "RETIRED" not in line:
+            problems.append(f"tree doc still calls loop.py live: {line.strip()[:80]}")
+        if "V2 не live" in line:
+            problems.append("tree doc still claims the v2 loop is not live")
+    if "supervisor.py" not in text:
+        problems.append("tree doc does not name supervisor.py as the loop entry point")
+    if "README.md" not in text:
+        problems.append("tree doc does not point at README.md (current overview)")
+    return _result("tree_doc_matches_reality", not problems, "; ".join(problems))
+
+
 def check_live_modules() -> dict:
     missing = [p for p in LIVE_MODULES if not (WORK / p).is_file()]
     return _result("live_modules_present", not missing, f"missing={missing}")
@@ -228,7 +288,7 @@ def check_live_modules() -> dict:
 CHECKS = (check_rules, check_deprecated_stub, check_infra_files, check_archived_absent,
           check_boards, check_default_board, check_board_runtime_parity, check_deltas,
           check_checks_module, check_manifest_fields, check_strategy_engine,
-          check_docs_claims, check_live_modules)
+          check_docs_claims, check_readme, check_tree_claims, check_live_modules)
 
 
 def run() -> dict:

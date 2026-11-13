@@ -1,4 +1,8 @@
-# Harness — структура и описание (2026-11-12)
+# Harness — структура и описание (структура 2026-11-12, сверено 2026-11-13)
+
+> **Актуальное состояние:** `README.md` (обзор и запуск), `RULES.md` (правила и живая конфигурация),
+> `CLAUDE.md` (режим работы). Этот файл описывает ДЕРЕВО и назначение каталогов; статусы модулей
+> сверены с кодом 2026-11-13 (см. RULES 66, 71, 79).
 
 Профиль: `C:\Users\Василий\AppData\Local\hermes\profiles\gray-swan-hackathon-v2`
 Корень: `workspace`
@@ -18,7 +22,7 @@
 
 ```
 workspace/
-├── RULES.md                         # 61 правило; правило 61 = защищённые live-файлы
+├── RULES.md                         # правила (номер записи = правило); правило 61 = защищённые live-файлы
 ├── CLAUDE.md                        # operating mode: не останавливаться, без волн/ручных гейтов
 ├── boards/                          # V2: профили досок (данные, без логики)
 │   ├── README.md
@@ -44,7 +48,7 @@ workspace/
 |---|---|---|
 | `hackathon.py` | LIVE-AUX | Транспорт: CDP, вкладки, `fill`, один `send`, `arena judge`, скриншоты. Не решает, какая доска/сценарий — это вынесено в профили и вызывающий CLI. 36 KB. |
 | `lbp.py` | **LIVE** | Живой CLI LBP: `state`, `switch`, `check`, `submit`, `verdict`, `repeat`, `export`, `cards`, `chats`, `newchat`, `eval`, `reload`. Держит константы доски, `lbp_tab_id()` (ровно одна LBP-вкладка), `looks_like_refusal()`, `autosubmit_allowed()`, duplicate-gate по `repeats.jsonl`. 38 KB. Защищён правилом 61. |
-| `loop.py` | **LIVE** | Непрерывный драйвер v1: выбирает нерешённую пару, мутирует payload дельтой, вызывает `lbp.py repeat --submit`, читает judge, обновляет board/bandit, пишет heartbeat. Экспортирует `DELTAS`, `SCENARIOS`, `MODELS`, `SOLVED`, `run_attempt`, `read_judge`, `newest_input`. 25 KB. Защищён. |
+| `loop.py` | **RETIRED (заглушка)** | Выведен из эксплуатации (RULES 66): сразу завершается кодом 3, `pairs.jsonl` не читает. Полная версия — `archive/legacy/harness/loop_v1_2026-11-13.py`. Живой контур запускается `harness/supervisor.py --lane main`. Файл защищён (правило 61). |
 | `farm.py` | LIVE-AUX | Обёртка Proving Ground: `bind_scope`, выбор сценария через `?behaviorId=`, чекпойнты `artifacts/farm-<board>-<scenario>.json`. 16 KB. |
 | `chat_ops.py` | LIVE-AUX | Работа с модалкой чатов: `find`, `open`, `meta`, `read`, `followup`, `judge`. Явный `--target` обязателен; `BASE_URL` — PG. 12 KB. |
 | `arena_heal.py` | LIVE-AUX | Judge/heal-операции арены (повторный разбор, восстановление состояния). 9 KB. |
@@ -57,7 +61,7 @@ workspace/
 
 | Файл | Статус | Что делает |
 |---|---|---|
-| `driver.py` | V2 | Один worker на лейн. SQLite WAL `artifacts/harness.db`: `pairs/attempts/deltas/leases/events`. Lease с heartbeat, UCB по `pcts`, judge только если файл новее старта попытки, `rc != 0` не обновляет board, backoff без выхода, кооперативный стоп `<state_dir>/restart.requested`. Импортирует константы/`run_attempt` из `loop.py`. 15 KB. |
+| `driver.py` | V2 | Один worker на лейн. SQLite WAL `artifacts/harness.db`: `pairs/attempts/deltas/leases/events`. Lease с heartbeat, UCB по `pcts`, judge только если файл новее старта попытки, `rc != 0` не обновляет board, backoff без выхода, кооперативный стоп `<state_dir>/restart.requested`. Константы и раскладку берёт из профиля доски (`boards/*.json` → `lbcore.py`), площадку — через шов `harness/arena.py`; выбор руки — `harness/strategy.py`. |
 | `supervisor.py` | V2 | Долгоживущий процесс: поднимает Chrome только если CDP down, **никогда не убивает браузер**, перезапускает driver после выхода, окна за краем экрана (`--window-position=-32000,-32000`), URL из board-профиля. 5 KB. |
 | `kb_graph.py` | V2 | Graph RAG: SQLite FTS5 + типизированный граф (`source/benchmark/scenario/technique/paper/model/doc`), команды `build/query/related/stats`, без LLM/эмбеддингов. 15 KB. Сейчас: 557 docs, 5 950 chunks, 2 432 nodes, 24 370 edges. |
 | `boards.py` | V2 | Загрузчик/валидатор профилей досок; `load_board()`, `active_board()`, `list_boards()`. |
@@ -127,7 +131,7 @@ workspace/
 | Файл | Что делает |
 |---|---|
 | `loop_watchdog.sh` | Сторож auto-лейна: heartbeat `artifacts/lane-auto/loop-heartbeat.json`; если старше порога — перезапускает драйвер; `FORCE_RESTART`; self-heal Chrome 9224; не убивает основной браузер. |
-| `lane_auto.sh` | Запуск auto-лейна: Chrome 9224, профиль `browser-data-auto`, окно за краем экрана, `pick_target`, старт `loop.py`. |
+| `lane_auto.sh` | **LEGACY (v1)** — запускает `tools/loop_watchdog.sh` → `harness/loop.py`, то есть выведенный контур (RULES 65/66). Живой контур: keeper-крон → `supervisor.py`. Файл защищён (правило 61). |
 | `run1.sh` | Одиночный прогон/подъём лейна. |
 
 `~/AppData/Local/hermes/scripts/loop_watchdog.sh` — шим на `workspace/tools/loop_watchdog.sh`; его вызывает cron. Тоже защищён правилом 61.
@@ -276,9 +280,9 @@ state → switch (panelTitle + Attacking:) → scope → один send → wait
 2. **Live `state` CLI не вызывает `lbp_tab_id()`**: библиотечный guard есть (ровно одна вкладка / явный `--target`), но `lbp.py state` его не вызывает; acceptance тестирует библиотеку, не CLI.
 3. **`pairs.jsonl` vs SQLite**: рекомендация называет `pairs.jsonl` единственным журналом; фактически живой журнал — `pairs.jsonl` (v1), а v2-истина — `harness.db`; `pairs-v2.jsonl` — производный экспорт. Нужно решение, какой слой главный.
 4. **Один вход не завершён**: `hackathon.py` (транспорт), `lbp.py`, `farm.py`, `chat_ops.py` всё ещё держат свои константы/URL; board-профили подключены к `supervisor.py`, но не к живому `lbp.py`/`farm.py`/`chat_ops.py`.
-5. **V2 не live**: `driver.py`/`supervisor.py` не запущены; автопилот — `loop.py` + `tools/loop_watchdog.sh`. `driver.py` импортирует `loop.py` (live), т.е. v2 зависит от защищённого файла.
+5. **[снято 2026-11-13]** V2 стал живым контуром: автопилот — `supervisor.py` + `driver.py` (RULES 65/66/71); цепочка `loop.py` + `tools/loop_watchdog.sh` выведена и защищена правилом 61. Площадка вынесена в `harness/arena.py` (RULES 79).
 6. **Legacy-шум**: `lbp_update*.py` (13), `lbp_blitz/plan/roster/accum/events/report`, `wave_scan.py`, `switch-wave.mjs`, `tools/chain*.sh`, `ladder*.sh`, `combat-queue.md`, `lbp.py.bak` — не используются continuous-петлёй, но лежат в рабочих каталогах.
-7. **Нет тестов driver/supervisor**: acceptance покрывает профили и refusal; SQLite/lease/UCB/supervisor не имеют unit-тестов.
+7. **[частично снято 2026-11-13]** Офлайн-набор `harness/run_offline_tests.py` покрывает SQLite/lease/состояния, политики выбора, генерацию кадров, шов арены и сторож доков (`harness/config_check.py`, 14 проверок); acceptance — отдельно. Тестов на сам supervisor (перезапуск/стойка) по-прежнему нет.
 8. **Автосабмиты**: правило 59 — автоматика включена решением участника, риск дисквалификации принят; рубильник `artifacts/BLOCK_AUTOSUBMIT.txt` / `LBP_BLOCK_AUTOSUBMIT=1`.
 9. **MDPI 403**: полный текст не получен; в корпусе только Crossref-аннотация. Для репликации нужен другой маршрут (VPN/PDF из институционального доступа).
 10. **Дубликаты `_chatops_chats_*.json`** (сотни) не чистились; это диагностические выгрузки, не состояние.
