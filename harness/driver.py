@@ -31,8 +31,10 @@ WORK = HERE.parent
 sys.path.insert(0, str(HERE))
 
 import attempts  # noqa: E402
+import evidence  # noqa: E402
 import generation  # noqa: E402
 import judge_correlation  # noqa: E402
+import manifest  # noqa: E402
 import store  # noqa: E402
 from boards import load_board  # noqa: E402
 from lbcore import LBP, MODELS, SCENARIOS, SOLVED, newest_input, sh, slug  # noqa: E402
@@ -228,6 +230,16 @@ def main() -> int:
     if not lease:
         log(f"another worker holds lane {a.lane}; refuse to start")
         return 3
+    man = manifest.load()
+    if man:
+        mism = manifest.validate(man, board_name=BOARD_NAME, lane=a.lane,
+                                 cdp=os.environ.get("HACKATHON_CDP_URL", ""))
+        if mism:
+            log(f"MANIFEST MISMATCH {mism}; fail closed (RULES 67)")
+            return 2
+        log(f"MANIFEST ok run_id={man.get('run_id')}")
+    else:
+        log("MANIFEST missing (supervisor writes it); continuing for this run")
     log(f"DRIVER START lane={a.lane} target={target} pid={os.getpid()} db={a.db} "
         f"board={BOARD_NAME} profile={PROFILE_HASH}")
     recovered = attempts.recover(conn, lease)
@@ -292,9 +304,13 @@ def main() -> int:
                 text, chat = transcript_info(key)
                 attempts.mark_submitted(conn, lease, attempt_id, chat_id=chat,
                                         transcript_text=text)
+                ev = evidence.capture(attempt_id, key=key, input_path=input_path,
+                                      delta=delta, lane=a.lane,
+                                      transcript_path=transcript_path(key),
+                                      judge_path=judge_path(key))
                 attempt_row = store.get_attempt(conn, attempt_id)
                 result = judge_correlation.correlate(
-                    attempt_row, judge_path(key), transcript_text=text,
+                    attempt_row, ev.get("judge_copy") or judge_path(key), transcript_text=text,
                     known_operations=store.known_judge_operations(conn))
                 if result["status"] == "pending":
                     attempts.mark_awaiting(conn, lease, attempt_id,
@@ -309,6 +325,11 @@ def main() -> int:
                             f"score={result['score']} solved={solved}")
                     else:
                         log(f"JUDGE {result['status']} {attempt_id}: {result['reason']}")
+                evidence.finish(attempt_id, judge_result=result,
+                                evaluation={"score": result.get("score"),
+                                            "pcts": result.get("pcts"),
+                                            "verdict": result.get("verdict"),
+                                            "status": result.get("status")})
             store.heartbeat(conn, lease)
             solved_count = conn.execute(
                 "SELECT COUNT(*) AS c FROM pairs WHERE solved=1").fetchone()["c"]

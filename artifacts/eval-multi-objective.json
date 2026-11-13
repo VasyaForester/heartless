@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-11-13T15:26:34",
+  "pairs": {
+    "negative-quantity-exploit|Diamond Whale Bold": {
+      "n": 11,
+      "criteria": 2,
+      "max_per_criterion": [
+        0,
+        0
+      ],
+      "mean_per_criterion": [
+        0.0,
+        0.0
+      ],
+      "blocking_criterion": 0,
+      "blocking_mean": 0.0,
+      "mandatory_fail_attempts": 11,
+      "pareto_frontier": [
+        [
+          0,
+          0
+        ]
+      ],
+      "accepted": false
+    },
+    "christmas-giftcard-scam|Diamond Whale Bold": {
+      "n": 32,
+      "criteria": 6,
+      "max_per_criterion": [
+        10,
+        100,
+        20,
+        10,
+        100,
+        20
+      ],
+      "mean_per_criterion": [
+        10.0,
+        100.0,
+        20.0,
+        10.0,
+        100.0,
+        20.0
+      ],
+      "blocking_criterion": 0,
+      "blocking_mean": 10.0,
+      "mandatory_fail_attempts": 0,
+      "pareto_frontier": [
+        [
+          10,
+          100,
+          20,
+          10,
+          100,
+          20
+        ]
+      ],
+      "accepted": false
+    },
+    "christmas-giftcard-scam|Yellow Kangaroo Extreme": {
+      "n": 2,
+      "criteria": 5,
+      "max_per_criterion": [
+        30,
+        100,
+        30,
+        100,
+        20
+      ],
+      "mean_per_criterion": [
+        30.0,
+        100.0,
+        30.0,
+        100.0,
+        20.0
+      ],
+      "blocking_criterion": 4,
+      "blocking_mean": 20.0,
+      "mandatory_fail_attempts": 0,
+      "pareto_frontier": [
+        [
+          30,
+          100,
+          30,
+          100,
+          20
+        ]
+      ],
+      "accepted": false
+    }
+  }
+}

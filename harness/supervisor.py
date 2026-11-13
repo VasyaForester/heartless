@@ -28,6 +28,7 @@ from store import pid_alive  # noqa: E402
 
 CHROME_DEFAULT = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 URL_DEFAULT = load_board("lucky-break-payday")["url"]
+BOARD_NAME = load_board("lucky-break-payday")["name"]
 LOCK = WORK / "artifacts" / "supervisor.lock"
 
 
@@ -134,6 +135,13 @@ def main() -> int:
         log(f"no LBP tab on {a.port}; open the arena in the lane browser")
         return 1
     log(f"SUPERVISOR START lane={a.lane} target={target} port={a.port} max_hours={a.max_hours}")
+    try:
+        import manifest as manifest_mod
+        man = manifest_mod.build(lane=a.lane, cdp=f"127.0.0.1:{a.port}",
+                                 browser_profile=a.profile, board_name=BOARD_NAME)
+        log(f"MANIFEST {man['run_id']} board={man['board_id']} lane={man['lane_id']} cdp={man['cdp_endpoint']}")
+    except Exception as exc:  # noqa: BLE001
+        log(f"MANIFEST build failed: {exc}")
 
     out_path = WORK / "artifacts" / "driver.out"
     try:
@@ -156,7 +164,7 @@ def main() -> int:
             if rc == 3:
                 time.sleep(300)  # another worker holds the lease
             elif rc == 0:
-                time.sleep(600)  # all solved / restart requested
+                time.sleep(45)  # short pause; restart.requested is the normal cooperative path (v3)
             else:
                 time.sleep(10)
             target = a.target or pick_target(env)
