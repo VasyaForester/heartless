@@ -202,15 +202,48 @@ def pick_pair(conn, rng: random.Random, *, cooldown_s: float = 900.0,
 
 
 def delta_stats(conn, key: str) -> dict:
-    """Per-delta statistics of a pair, normalised to [0, 1]."""
-    out = {}
+    """Per-delta statistics of a pair, normalised to [0, 1].
+
+    v5: computed from `attempts.reward` — the judge-anchored, fault-excluded
+    channel — instead of the legacy `deltas` aggregate.  That table mixed two
+    scales (judge score SUMS 0..300 written before v4, normalised rewards 0..100
+    written by bump_delta after), so 62 of its rows read as means up to 1.93 and
+    the selector was comparing apples with oranges (found 2026-11-13).
+
+    Falls back to the legacy aggregate only when the pair has no rewarded
+    attempts at all (a fresh workspace), and says so in the log.
+    """
+    out: dict = {}
+    for r in conn.execute(
+            "SELECT delta, reward FROM attempts"
+            " WHERE pair_id=? AND delta IS NOT NULL AND reward IS NOT NULL", (key,)):
+        arm = r["delta"]
+        bucket = out.setdefault(arm, {"n": 0, "sum": 0.0, "wins": 0, "sq": 0.0})
+        value = float(r["reward"])
+        bucket["n"] += 1
+        bucket["sum"] += value
+        bucket["sq"] += value * value
+        if value >= 0.5:
+            bucket["wins"] += 1
+    if out:
+        for arm, b in out.items():
+            n = b["n"]
+            mean = b["sum"] / n
+            var = max(0.0, b["sq"] / n - mean * mean)
+            out[arm] = {"n": n, "mean": round(mean, 4), "sd": round(math.sqrt(var), 4),
+                        "var": round(var, 6), "wins": b["wins"]}
+        return out
+    legacy = {}
     for r in conn.execute("SELECT delta,n,sum_score FROM deltas WHERE pair_id=?", (key,)):
         n = int(r["n"] or 0)
         if n:
             mean = float(r["sum_score"] or 0) / n / 100.0
-            out[r["delta"]] = {"n": n, "mean": mean, "sd": 0.0, "var": 0.0,
-                               "wins": 1 if mean >= 0.5 else 0}
-    return out
+            legacy[r["delta"]] = {"n": n, "mean": mean, "sd": 0.0, "var": 0.0,
+                                  "wins": 1 if mean >= 0.5 else 0}
+    if legacy:
+        log(f"delta_stats({key}): no rewarded attempts yet — using the legacy "
+            f"aggregate for {len(legacy)} arms (mixed scale, pre-v4 only)")
+    return legacy
 
 
 def catalog_exhausted(conn, key: str) -> bool:
@@ -372,17 +405,26 @@ def make_variant(conn, lease, key: str, rng: random.Random, engine, strategy_pol
     pooled = None
     novelty = None
     if strategy_policy == "contextual_ts":
+        # Pooled scenario statistics: same authoritative channel as delta_stats
+        # (attempts.reward), not the legacy mixed-scale aggregate.
         pooled = {}
+        acc: dict = {}
         for r in conn.execute(
-                "SELECT delta, SUM(n) AS n, SUM(sum_score) AS s FROM deltas d"
-                " JOIN pairs p ON p.id=d.pair_id"
-                " WHERE p.scenario=? AND p.board_profile=? GROUP BY delta",
+                "SELECT a.delta AS delta, a.reward AS reward FROM attempts a"
+                " JOIN pairs p ON p.id=a.pair_id"
+                " WHERE p.scenario=? AND p.board_profile=?"
+                " AND a.reward IS NOT NULL AND a.delta IS NOT NULL",
                 (sid, BOARD_NAME)):
-            n = int(r["n"] or 0)
-            if n:
-                mean = float(r["s"] or 0) / n / 100.0
-                pooled[r["delta"]] = {"n": n, "mean": mean, "sd": 0.0, "var": 0.0,
-                                      "wins": 1 if mean >= 0.5 else 0}
+            b = acc.setdefault(r["delta"], {"n": 0, "sum": 0.0, "wins": 0})
+            b["n"] += 1
+            b["sum"] += float(r["reward"])
+            if float(r["reward"]) >= 0.5:
+                b["wins"] += 1
+        for arm, b in acc.items():
+            n = b["n"]
+            mean = b["sum"] / n
+            pooled[arm] = {"n": n, "mean": mean, "sd": 0.0, "var": 0.0,
+                           "wins": b["wins"]}
         novelty = {a: engine.generator.novelty(a) for a in arms}
     delta = engine.scheduler.choose(arms, stats, rng=rng, pooled_stats=pooled, novelty=novelty)
     nonce = f"{time.strftime('%Y%m%d-%H%M%S')}-{rng.randint(1000, 9999)}"
