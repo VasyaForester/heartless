@@ -1,12 +1,13 @@
 #!/usr/bin/env node
-// Diagnostic: dump key DOM facts from the proving-ground tab.
+// Diagnostic: dump key DOM facts from the board tab (boards.py profile).
 import {assertRuntime, CdpPage, listTargets} from './engine/cdp.mjs';
+import {BOARD_MATCH} from './engine/board.mjs';
 assertRuntime();
 const cdpUrl = 'http://127.0.0.1:9223';
 const targets = await listTargets(cdpUrl);
 const pages = targets.filter(x => x.type === 'page');
 console.log(JSON.stringify({pages: pages.map(p => p.url).slice(0, 8)}, null, 1));
-const t = pages.find(x => String(x.url || '').includes('/arena/challenge/proving-ground'))
+const t = pages.find(x => String(x.url || '').includes(BOARD_MATCH))
   || pages.find(x => String(x.url || '').includes('grayswan.ai'));
 if (!t) { console.log(JSON.stringify({error: 'no target'})); process.exit(1); }
 const page = await new CdpPage(t.webSocketDebuggerUrl, 10000).connect();

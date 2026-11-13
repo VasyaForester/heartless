@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// Evaluate a JS expression in the proving-ground tab and print the result.
+// Evaluate a JS expression in the board tab (from the boards.py profile) and print the result.
 // Usage: node harness/eval-page.mjs --js "document.title"   (or --jsfile path)
 import fs from 'node:fs';
 import {assertRuntime, CdpPage, listTargets} from './engine/cdp.mjs';
+import {BOARD_MATCH} from './engine/board.mjs';
 assertRuntime();
 const args = {};
 for (let i = 2; i < process.argv.length; i += 2) {
@@ -23,7 +24,7 @@ if (args.target) {
   if (m.length !== 1) { console.log(JSON.stringify({error: 'match not unique', match: args.match, found: m.length, tabs: pages.map(p => ({id: p.id, url: p.url}))})); process.exit(1); }
   t = m[0];
 } else {
-  const pg = pages.filter(x => String(x.url || '').includes('/arena/challenge/proving-ground'));
+  const pg = pages.filter(x => String(x.url || '').includes(BOARD_MATCH));
   if (pg.length === 1) t = pg[0];
   else if (pages.length === 1) t = pages[0];
   else { console.log(JSON.stringify({error: 'multiple grayswan tabs; pass --match or --target', tabs: pages.map(p => ({id: p.id, url: p.url}))})); process.exit(1); }

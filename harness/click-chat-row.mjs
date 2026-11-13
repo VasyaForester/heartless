@@ -2,6 +2,7 @@
 // Click a chat-list row in the Arena chats modal by matching its text (e.g. a model name).
 // Usage: node harness/click-chat-row.mjs --text "Sand Elephant Giga" [--cdp http://127.0.0.1:9223]
 import {assertRuntime, CdpPage, listTargets} from './engine/cdp.mjs';
+import {BOARD_MATCH} from './engine/board.mjs';
 assertRuntime();
 const args = {};
 for (let i = 2; i < process.argv.length; i += 2) {
@@ -12,7 +13,7 @@ for (let i = 2; i < process.argv.length; i += 2) {
 const cdpUrl = args.cdp || 'http://127.0.0.1:9223';
 const needle = args.text || '';
 const targets = await listTargets(cdpUrl);
-const t = targets.find(x => x.type === 'page' && String(x.url || '').includes('/arena/challenge/proving-ground'))
+const t = targets.find(x => x.type === 'page' && String(x.url || '').includes(BOARD_MATCH))
   || targets.find(x => x.type === 'page' && String(x.url || '').includes('grayswan.ai'));
 if (!t) { console.log(JSON.stringify({error: 'no grayswan tab', tabs: targets.map(x => x.url).slice(0, 5)})); process.exit(1); }
 const page = await new CdpPage(t.webSocketDebuggerUrl, 10000).connect();

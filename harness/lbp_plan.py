@@ -3,7 +3,7 @@
 
 Читает ТОЛЬКО локальные файлы (никаких браузерных действий):
   datasets/lbp/decision-tree.json   — курированное знание (rails/стратегии/принципы/парки)
-  datasets/lbp/pairs.jsonl          — живая матрица 20 пар (статусы/attempts/цитаты)
+  datasets/lbp/pairs.jsonl          — исторический журнал v1 (append-only; живой учёт = artifacts/harness.db)
 
 План НЕ отправляет ничего сам. Прогон — отдельными командами (lbp.py repeat / lbp_blitz.py),
 которые планировщик печатает готовыми к запуску.
@@ -127,7 +127,7 @@ def plan_pair(tree, scen_key, model, row):
 def cmd_all(tree, pairs):
     print("=== ПЛАН ПО ДОСКЕ Lucky Break: Payday (все 5 сценариев) ===\n")
     solved = sum(1 for r in pairs if (r.get("outcome") or "").upper() == "SUCCESS")
-    print(f"Матрица: {solved}/20 пар закрыто. Живая правда: datasets/lbp/pairs.jsonl\n")
+    print(f"Матрица (история v1): {solved}/20 пар закрыто. Живой учёт: artifacts/harness.db; pairs.jsonl — исторический срез\n")
     for scen_key, sc in tree["scenarios"].items():
         rows = [r for r in pairs if r["scenario_id"] == scen_key]
         solved_here = sum(1 for r in rows if (r.get("outcome") or "").upper() == "SUCCESS")

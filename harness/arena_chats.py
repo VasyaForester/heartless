@@ -33,7 +33,17 @@ def arena(*args, timeout=240):
     return sh([sys.executable, str(HACK), "arena", *args], timeout=timeout)
 
 
-def current_pg_url(target, board_substr="proving-ground"):
+def _board_match():
+    """URL substring of the board tab, from the boards.py profile (Payday default)."""
+    try:
+        from boards import load_board as _lb
+        return str(_lb().get("match") or "lucky-break-payday")
+    except Exception:
+        return "lucky-break-payday"
+
+
+def current_pg_url(target, board_substr=None):
+    board_substr = board_substr or _board_match()
     rc, out, err = arena("tabs", timeout=120)
     try:
         d = json.loads(out)
@@ -114,8 +124,8 @@ def main():
     ap.add_argument("--tab", choices=["chats", "submitted", "auto"], default="auto")
     ap.add_argument("--scope")
     ap.add_argument("--out", default="artifacts/chats-modal.json")
-    ap.add_argument("--board-substr", default="proving-ground",
-                    help="URL substring identifying the board tab (default: proving-ground)")
+    ap.add_argument("--board-substr", default=_board_match(),
+                    help="URL substring identifying the board tab (default: from the boards.py profile)")
     a = ap.parse_args()
 
     tid, url = current_pg_url(a.target, a.board_substr)

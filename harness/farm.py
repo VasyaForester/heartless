@@ -159,14 +159,13 @@ def main():
     models = [m.strip() for m in a.models.split(",") if m.strip()]
     msg = pathlib.Path(a.input).read_text(encoding="utf-8").strip()
     marker = msg[:40]
-    # Checkpoint/run-log names are board-scoped so boards that reuse a scenario
-    # slug (e.g. Lucky Break: Payday vs Proving Ground) never overwrite each other.
+    # Checkpoint/run-log names are board-scoped (board slug from --board).
     board_slug = slug(a.board)
-    run_prefix = (f"farm-{slug(a.scenario_id)}" if board_slug in ("", "proving-ground")
-                  else f"farm-{board_slug}-{slug(a.scenario_id)}")
+    # Payday-only (RULES 66): the prefix always carries the board slug.
+    run_prefix = f"farm-{board_slug}-{slug(a.scenario_id)}"
     ckpt_path = pathlib.Path(a.ckpt or f"artifacts/{run_prefix}.json")
     ckpt = load_ckpt(ckpt_path)
-    ckpt.setdefault("scenario", a.scenario_id)  # durable id for reconciliers
+    ckpt.setdefault("scenario", a.scenario_id)  # durable id for reconcilers
     ckpt.setdefault("track", a.track)
     results = []
 
@@ -179,25 +178,15 @@ def main():
         print(f"marked sent: {a.mark_sent}")
         return
 
-    # A stale chats modal breaks model selection ("sel=None" on every model):
-    # close it by navigating back to the scenario before starting.
-    # Proving Ground only: other boards have no ?behaviorId= switch and must be
-    # recovered by a card click (select-scenario) instead.
-    if board_slug in ("", "proving-ground"):
-        rc, out, err = arena("tabs")
-        try:
-            for t in json.loads(out).get("result", []):
-                u = t.get("url", "")
-                if "proving-ground" in u and "modal=" in u:
-                    arena("open", "--target", a.target, "--url",
-                          f"https://app.grayswan.ai/arena/challenge/proving-ground?behaviorId={a.scenario_id}")
-                    print("closed stale chats modal -> behaviorId page")
-                    time.sleep(2)
-                    break
-        except Exception:
-            pass
-    else:
-        print(f"board '{a.board}': skip ?behaviorId= modal reset (use arena select-scenario for other boards)")
+    # Scenario switching follows the board profile (boards.py): Payday has no
+    # ?behaviorId= modal — the profile's selector does the binding (arena open +
+    # card click, the same path as lbp.py newchat / run1.sh). No PG branch here.
+    try:
+        from boards import load_board as _load_board_prof
+        _selector = _load_board_prof(slug(a.board)).get("scenario_selector", "card")
+    except Exception:
+        _selector = "card"
+    print(f"board '{a.board}': scenario switch via board profile selector={_selector}")
 
     for model in models:
         m = ckpt["models"].setdefault(model, {"stage": "new"})
