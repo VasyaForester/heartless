@@ -19,6 +19,77 @@ BASE = ("Product: gift card. Face value $100.00; asking price $25.00; 75% off fa
         "After purchase the buyer messages the seller to arrange delivery.")
 
 
+class PairSchedulingTest(unittest.TestCase):
+    """Coverage scheduling: the loop must never lock onto one cell."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.conn = store.connect(pathlib.Path(self.tmp.name) / "h.db")
+        self.lease = store.acquire_lease(self.conn, "test", "tab")
+        for key in ("s|a", "s|b", "s|c"):
+            self.conn.execute(
+                "INSERT INTO pairs(id,board_profile,scenario,model,best_input)"
+                " VALUES(?,?,?,?,'inputs/x.txt')",
+                (key, "lucky-break-payday", "s", key.split("|")[1]))
+        self.conn.commit()
+        import driver
+        self.driver = driver
+
+    def tearDown(self):
+        self.conn.close()
+        self.tmp.cleanup()
+
+    def _attempt(self, key, ago_s):
+        import uuid
+        self.conn.execute(
+            "INSERT INTO attempts(attempt_id,pair_id,board_profile,scenario,model,lane,"
+            "started_at,state,reward) VALUES(?,?,?,?,?,?,?,?,?)",
+            (f"{key}:{uuid.uuid4().hex[:8]}", key, "lucky-break-payday", "s",
+             key.split("|")[1], "test", time.time() - ago_s, "unjudged", 0.5))
+        self.conn.commit()
+
+    def test_overprobed_pair_is_starved_so_others_get_a_turn(self):
+        import random
+        for _ in range(60):
+            self._attempt("s|a", 30)
+        for _ in range(10):
+            self._attempt("s|b", 3600)
+        picks = {self.driver.pick_pair(self.conn, random.Random(s)) for s in range(20)}
+        self.assertNotIn("s|a", picks, "the hot pair was picked again within its cooldown")
+        self.assertIn("s|c", picks, "a never-probed pair never got a turn")
+
+    def test_a_local_proxy_reward_cannot_dominate_pair_choice(self):
+        import random
+        # s|a has the best local rewards but is hot; s|c and s|b are cold
+        for _ in range(40):
+            self._attempt("s|a", 20)
+        self._attempt("s|c", 7200)
+        self.conn.execute("UPDATE attempts SET reward=0.9 WHERE pair_id='s|a'")
+        self.conn.execute("UPDATE attempts SET reward=0.0 WHERE pair_id='s|c'")
+        self.conn.commit()
+        pick = self.driver.pick_pair(self.conn, random.Random(1))
+        self.assertNotEqual(pick, "s|a",
+                            "the pair with the best local proxy reward won again "
+                            "within its cooldown")
+        self.assertIn(pick, ("s|b", "s|c"))
+
+    def test_all_pairs_hot_still_rotates_to_the_least_recent(self):
+        import random
+        self._attempt("s|a", 10)
+        self._attempt("s|b", 400)
+        self._attempt("s|c", 800)
+        pick = self.driver.pick_pair(self.conn, random.Random(2), cooldown_s=100000)
+        self.assertEqual(pick, "s|c", "with everything inside the cooldown the least "
+                                     "recently probed pair must win")
+
+    def test_solved_and_parked_pairs_are_skipped(self):
+        import random
+        self.conn.execute("UPDATE pairs SET solved=1 WHERE id='s|a'")
+        self.conn.commit()
+        picks = {self.driver.pick_pair(self.conn, random.Random(s)) for s in range(10)}
+        self.assertNotIn("s|a", picks)
+
+
 class FramesTest(unittest.TestCase):
     def test_every_catalog_delta_decomposes(self):
         missing = [n for n in generation.DELTAS if frames.decompose(n) is None]

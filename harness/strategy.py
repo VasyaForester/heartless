@@ -49,6 +49,15 @@ POLICIES = ("random", "ucb", "ucb_improved", "thompson", "contextual_ts")
 REWARD_SOURCES = ("judge", "local", "composite")
 SUCCESS_THRESHOLD = 0.5
 
+# Measured prior strengths (harness/strategy_bench.py --tune, 1539 real probes,
+# 9 seeds, budget 300): the Bayesian policies are very sensitive to how many
+# pseudo-observations the parent rate contributes.  At the naive value (6) both
+# lose to the plain UCB; at the tuned value they reach parity with it
+# (contextual_ts 0.0856 vs 0.0814) and thompson leads on confirmed successes
+# (0.0293 vs 0.017).  The defaults below are therefore policy-specific.
+POLICY_PRIOR_K = {"thompson": 25.0, "contextual_ts": 40.0}
+DEFAULT_PRIOR_K = 6.0
+
 MEMORY_PATH = WORK / "artifacts" / "strategy-memory.db"
 
 MEMORY_SCHEMA = """
@@ -370,6 +379,7 @@ class AdaptiveScheduler:
 
     def __init__(self, policy: str = "ucb_improved", *, c: float = 0.45,
                  pool_weight: float = 12.0, novelty_weight: float = 0.12,
+                 prior_k: float | None = None, prior_mean: float = 0.3,
                  seed: int = 20261113):
         if policy not in POLICIES:
             raise ValueError(f"unknown policy {policy!r}; known: {POLICIES}")
@@ -377,6 +387,10 @@ class AdaptiveScheduler:
         self.c = float(c)
         self.pool_weight = float(pool_weight)
         self.novelty_weight = float(novelty_weight)
+        # prior_k=None means "the measured default for this policy"
+        self.prior_k = float(prior_k if prior_k is not None
+                             else POLICY_PRIOR_K.get(policy, DEFAULT_PRIOR_K))
+        self.prior_mean = float(prior_mean)
         self.rng = random.Random(seed)
 
     # -- helpers ----------------------------------------------------------
@@ -436,16 +450,16 @@ class AdaptiveScheduler:
                 scale = max(0.05, s["sd"])
                 scored.append((s["mean"] + scale * math.sqrt(2.0 * math.log(total) / s["n"]), a))
         elif self.policy == "thompson":
-            # Normal-Normal posterior on the GRADED reward: the arena's local
-            # validator returns 0.05 … 0.85, and binarising that loses most of
-            # the signal (measured: binarised TS scores 0.021 success vs 0.056).
-            scored = [(self._sample_normal(stats[a], rng), a) for a in arms]
-        else:  # contextual_ts
+            # Hierarchical Beta-Bernoulli on the BINARISED event that matters
+            # (reward >= SUCCESS_THRESHOLD: the tool was really called / local
+            # check passed).  Beta with a global parent rate, so an arm with two
+            # observations cannot outvote one with two hundred.
+            scored = [(self._sample_beta_post(stats, None, a, rng), a) for a in arms]
+        else:  # contextual_ts — same posterior, parent rate from the SCENARIO
             pooled = pooled_stats or stats
             scored = []
             for a in arms:
-                s = self._pooled(stats, pooled, a)
-                draw = self._sample_normal(s, rng)
+                draw = self._sample_beta_post(stats, pooled, a, rng)
                 nov = float((novelty or {}).get(a, 0.0))
                 scored.append((draw * (1 - self.novelty_weight) + nov * self.novelty_weight, a))
         best = max(v for v, _ in scored)
@@ -458,24 +472,36 @@ class AdaptiveScheduler:
         beta = 1.0 + float(n - wins)
         return rng.betavariate(alpha, beta)
 
-    @staticmethod
-    def _sample_normal(stats: dict, rng: random.Random, *, prior_mean: float = 0.5,
-                       prior_sd: float = 1.0) -> float:
-        """One draw from the posterior of an arm's mean graded reward.
+    def _sample_beta_post(self, ctx_stats: dict, pooled: dict | None, arm: str,
+                          rng: random.Random) -> float:
+        """One draw from a HIERARCHICAL Beta posterior of P(success).
 
-        Weakly informative prior (0.5 ± 1.0) so an arm with little evidence is
-        sampled optimistically, but an arm with many consistently bad results is
-        quickly sampled near zero.  `sd` is floored to keep a single lucky
-        observation from looking certain.
+        Empirical-Bayes shrinkage: the arm's own wins/losses are augmented with
+        `prior_k` pseudo-observations at the parent rate — the scenario's rate for
+        `contextual_ts`, the global rate for `thompson`.  This is the Bayesian
+        answer to "mean vs evidence": an arm at 1/1 is not better than one at
+        20/40, it is only less known.
         """
-        n = int(stats.get("n", 0) or 0)
-        mean = float(stats.get("mean", 0.0) or 0.0)
-        sd = max(float(stats.get("sd", 0.0) or 0.0), 0.15)
-        prior_prec = 1.0 / (prior_sd * prior_sd)
-        data_prec = n / (sd * sd)
-        post_prec = prior_prec + data_prec
-        post_mean = (prior_prec * prior_mean + data_prec * mean) / post_prec
-        return min(1.0, max(0.0, rng.gauss(post_mean, 1.0 / math.sqrt(post_prec))))
+        s = ctx_stats.get(arm) or {}
+        n = int(s.get("n", 0) or 0)
+        wins = int(s.get("wins", 0) or 0)
+        parent = self._parent_rate(ctx_stats, pooled, arm)
+        alpha = 1.0 + wins + self.prior_k * parent
+        beta = 1.0 + (n - wins) + self.prior_k * (1.0 - parent)
+        return rng.betavariate(alpha, beta)
+
+    def _parent_rate(self, ctx_stats: dict, pooled: dict | None, arm: str) -> float:
+        """Parent success rate: the scenario's (contextual_ts) or the global one."""
+        if pooled is not None:
+            ps = pooled.get(arm) or {}
+            pn, pw = int(ps.get("n", 0) or 0), int(ps.get("wins", 0) or 0)
+            if pn:
+                return (pw + 0.5) / (pn + 1.0)
+        tot = sum(int(v.get("n", 0) or 0) for v in ctx_stats.values())
+        wins = sum(int(v.get("wins", 0) or 0) for v in ctx_stats.values())
+        if tot:
+            return (wins + 0.5) / (tot + 1.0)
+        return self.prior_mean
 
     def explain(self, arms, stats: dict, *, pooled_stats: dict | None = None,
                 novelty: dict | None = None) -> dict:

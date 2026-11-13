@@ -63,9 +63,21 @@ def delta_of_input(path: str) -> str | None:
     return m.group(1) if m else None
 
 
-def load_history(path=REPEATS) -> list[dict]:
-    """Real probes with an arm and an independently validated reward."""
+def load_history(path=REPEATS, *, arms: str = "catalog",
+                 min_probes_per_context: int = 0) -> list[dict]:
+    """Real probes with an arm and an independently validated reward.
+
+    `arms="catalog"` (default) restricts the arm space to the fixed delta
+    catalog, so the comparison stays a comparison of POLICIES over a stable
+    space.  Leaving it at "all" folds in the generated frames, which are
+    one-shot by construction: a frame tried once has no payoff in the held-out
+    half, so the metric collapses (measured 2026-11-13: 132 arms, every policy
+    at ~0.006).  The generated arms are a different question — whether
+    generation pays off — and are measured by generator_bench.py / live rewards.
+    """
+    import generation
     out = []
+    excluded = 0
     p = pathlib.Path(path)
     if not p.is_file():
         return out
@@ -80,6 +92,9 @@ def load_history(path=REPEATS) -> list[dict]:
         arm = delta_of_input(row.get("input"))
         if not arm:
             continue
+        if arms == "catalog" and arm not in generation.DELTAS:
+            excluded += 1
+            continue
         reward, conf = local_reward(row)
         out.append({
             "ts": row.get("ts"), "context": f"{row.get('scenario')}|{row.get('model')}",
@@ -87,6 +102,20 @@ def load_history(path=REPEATS) -> list[dict]:
             "arm": arm, "reward": reward, "confidence": conf,
             "valid": reward is not None,
         })
+    if excluded:
+        print(f"[bench] arm space = catalog; {excluded} probes on generated/unknown "
+              f"arms excluded (use --arms all to include them)")
+    if min_probes_per_context:
+        by_ctx = defaultdict(list)
+        for row in out:
+            by_ctx[row["context"]].append(row)
+        keep = {c for c, rows in by_ctx.items() if len(rows) >= min_probes_per_context}
+        dropped = len(by_ctx) - len(keep)
+        out = [row for row in out if row["context"] in keep]
+        if dropped:
+            print(f"[bench] context filter: {dropped} contexts with <"
+                  f"{min_probes_per_context} catalog probes dropped (too little history "
+                  f"to learn from; the comparison would be noise)")
     return out
 
 
@@ -111,11 +140,16 @@ def legacy_pick(arms, stats, rng: random.Random, *, c: float = 45.0) -> str:
     return scored[0][1]
 
 
-def policy_pick(policy: str, arms, stats, rng: random.Random) -> str:
+def policy_pick(policy: str, arms, stats, rng: random.Random,
+                pooled: dict | None = None, prior_k: float | None = None) -> str:
     if policy == "current":
         return legacy_pick(arms, stats, rng)
-    sch = AdaptiveScheduler(policy, seed=rng.randint(0, 10**6))
-    return sch.choose(arms, _norm_stats(stats), rng=rng)
+    kw: dict[str, float | int] = {"seed": rng.randint(0, 10**6)}
+    if prior_k is not None:
+        kw["prior_k"] = float(prior_k)
+    sch = AdaptiveScheduler(policy, **kw)
+    return sch.choose(arms, _norm_stats(stats), rng=rng,
+                      pooled_stats=_norm_stats(pooled) if pooled else None)
 
 
 def _norm_stats(stats: dict) -> dict:
@@ -150,7 +184,8 @@ def update(stats: dict, arm: str, reward: float | None, raw_percent: float = 0.0
 # replay
 # --------------------------------------------------------------------------
 def run_policy(history: list[dict], policy: str, *, budget: int, seed: int,
-               split: float = 0.7, arms: list[str] | None = None) -> dict:
+               split: float = 0.7, arms: list[str] | None = None,
+               prior_k: float | None = None) -> dict:
     """Train on the first `split` of the log, then replay decisions on the rest.
 
     Payoffs are estimated per (context, arm) from the logged rewards: the train
@@ -188,6 +223,23 @@ def run_policy(history: list[dict], policy: str, *, budget: int, seed: int,
         for r in rows:
             update(st, r["arm"], r["reward"])
         stats[ctx] = st
+    # scenario-level pool: what the OTHER models of this scenario already showed
+    scen_stats: dict[str, dict] = {}
+    for ctx, st in stats.items():
+        scene = ctx.split("|")[0]
+        pool = scen_stats.setdefault(scene, {})
+        for arm, s in st.items():
+            tgt = pool.setdefault(arm, {"n": 0, "sum": 0.0, "sumsq": 0.0, "max": -1.0,
+                                        "wins": 0, "reward": None})
+            tgt["n"] += s["n"]
+            tgt["sum"] += s["sum"]
+            tgt["sumsq"] += s["sumsq"]
+            tgt["wins"] += s["wins"]
+            tgt["max"] = max(tgt["max"], s["max"])
+            mean = tgt["sum"] / tgt["n"] if tgt["n"] else 0.0
+            tgt["mean"] = mean
+            tgt["var"] = max(0.0, tgt["sumsq"] / tgt["n"] - mean * mean) if tgt["n"] else 0.0
+            tgt["sd"] = math.sqrt(tgt["var"])
 
     rng = random.Random(seed)
     contexts = sorted(test)
@@ -208,7 +260,9 @@ def run_policy(history: list[dict], policy: str, *, budget: int, seed: int,
     for i in range(int(budget)):
         ctx = contexts[i % len(contexts)]
         st = stats.setdefault(ctx, {})
-        arm = policy_pick(policy, arms, st, rng)
+        scene = ctx.split("|")[0]
+        pool = scen_stats.setdefault(scene, {})
+        arm = policy_pick(policy, arms, st, rng, pooled=pool, prior_k=prior_k)
         picks.append(arm)
         arms_used.add(arm)
         fams_used.add(arm_family(arm))
@@ -225,7 +279,9 @@ def run_policy(history: list[dict], policy: str, *, budget: int, seed: int,
             top3_hits += 1
         rewards.append(reward)
         # the policy learns from the TRAIN payoff of that pair (no peeking at test)
-        update(st, arm, (train_pay.get((ctx, arm)) or (None, 0))[0])
+        train_reward = (train_pay.get((ctx, arm)) or (None, 0))[0]
+        update(st, arm, train_reward)
+        update(pool, arm, train_reward)   # keep the scenario pool in step
     n = len(rewards)
     total = sum(rewards)
     wins = sum(1 for r in rewards if r >= SUCCESS_THRESHOLD)
@@ -320,6 +376,37 @@ def compare(history: list[dict], *, budget: int = 200, seeds: int = 5,
     }
 
 
+def tune_prior(history: list[dict], *, policy: str = "contextual_ts", betas=(1.0, 2.0, 6.0, 12.0, 25.0),
+               budget: int = 300, seeds: int = 5, split: float = 0.7) -> dict:
+    """Is the Bayesian policy losing because the PRIOR is mis-tuned?
+
+    The hierarchical Beta has one free knob (prior_k: how many pseudo-observations
+    the scenario parent contributes).  Sweeping it turns "TS does not win" from an
+    opinion into a measured statement about the algorithm and its prior.
+    """
+    import strategy as strategy_mod  # noqa: F401  (policies come from the live module)
+    arms = sorted({h["arm"] for h in history})
+    out = {}
+    for beta in betas:
+        rewards, successes, good = [], [], []
+        for s in range(seeds):
+            run = run_policy(history, policy, budget=budget, seed=3000 + s,
+                             split=split, arms=arms, prior_k=beta)
+            if run.get("mean_reward") is not None:
+                rewards.append(run["mean_reward"])
+                successes.append(run["success_rate"])
+                good.append(run["good_arm_rate"])
+        if rewards:
+            out[str(beta)] = {
+                "mean_reward": round(statistics.fmean(rewards), 4),
+                "success_rate": round(statistics.fmean(successes), 4),
+                "good_arm_rate": round(statistics.fmean(good), 4),
+                "seeds": len(rewards),
+            }
+    best = max(out, key=lambda k: out[k]["mean_reward"]) if out else None
+    return {"policy": policy, "budget": budget, "seeds": seeds, "by_prior_k": out, "best": best}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -327,17 +414,38 @@ def main() -> int:
     ap.add_argument("--seeds", type=int, default=5)
     ap.add_argument("--split", type=float, default=0.7)
     ap.add_argument("--history", default=str(REPEATS))
+    ap.add_argument("--arms", default="catalog", choices=("catalog", "all"),
+                    help="catalog = the fixed delta space (stable policy comparison); "
+                         "all = include generated frames (one-shot, unmeasurable offline)")
+    ap.add_argument("--min-probes-per-context", type=int, default=20,
+                    help="keep only contexts with at least this many catalog probes "
+                         "(default 20; the workspace now has 52 contexts and most are "
+                         "too young to compare policies on)")
     ap.add_argument("--out", default=str(OUT_JSON))
     ap.add_argument("--json", action="store_true", help="print the whole report")
     ap.add_argument("--sweep", default="", help="comma-separated budgets for the sweep, e.g. 100,300,1000")
+    ap.add_argument("--tune", default="", help="comma-separated prior_k values to sweep for the "
+                                               "Bayesian policies, e.g. 1,2,6,12,25")
+    ap.add_argument("--tune-seeds", type=int, default=0,
+                    help="seeds for the prior sweep (default: half of --seeds)")
     a = ap.parse_args()
-    history = load_history(a.history)
+    history = load_history(a.history, arms=a.arms,
+                           min_probes_per_context=a.min_probes_per_context)
     if not history:
         print(json.dumps({"error": "no history", "path": a.history}))
         return 1
     sweep = tuple(int(x) for x in a.sweep.split(",") if x.strip())
     report = compare(history, budget=a.budget, seeds=a.seeds, split=a.split,
                      budget_sweep=sweep)
+    if a.tune:
+        betas = tuple(float(x) for x in a.tune.split(",") if x.strip())
+        tune_seeds = a.tune_seeds or max(3, a.seeds // 2)
+        report["tuning"] = {
+            "contextual_ts": tune_prior(history, policy="contextual_ts", betas=betas,
+                                        budget=a.budget, seeds=tune_seeds),
+            "thompson": tune_prior(history, policy="thompson", betas=betas,
+                                   budget=a.budget, seeds=tune_seeds),
+        }
     pathlib.Path(a.out).write_text(json.dumps(report, ensure_ascii=False, indent=2),
                                    encoding="utf-8")
     if a.json:

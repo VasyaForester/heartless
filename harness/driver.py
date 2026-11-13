@@ -133,10 +133,39 @@ def pair_stats(conn) -> dict:
     return out
 
 
-def pick_pair(conn, rng: random.Random, engine):
-    # board-scoped: a shared DB may seed several boards (board_profile column);
-    # pairs without a base probe cannot be variant-generated yet — keep them out of
-    # the selection so the loop never spins on "no base input" (added 2026-11-13)
+def pair_recent(conn, ids, window_s: float, now: float | None = None) -> dict:
+    """per-pair (last probe time, attempts inside the window)."""
+    now = now or time.time()
+    out = {k: {"last": 0.0, "n": 0} for k in ids}
+    for r in conn.execute(
+            "SELECT pair_id, MAX(started_at) AS last, COUNT(*) AS n FROM attempts"
+            " WHERE started_at > ? GROUP BY pair_id", (now - window_s,)):
+        if r["pair_id"] in out:
+            out[r["pair_id"]] = {"last": float(r["last"] or 0.0), "n": int(r["n"] or 0)}
+    # a pair never probed in the window may still have older attempts
+    for r in conn.execute(
+            "SELECT pair_id, MAX(started_at) AS last FROM attempts GROUP BY pair_id"):
+        if r["pair_id"] in out and not out[r["pair_id"]]["last"]:
+            out[r["pair_id"]]["last"] = float(r["last"] or 0.0)
+    return out
+
+
+def pick_pair(conn, rng: random.Random, *, cooldown_s: float = 900.0,
+              window_s: float = 21600.0):
+    """Choose the next pair by COVERAGE, not by the local proxy reward.
+
+    Measured defect (2026-11-13 ~21:50): ranking pairs by the mean local reward
+    sent 131 of 133 probes into two cells (`negq|YK`, `negq|DW`) — the local
+    validator scores a tool call ~0.5 there, so the bandit believed those pairs
+    were the best and starved the other six unsolved pairs.  The local reward is
+    a fair comparison *between deltas of one pair*; it is NOT comparable across
+    pairs, where only a judge verdict means "solved".  So the bandit now decides
+    the DELTA inside the chosen pair, and the pair itself is chosen by coverage.
+
+    Priority: pairs not probed within `cooldown_s` first, least recently probed
+    first; then the fewest attempts inside the window; ties break on the
+    judge-verified score, and finally at random.
+    """
     rows = conn.execute(
         "SELECT id,best_score,attempts FROM pairs WHERE solved=0 AND best_input IS NOT NULL "
         "AND board_profile=?", (BOARD_NAME,)).fetchall()
@@ -144,9 +173,20 @@ def pick_pair(conn, rng: random.Random, engine):
     ids = [r["id"] for r in rows if r["id"] not in parked]
     if not ids:
         return None
-    stats = pair_stats(conn)
-    known = {k: v for k, v in stats.items() if k in ids}
-    return engine.scheduler.choose(ids, known, rng=rng)
+    now = time.time()
+    recent = pair_recent(conn, ids, window_s, now)
+    verified = {r["pair_id"]: float(r["mean"] or 0.0) for r in conn.execute(
+        "SELECT pair_id, AVG(score) AS mean FROM attempts"
+        " WHERE judge_status='verified' AND score IS NOT NULL GROUP BY pair_id")}
+    cooled = [k for k in ids if now - recent[k]["last"] >= cooldown_s]
+    pool = cooled or ids
+    if not cooled:
+        # every unsolved pair is inside the cooldown: fall back to the least
+        # recently probed one, so the loop can never lock onto a single cell
+        pool = sorted(ids, key=lambda k: recent[k]["last"])[:max(1, len(ids) // 3)]
+    best = sorted(pool, key=lambda k: (recent[k]["n"], -verified.get(k, 0.0),
+                                       recent[k]["last"], rng.random()))
+    return best[0]
 
 
 def delta_stats(conn, key: str) -> dict:
@@ -494,6 +534,10 @@ def main() -> int:
                     choices=("off", "exhausted", "always"),
                     help="compose NEW frames (frames.py/candidate.py): off | only when the "
                          "fixed catalog of a pair is exhausted | always")
+    ap.add_argument("--pair-cooldown", type=float,
+                    default=float(os.environ.get("HERMES_PAIR_COOLDOWN", "900")),
+                    help="seconds before an unsolved pair may be probed again (coverage "
+                         "scheduling; prevents the loop from locking onto one cell)")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
@@ -566,7 +610,7 @@ def main() -> int:
             except Exception:
                 pass
             store.heartbeat(conn, lease)
-            key = pick_pair(conn, rng, engine)
+            key = pick_pair(conn, rng, cooldown_s=a.pair_cooldown)
             if not key:
                 total = conn.execute(
                     "SELECT COUNT(*) AS c FROM pairs WHERE board_profile=?",

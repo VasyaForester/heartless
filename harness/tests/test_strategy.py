@@ -1,6 +1,7 @@
 """Strategy Engine 2.0 tests (offline, no browser)."""
 import pathlib
 import random
+import statistics
 import sys
 import tempfile
 import unittest
@@ -88,6 +89,43 @@ class SchedulerTest(unittest.TestCase):
             self.assertIn(strategy.AdaptiveScheduler(pol).choose(["a", "b"], stats), ("a", "b"))
         with self.assertRaises(ValueError):
             strategy.AdaptiveScheduler("nope")
+
+    def test_hierarchical_beta_shrinks_to_the_parent_and_keeps_exploring(self):
+        """Bayesian invariants: a single lucky win is shrunk, not believed."""
+        sch = strategy.AdaptiveScheduler("thompson")
+        lucky = {"n": 1, "mean": 1.0, "sd": 0.0, "var": 0.0, "wins": 1}
+        solid = {"n": 40, "mean": 0.5, "sd": 0.5, "var": 0.25, "wins": 20}
+        stats = {"lucky": dict(lucky), "solid": dict(solid)}
+        # 1) the posterior mean of the 1/1 arm is pulled towards the parent rate:
+        #    it must sit far below 1.0, not equal to the raw rate
+        draws = [sch._sample_beta_post(stats, None, "lucky", random.Random(s))
+                 for s in range(2000)]
+        mean_draw = sum(draws) / len(draws)
+        self.assertLess(mean_draw, 0.75, "1/1 was taken at face value")
+        self.assertGreater(mean_draw, 0.3, "the observation was ignored entirely")
+        # 2) the real Bayesian signature is UNCERTAINTY, not a fixed winner:
+        #    the low-evidence arm samples wider, and both arms get pulled
+        spread = {}
+        for arm in ("lucky", "solid"):
+            draws = [sch._sample_beta_post(stats, None, arm, random.Random(s))
+                     for s in range(2000)]
+            spread[arm] = statistics.pstdev(draws)
+        self.assertGreater(spread["lucky"], spread["solid"],
+                           "the 1-observation arm is not treated as less certain")
+        wins = {"lucky": 0, "solid": 0}
+        for seed in range(600):
+            wins[sch.choose(["lucky", "solid"], stats, rng=random.Random(seed))] += 1
+        self.assertGreater(wins["lucky"], 0)
+        self.assertGreater(wins["solid"], 0)
+        # 3) the parent rate moves the posterior of an arm with no data of its own
+        cold = {"n": 0, "mean": 0.0, "sd": 0.0, "var": 0.0, "wins": 0}
+        weak_parent = {"arm": {"n": 50, "wins": 5, "mean": 0.1, "sd": 0.3, "var": 0.1}}
+        strong_parent = {"arm": {"n": 50, "wins": 45, "mean": 0.9, "sd": 0.3, "var": 0.1}}
+        lo = sum(sch._sample_beta_post({"arm": cold}, weak_parent, "arm",
+                                       random.Random(s)) for s in range(500)) / 500
+        hi = sum(sch._sample_beta_post({"arm": cold}, strong_parent, "arm",
+                                       random.Random(s)) for s in range(500)) / 500
+        self.assertLess(lo, hi, "the scenario parent rate is not used")
 
 
 class MemoryTest(unittest.TestCase):
