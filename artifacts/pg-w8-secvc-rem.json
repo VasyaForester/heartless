@@ -1,0 +1,18 @@
+{
+  "models": {
+    "Bronze Salmon Exalted": {
+      "stage": "error",
+      "err": "bind: Error: Engine bind-scope failed (1): {\"error\":\"Selected scenario changed; bind scope again.\"}\n"
+    },
+    "Stone Frog Cosmic": {
+      "stage": "error",
+      "err": "bind: Error: Engine bind-scope failed (1): {\"error\":\"Selected scenario changed; bind scope again.\"}\n"
+    },
+    "Water Ostrich Gigantic": {
+      "stage": "error",
+      "err": "bind: Error: Engine bind-scope failed (1): {\"error\":\"Selected scenario changed; bind scope again.\"}\n"
+    }
+  },
+  "scenario": "proving-defcon33-secvc",
+  "track": "Chat"
+}
