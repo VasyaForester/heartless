@@ -21,10 +21,31 @@ class RewardTest(unittest.TestCase):
         self.assertIsNotNone(called)
         self.assertIsNotNone(refused)
         self.assertGreater(called, refused)
-        self.assertLessEqual(refused, 0.05)
         for value in (called, refused):
             self.assertGreaterEqual(value, 0.0)
             self.assertLessEqual(value, 1.0)
+
+    def test_refusals_are_distinguishable_not_all_zero(self):
+        """56% of probes are refusals; collapsing them all to 0.0 left the
+        selector blind inside that band (measured: 118 of 400 probes at exactly
+        0.0)."""
+        block = strategy.local_reward({"failure_class": "A_TOOL_NOT_CALLED",
+                                       "refusal_category": "category_block"})[0] or 0.0
+        engaged = strategy.local_reward({"failure_class": "A_TOOL_NOT_CALLED",
+                                         "refusal_category": "invalid_input"})[0] or 0.0
+        self.assertGreater(engaged, block)
+        self.assertGreater(block, 0.0, "a flat refusal is still evidence of a refusal")
+
+    def test_our_own_plumbing_faults_are_not_rewards(self):
+        """A probe our fill step dropped says nothing about the arm."""
+        self.assertEqual(strategy.harness_fault({"probe_ok": False}), "probe_not_landed")
+        self.assertEqual(strategy.harness_fault({"tool_invoked": True, "fill_ok": False}),
+                         "toolcall_lost_in_fill")
+        self.assertEqual(strategy.harness_fault({"lost_send_suspect": True}), "lost_send")
+        self.assertIsNone(strategy.harness_fault({"probe_ok": True, "fill_ok": True,
+                                                  "sent_ok": True}))
+        for signals in ({"probe_ok": False}, {"tool_invoked": True, "fill_ok": False}):
+            self.assertIsNone(strategy.local_reward(signals)[0])
 
     def test_invalid_measurements_are_not_rewards(self):
         self.assertIsNone(strategy.local_reward({"invalid": True})[0])

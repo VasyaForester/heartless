@@ -565,9 +565,17 @@ def main(argv=None) -> int:
     ap.add_argument("--max-hours", type=float, default=0.0)
     ap.add_argument("--seed", type=int, default=20261112)
     ap.add_argument("--strategy",
-                    default=flag_default("strategy", "HERMES_STRATEGY", "ucb_improved", flags),
+                    default=flag_default("strategy", "HERMES_STRATEGY",
+                                         "contextual_ts", flags),
                     choices=strategy.POLICIES,
-                    help="adaptive-search policy (see strategy_bench.py for the evidence)")
+                    help="adaptive-search policy.  Default contextual_ts: measured on the "
+                         "corrected reward channel (harness/reward_audit.py; our own dropped "
+                         "probes no longer count as model refusals) it leads on mean reward, "
+                         "success rate AND good-arm rate at budgets 100/300/1000, 21 seeds, "
+                         "non-overlapping CI vs ucb_improved (0.2326/0.2222/0.355 against "
+                         "0.1603/0.1700/0.250).  On the OLD channel ucb_improved won — the "
+                         "channel was what changed, not the task: see "
+                         "harness/strategy_bench.py --reward-map v1|faults|v2")
     ap.add_argument("--generate", default=flag_default("generate", "HERMES_GENERATE",
                                                       "exhausted", flags),
                     choices=("off", "exhausted", "always"),

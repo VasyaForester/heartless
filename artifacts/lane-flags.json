@@ -1,1 +1,5 @@
-{"ab_generate": 0.5}
+{
+  "strategy": "contextual_ts",
+  "ab_generate": 0.5,
+  "_note": "Live lane flags, read by harness/driver.py as CLI defaults (precedence: CLI > env > this file > built-in). strategy=contextual_ts: leads on the CORRECTED reward channel (mean 0.2326 / success 0.2222 / good-arm 0.355 vs ucb_improved 0.1603 / 0.1700 / 0.250, budget 300, 21 seeds, non-overlapping CI; ablated with strategy_bench.py --reward-map v1|faults|v2). ab_generate=0.5: randomized control for the frame generator (see harness/ab_report.py)."
+}

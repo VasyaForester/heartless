@@ -64,7 +64,8 @@ def delta_of_input(path: str) -> str | None:
 
 
 def load_history(path=REPEATS, *, arms: str = "catalog",
-                 min_probes_per_context: int = 0) -> list[dict]:
+                 min_probes_per_context: int = 0,
+                 reward_map: tuple[bool, bool] = (True, True)) -> list[dict]:
     """Real probes with an arm and an independently validated reward.
 
     `arms="catalog"` (default) restricts the arm space to the fixed delta
@@ -95,7 +96,7 @@ def load_history(path=REPEATS, *, arms: str = "catalog",
         if arms == "catalog" and arm not in generation.DELTAS:
             excluded += 1
             continue
-        reward, conf = local_reward(row)
+        reward, conf = local_reward(row, faults=reward_map[0], graded=reward_map[1])
         out.append({
             "ts": row.get("ts"), "context": f"{row.get('scenario')}|{row.get('model')}",
             "scenario": row.get("scenario"), "model": row.get("model"),
@@ -421,6 +422,12 @@ def main() -> int:
                     help="keep only contexts with at least this many catalog probes "
                          "(default 20; the workspace now has 52 contexts and most are "
                          "too young to compare policies on)")
+    ap.add_argument("--reward-map", default="v2", choices=("v1", "faults", "v2"),
+                    help="which local-reward mapping grades the probes: "
+                         "v1 = the old one (our own dropped probes graded as refusals, "
+                         "every refusal family clamped to the same 0.0), "
+                         "faults = v1 but our faults excluded, "
+                         "v2 = both fixes (default; see strategy.local_reward)")
     ap.add_argument("--out", default=str(OUT_JSON))
     ap.add_argument("--json", action="store_true", help="print the whole report")
     ap.add_argument("--sweep", default="", help="comma-separated budgets for the sweep, e.g. 100,300,1000")
@@ -430,7 +437,9 @@ def main() -> int:
                     help="seeds for the prior sweep (default: half of --seeds)")
     a = ap.parse_args()
     history = load_history(a.history, arms=a.arms,
-                           min_probes_per_context=a.min_probes_per_context)
+                           min_probes_per_context=a.min_probes_per_context,
+                           reward_map={"v1": (False, False), "faults": (True, False),
+                                       "v2": (True, True)}[a.reward_map])
     if not history:
         print(json.dumps({"error": "no history", "path": a.history}))
         return 1
