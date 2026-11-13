@@ -171,3 +171,5 @@ Sanitizer/tag-resistant модели (которые режут <SYSTEM>-payload
 - **PG smart-gate on refusals works.** Attempt #1 (afterparty BS wrap_table) produced a refusal
   (UNKNOWN_REFUSAL) and was correctly NOT submitted ("JUDGE missing: no judge artifact" = expected
   for refusal attempts; guard fired before submit). Attempts continue on the board.
+
+- **Shared Chrome (9223) etiquette:** both lanes live in one browser; the window's active tab must stay on the other lane (lucky-break). After own-tab operations, restore it via browser-level CDP `Target.activateTarget` on the other lane's targetId (D769… for payday). Nothing in the harness auto-activates, but a stray activation sticks — on 2026-11-13 the PG tab was left active and the lucky-break window showed proving-ground.
