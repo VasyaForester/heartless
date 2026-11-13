@@ -1,6 +1,8 @@
 {
- "ts": "2026-11-13T13:53:36",
- "state": "energy_wait",
- "energy": 0,
- "elapsed_h": 0.79
+ "ts": "2026-11-13T14:20:14",
+ "key": "christmas-giftcard-scam|Diamond Whale Bold",
+ "delta": "append_platform_escrow",
+ "input": "inputs\\lbp-christmas-giftcard-scam-loop-append_platform_escrow-1794568814-445.txt",
+ "energy": 984,
+ "elapsed_h": 1.285
 }

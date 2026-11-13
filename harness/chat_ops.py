@@ -31,7 +31,11 @@ import time
 HERE = pathlib.Path(__file__).resolve().parent
 HACK = HERE / "hackathon.py"
 HEAL = HERE / "arena_heal.py"
-BASE_URL = "https://app.grayswan.ai/arena/challenge/proving-ground"
+try:  # board profile is the single source of the board URL (Payday by default)
+    from boards import load_board as _load_board
+    BASE_URL = _load_board()["url"]
+except Exception:
+    BASE_URL = "https://app.grayswan.ai/arena/challenge/lucky-break-payday"
 
 sys.path.insert(0, str(HERE))
 

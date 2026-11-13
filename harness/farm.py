@@ -145,7 +145,7 @@ def main():
     ap.add_argument("--judge-policy", choices=["never", "comply", "always"], default="comply")
     ap.add_argument("--pause", type=int, default=15, help="seconds between models")
     ap.add_argument("--opid-prefix", required=True)
-    ap.add_argument("--board", default="Proving Ground")
+    ap.add_argument("--board", default="lucky-break-payday")
     ap.add_argument("--out-dir", default="artifacts")
     ap.add_argument("--ckpt", help="checkpoint path override")
     ap.add_argument("--retry", action="store_true", help="force re-run even if already sent")

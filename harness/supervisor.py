@@ -7,7 +7,7 @@
 - cooperative stop: create <state_dir>/restart.requested (driver exits; supervisor restarts)
 - full stop: terminate this process; the driver's lease expires after 30 min
 
-Run: python3 harness/supervisor.py --lane auto --max-hours 0
+Run: python3 harness/supervisor.py --lane main --max-hours 0   (CDP 9223, browser-data; the working entrance)
 """
 from __future__ import annotations
 
@@ -103,10 +103,10 @@ def pick_target(env: dict) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--lane", default="auto")
-    ap.add_argument("--port", type=int, default=9224)
+    ap.add_argument("--lane", default="main")
+    ap.add_argument("--port", type=int, default=9223)
     ap.add_argument("--chrome", default=CHROME_DEFAULT)
-    ap.add_argument("--profile", default=str(WORK.parent / "browser-data-auto"))
+    ap.add_argument("--profile", default=str(WORK.parent / "browser-data"))
     ap.add_argument("--url", default=URL_DEFAULT)
     ap.add_argument("--db", default=str(WORK / "artifacts" / "harness.db"))
     ap.add_argument("--target", default="")

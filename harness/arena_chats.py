@@ -4,7 +4,7 @@
 Usage (from workspace dir):
   python3 harness/arena_chats.py --target TID [--tab chats|submitted|auto] [--scope inputs/scope-x.json] [--out artifacts/chats.json]
 
-- Uses the proving-ground tab URL (must contain chatId=...). If the current tab has no chatId,
+- Uses the lane board tab URL (must contain chatId=...). If the current tab has no chatId,
   open a chat first and rerun.
 - tab=submitted parses the default SUBMITTED list (no click needed).
 - tab=chats clicks the CHATS tab first (requires --scope for the click).

@@ -35,7 +35,7 @@ import generation  # noqa: E402
 import judge_correlation  # noqa: E402
 import store  # noqa: E402
 from boards import load_board  # noqa: E402
-from loop import LBP, MODELS, SCENARIOS, SOLVED, newest_input, sh, slug  # noqa: E402
+from lbcore import LBP, MODELS, SCENARIOS, SOLVED, newest_input, sh, slug  # noqa: E402
 
 BOARD = load_board("lucky-break-payday")
 BOARD_NAME = BOARD["name"]
