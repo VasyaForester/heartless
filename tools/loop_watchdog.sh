@@ -26,18 +26,17 @@ OUT="$STATE_DIR/loop.out"
 # Совместимость: старый общий флаг паузы (до лейнов) тоже уважаем для auto
 [ "$LANE" = "auto" ] && [ -f "artifacts/loop.paused" ] && exit 0
 
-# Авто-лейн: если браузер лейна не поднят — поднять (само-лечение, правило 57)
-if [ "$LANE" = "auto" ]; then
-  if ! curl -s --max-time 4 "http://127.0.0.1:9224/json/version" >/dev/null; then
-    echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog(auto): browser 9224 down — launching" >> "$LOG"
-    CHROME_BIN="${CHROME_EXE:-/c/Program Files/Google/Chrome/Application/chrome.exe}"
-    "$CHROME_BIN" --user-data-dir="$HOME/AppData/Local/hermes/profiles/gray-swan-hackathon-v2/browser-data-auto" \
-      --remote-debugging-address=127.0.0.1 --remote-debugging-port=9224 \
-      --window-position=-32000,-32000 --window-size=1600,1000 \
-      --no-first-run --no-default-browser-check \
-      "https://app.grayswan.ai/arena/challenge/lucky-break-payday" >/dev/null 2>&1 &
-    sleep 10
-  fi
+# Само-лечение браузера лейна (правило 57 + 23:35): main→9223/browser-data, auto→9224/browser-data-auto.
+LANE_PORT="${LANE_PORT:-9224}"; LANE_PROFILE="${LANE_PROFILE:-browser-data-auto}"
+if [ "$LANE" = "main" ]; then LANE_PORT=9223; LANE_PROFILE="browser-data"; fi
+if ! curl -s --max-time 4 "http://127.0.0.1:${LANE_PORT}/json/version" >/dev/null; then
+  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] watchdog($LANE): browser ${LANE_PORT} down — launching" >> "$LOG"
+  CHROME_BIN="${CHROME_EXE:-/c/Program Files/Google/Chrome/Application/chrome.exe}"
+  "$CHROME_BIN" --user-data-dir="$HOME/AppData/Local/hermes/profiles/gray-swan-hackathon-v2/${LANE_PROFILE}" \
+    --remote-debugging-address=127.0.0.1 --remote-debugging-port="${LANE_PORT}" \
+    --no-first-run --no-default-browser-check --no-default-browser-check \
+    "https://app.grayswan.ai/arena/challenge/lucky-break-payday" >/dev/null 2>&1 &
+  sleep 14
 fi
 
 # tab-id НЕ хардкодить: pick_target смотрит на HACKATHON_CDP_URL (экспортирован выше).
