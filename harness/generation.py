@@ -7,7 +7,7 @@ the caller persists it and can reconstruct the exact same input offline.
 """
 from __future__ import annotations
 
-from loop import DELTAS
+from lbcore import DELTAS
 
 DELTA_VERSION = 1
 
