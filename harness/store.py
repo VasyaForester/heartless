@@ -245,6 +245,11 @@ def _add_missing_columns(conn: sqlite3.Connection) -> list[str]:
         "attempts": (
             ("reward", "REAL"),
             ("reward_source", "TEXT"),
+            # which arm the attempt came from: 'catalog' (a fixed delta),
+            # 'generated' (a frame composed on the fly) or 'control_repeat'
+            # (the randomized control of the generator experiment: re-probe the
+            # best catalog delta instead of composing a new frame).
+            ("arm_source", "TEXT"),
         ),
     }
     for table, cols in plans.items():
@@ -571,6 +576,28 @@ def bump_delta(conn: sqlite3.Connection, lease: Lease, pair_id: str, delta: str,
             "INSERT INTO deltas(pair_id,delta,n,sum_score) VALUES(?,?,1,?)"
             " ON CONFLICT(pair_id,delta) DO UPDATE SET n=n+1,sum_score=sum_score+excluded.sum_score",
             (pair_id, delta, value))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+
+
+def set_arm_source(conn: sqlite3.Connection, lease: Lease, attempt_id: str,
+                   source: str) -> None:
+    """Tag where the arm came from (catalog | generated | control_repeat).
+
+    Needed by the generator experiment: without the tag a re-probe of a known
+    delta and a freshly composed frame are indistinguishable in the ledger, so
+    "does generation pay off?" could never be answered from live data (the
+    offline bench cannot answer it either — a brand-new frame has no reward by
+    construction).
+    """
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        assert_owner(conn, lease)
+        conn.execute("UPDATE attempts SET arm_source=? WHERE attempt_id=?",
+                     (source, attempt_id))
+        event(conn, "arm_source", {"attempt_id": attempt_id, "source": source})
         conn.commit()
     except Exception:
         conn.rollback()

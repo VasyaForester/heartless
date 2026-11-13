@@ -522,7 +522,37 @@ def apply_verdict(conn, lease, attempt_id: str, key: str, sid: str, model: str,
     return {"outcome": "unjudged", "reward": ev["reward"]}
 
 
-def main() -> int:
+def lane_flags() -> dict:
+    """Persisted per-lane flag defaults: `artifacts/lane-flags.json`.
+
+    Why a file and not an env var: the lane is auto-restarted (watchdog,
+    supervisor, operator), and an env var exported once is forgotten by the next
+    restart — a live experiment would silently stop collecting its control arm.
+    Precedence stays CLI > env > this file > built-in default.
+    """
+    path = WORK / "artifacts" / "lane-flags.json"
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        log(f"WARN lane-flags.json unreadable; ignoring it ({path})")
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def flag_default(name: str, env_key: str, hard, flags: dict):
+    """CLI > env > lane-flags.json > hard default."""
+    env = os.environ.get(env_key)
+    if env is not None:
+        return env
+    if name in flags:
+        return flags[name]
+    return hard
+
+
+def main(argv=None) -> int:
+    flags = lane_flags()
     ap = argparse.ArgumentParser()
     ap.add_argument("--lane", default="auto")
     ap.add_argument("--target", default=os.environ.get("CHAT_TARGET", ""))
@@ -534,13 +564,24 @@ def main() -> int:
     ap.add_argument("--max-errors", type=int, default=8)
     ap.add_argument("--max-hours", type=float, default=0.0)
     ap.add_argument("--seed", type=int, default=20261112)
-    ap.add_argument("--strategy", default=os.environ.get("HERMES_STRATEGY", "ucb_improved"),
+    ap.add_argument("--strategy",
+                    default=flag_default("strategy", "HERMES_STRATEGY", "ucb_improved", flags),
                     choices=strategy.POLICIES,
                     help="adaptive-search policy (see strategy_bench.py for the evidence)")
-    ap.add_argument("--generate", default=os.environ.get("HERMES_GENERATE", "exhausted"),
+    ap.add_argument("--generate", default=flag_default("generate", "HERMES_GENERATE",
+                                                      "exhausted", flags),
                     choices=("off", "exhausted", "always"),
                     help="compose NEW frames (frames.py/candidate.py): off | only when the "
                          "fixed catalog of a pair is exhausted | always")
+    ap.add_argument("--ab-generate", type=float,
+                    default=float(flag_default("ab_generate", "HERMES_AB_GENERATE", "1.0",
+                                               flags)),
+                    help="randomized control for the generator (0..1): the probability that a "
+                         "would-be generation step actually composes a new frame; otherwise the "
+                         "probe re-runs the best catalog delta (control). 1.0 = always generate "
+                         "(the pre-experiment behaviour). Both branches cost one probe, so the "
+                         "ledger measures which one buys more reward — the offline bench cannot "
+                         "answer this, a brand-new frame has no reward by construction.")
     ap.add_argument("--pair-cooldown", type=float,
                     default=float(os.environ.get("HERMES_PAIR_COOLDOWN", "900")),
                     help="seconds before an unsolved pair may be probed again (coverage "
@@ -579,6 +620,9 @@ def main() -> int:
         log("MANIFEST missing (supervisor writes it); continuing for this run")
     log(f"DRIVER START lane={a.lane} target={target} pid={os.getpid()} db={a.db} "
         f"board={BOARD_NAME} profile={PROFILE_HASH}")
+    log(f"FLAGS strategy={a.strategy} generate={a.generate} ab_generate={a.ab_generate} "
+        f"pair_cooldown={a.pair_cooldown:.0f}s"
+        + (" [from lane-flags.json]" if flags.get("ab_generate") is not None else ""))
     recovered = attempts.recover(conn, lease)
     if recovered:
         log(f"RECOVERED {len(recovered)} in-progress attempts: {recovered}")
@@ -636,12 +680,23 @@ def main() -> int:
                         break
                 continue
             mv = None
+            arm_source = "catalog"
             if a.generate != "off" and (a.generate == "always" or catalog_exhausted(conn, key)):
-                try:
-                    mv = make_generated_variant(conn, lease, key, rng, gen_rows)
-                except Exception as exc:  # noqa: BLE001
-                    log(f"GENERATE failed ({type(exc).__name__}: {exc}); falling back to the catalog")
-                    mv = None
+                # Randomized control (hermes ab-generate): composing a new frame
+                # and re-probing the best catalog delta cost the same one probe,
+                # so the coin flip decides, and the tag lets the ledger compare
+                # them later.  Without it "generation pays off" stays an opinion.
+                if a.ab_generate >= 1.0 or rng.random() < a.ab_generate:
+                    try:
+                        mv = make_generated_variant(conn, lease, key, rng, gen_rows)
+                        arm_source = "generated"
+                    except Exception as exc:  # noqa: BLE001
+                        log(f"GENERATE failed ({type(exc).__name__}: {exc}); falling back to the catalog")
+                        mv = None
+                else:
+                    arm_source = "control_repeat"
+                    log(f"AB-CONTROL {key}: coin says re-probe the best catalog delta "
+                        f"instead of composing a new frame")
             if not mv:
                 mv = make_variant(conn, lease, key, rng, engine, a.strategy)
             if not mv:
@@ -649,7 +704,12 @@ def main() -> int:
                 time.sleep(30)
                 continue
             attempt_id, delta, input_path, sid, model = mv
-            log(f"ATTEMPT {attempt_id} {key} delta={delta} input={input_path} energy={en}")
+            try:
+                store.set_arm_source(conn, lease, attempt_id, arm_source)
+            except Exception as exc:  # noqa: BLE001 — tagging must never kill a probe
+                log(f"WARN {attempt_id}: arm_source tag failed ({type(exc).__name__}: {exc})")
+            log(f"ATTEMPT {attempt_id} {key} delta={delta} src={arm_source} "
+                f"input={input_path} energy={en}")
             if a.dry_run:
                 attempts.mark_failed(conn, lease, attempt_id, "dry-run: not sent")
                 log("dry-run: attempt allocated/prepared, not sent")
