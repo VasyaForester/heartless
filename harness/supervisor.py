@@ -27,9 +27,13 @@ from boards import load_board  # noqa: E402
 from store import pid_alive  # noqa: E402
 
 CHROME_DEFAULT = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-URL_DEFAULT = load_board("lucky-break-payday")["url"]
-BOARD_NAME = load_board("lucky-break-payday")["name"]
-LOCK = WORK / "artifacts" / "supervisor.lock"
+# board comes from $HERMES_BOARD (default: lucky-break-payday)
+URL_DEFAULT = load_board()["url"]
+BOARD_NAME = load_board()["name"]
+_SUFFIX = "" if BOARD_NAME == "lucky-break-payday" else f"-{BOARD_NAME}"
+LOCK = WORK / "artifacts" / f"supervisor{_SUFFIX}.lock"
+LOG_PATH = WORK / "artifacts" / f"supervisor{_SUFFIX}.log"
+OUT_PATH = WORK / "artifacts" / f"driver{_SUFFIX}.out"
 
 
 def acquire_lock(path: pathlib.Path) -> pathlib.Path | None:
@@ -61,7 +65,7 @@ def log(msg: str) -> None:
     line = f"[{time.strftime('%Y-%m-%dT%H:%M:%S')}] {msg}"
     print(line, flush=True)
     try:
-        with open(WORK / "artifacts" / "supervisor.log", "a", encoding="utf-8") as f:
+        with open(LOG_PATH, "a", encoding="utf-8") as f:
             f.write(line + "\n")
     except OSError:
         pass
@@ -132,9 +136,9 @@ def main() -> int:
 
     target = a.target or pick_target(env)
     if not target:
-        log(f"no LBP tab on {a.port}; open the arena in the lane browser")
+        log(f"no {BOARD_NAME} tab on {a.port}; open the arena in the lane browser")
         return 1
-    log(f"SUPERVISOR START lane={a.lane} target={target} port={a.port} max_hours={a.max_hours}")
+    log(f"SUPERVISOR START board={BOARD_NAME} lane={a.lane} target={target} port={a.port} max_hours={a.max_hours}")
     try:
         import manifest as manifest_mod
         man = manifest_mod.build(lane=a.lane, cdp=f"127.0.0.1:{a.port}",
@@ -143,7 +147,7 @@ def main() -> int:
     except Exception as exc:  # noqa: BLE001
         log(f"MANIFEST build failed: {exc}")
 
-    out_path = WORK / "artifacts" / "driver.out"
+    out_path = OUT_PATH
     try:
         while True:
             args = [sys.executable, str(WORK / "harness" / "driver.py"),
@@ -169,7 +173,7 @@ def main() -> int:
                 time.sleep(10)
             target = a.target or pick_target(env)
             if not target:
-                log(f"no LBP tab on {a.port} after restart; sleep 60")
+                log(f"no {BOARD_NAME} tab on {a.port} after restart; sleep 60")
                 time.sleep(60)
     except KeyboardInterrupt:
         log("supervisor interrupted")

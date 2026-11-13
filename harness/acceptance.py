@@ -31,8 +31,9 @@ from boards import load_board  # noqa: E402
 
 
 def check_boards():
+    # lbp.py itself is profile-driven now; this verifies the identity holds for the ACTIVE board
     from lbp import BOARD, BASE_URL, CARD_HINTS, MATCH, MOCK_SIGNS, SCENARIO_TITLES
-    p = load_board("lucky-break-payday")
+    p = load_board()
     problems = []
     if p["match"] != MATCH:
         problems.append(f"match {p['match']!r} != {MATCH!r}")
@@ -63,7 +64,8 @@ def check_refusal():
 
 def state_guard(target: str | None = None):
     from lbp import grayswan_tabs, lbp_tab_id
-    tabs = [t for t in grayswan_tabs() if "lucky-break-payday" in (t.get("url") or "")]
+    _m = load_board().get("match") or "lucky-break-payday"
+    tabs = [t for t in grayswan_tabs() if _m in (t.get("url") or "")]
     if len(tabs) < 2:
         return None, f"skip: {len(tabs)} LBP tab(s); need 2 to exercise the guard"
     if target:

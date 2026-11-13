@@ -108,5 +108,6 @@
  "deltas_module": "deltas_payday",
  "checks_module": "lbp_checks",
  "pairs_seed": "lbp-board.json",
- "pair_status": "datasets/lbp/pair-status.json"
+ "pair_status": "datasets/lbp/pair-status.json",
+ "track_default": "Chat"
 }

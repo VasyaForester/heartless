@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""pick_target.py — печатает tabId grayswan-вкладки доски Lucky Break: Payday (или PG, если --pg)."""
+"""pick_target.py — печатает tabId grayswan-вкладки активной доски (профиль boards.py; --pg = Proving Ground)."""
 import json, os, sys, urllib.request
 from urllib.parse import urlsplit
 
@@ -11,7 +11,17 @@ try:
         PORT = _u.port
 except Exception:
     pass
-needle = "--pg" if "--pg" in sys.argv else "lucky-break-payday"
+needle = None
+if "--pg" in sys.argv:
+    needle = "proving-ground"
+else:
+    # board profile is the single source of the tab match ($HERMES_BOARD; default payday)
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from boards import load_board  # noqa: E402
+        needle = str(load_board().get("match") or "lucky-break-payday")
+    except Exception:
+        needle = "lucky-break-payday"
 try:
     with urllib.request.urlopen(f"http://127.0.0.1:{PORT}/json", timeout=5) as r:
         tabs = json.load(r)

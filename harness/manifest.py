@@ -21,7 +21,11 @@ import time
 
 HERE = pathlib.Path(__file__).resolve().parent
 WORK = HERE.parent
-MANIFEST_PATH = WORK / "artifacts" / "run-manifest.json"
+# One workspace may host several boards; each keeps its own pointer file.
+# Payday (the default board) keeps the legacy name for compatibility.
+_BOARD_ENV = os.environ.get("HERMES_BOARD") or "lucky-break-payday"
+_SUFFIX = "" if _BOARD_ENV == "lucky-break-payday" else f"-{_BOARD_ENV}"
+MANIFEST_PATH = WORK / "artifacts" / f"run-manifest{_SUFFIX}.json"
 ARCHIVE_DIR = WORK / "artifacts" / "run-manifests"
 
 
@@ -40,8 +44,13 @@ def _git_commit() -> str:
 
 def build(*, lane: str, cdp: str, browser_profile: str, board_name: str | None = None) -> dict:
     from boards import load_board  # noqa: E402
-    from lbcore import MODELS  # noqa: E402
+    from lbcore import MODELS, DELTAS_MODULE  # noqa: E402
     from store import SCHEMA_VERSION  # noqa: E402
+    try:
+        import generation  # noqa: E402
+        _delta_version = generation.DELTA_VERSION
+    except Exception:
+        _delta_version = 1
 
     board = load_board(board_name)
     board_file = WORK / "boards" / f"{board['name']}.json"
@@ -58,7 +67,8 @@ def build(*, lane: str, cdp: str, browser_profile: str, board_name: str | None =
         "browser_profile": str(browser_profile),
         "harness_git_commit": _git_commit(),
         "database_schema_version": SCHEMA_VERSION,
-        "delta_catalog_version": 1,
+        "delta_catalog_version": _delta_version,
+        "delta_catalog_module": DELTAS_MODULE,
         "model_roster_hash": _sha_text("|".join(MODELS)),
         "pricing_source": "unknown",  # arena UI cost not exposed to the transport
         "started_at": time.strftime("%Y-%m-%dT%H:%M:%S"),

@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS board_profiles (
   loaded_at REAL
 );
 CREATE TABLE IF NOT EXISTS pairs (
-  id TEXT PRIMARY KEY, board_profile TEXT NOT NULL DEFAULT 'lucky-break-payday',
+  id TEXT PRIMARY KEY, board_profile TEXT NOT NULL DEFAULT 'default',
   scenario TEXT NOT NULL, model TEXT NOT NULL, model_version TEXT,
   solved INTEGER NOT NULL DEFAULT 0, solved_attempt TEXT,
   best_score INTEGER NOT NULL DEFAULT -1, best_input TEXT,
@@ -180,7 +180,7 @@ def _migrate_v2_to_v3(conn: sqlite3.Connection) -> None:
     """Migrate the driver's v2 schema in place; preserve old attempts."""
     pairs_cols = _columns(conn, "pairs")
     for col, ddl in (
-        ("board_profile", "TEXT NOT NULL DEFAULT 'lucky-break-payday'"),
+        ("board_profile", "TEXT NOT NULL DEFAULT 'default'"),
         ("model_version", "TEXT"),
         ("solved_attempt", "TEXT"),
         ("version", "INTEGER NOT NULL DEFAULT 0"),

@@ -38,9 +38,12 @@ import manifest  # noqa: E402
 import policy_classify  # noqa: E402
 import store  # noqa: E402
 from boards import load_board  # noqa: E402
-from lbcore import LBP, MODELS, SCENARIOS, SOLVED, newest_input, sh, slug  # noqa: E402
+from lbcore import (LBP, MODELS, SCENARIOS, SOLVED, newest_input, sh, slug,  # noqa: E402
+                    models_for, loop_input_name, judge_path as core_judge_path,
+                    transcript_path as core_transcript_path, PAIRS_SEED, PAIR_STATUS)
 
-BOARD = load_board("lucky-break-payday")
+# board comes from $HERMES_BOARD (default: lucky-break-payday)
+BOARD = load_board()
 BOARD_NAME = BOARD["name"]
 PROFILE_HASH = BOARD["_profile_hash"]
 
@@ -58,14 +61,14 @@ def log(msg: str) -> None:
 def seed(conn) -> None:
     """Seed the 20 pairs from the v1 board; never overwrite newer v2 rows."""
     board = {}
-    p = WORK / "artifacts" / "lbp-board.json"
-    if p.exists():
+    p = (WORK / "artifacts" / PAIRS_SEED) if PAIRS_SEED else None
+    if p and p.exists():
         try:
             board = (json.loads(p.read_text(encoding="utf-8")) or {}).get("pairs", {}) or {}
         except Exception:
             board = {}
     for sid in SCENARIOS:
-        for model in MODELS:
+        for model in models_for(sid):
             key = f"{sid}|{model}"
             b = board.get(key) or {}
             solved = 1 if (b.get("solved") or model in SOLVED.get(sid, set())) else 0
@@ -91,8 +94,10 @@ def seed(conn) -> None:
 
 def load_parked() -> set:
     """Pairs our bookkeeping has parked (datasets/lbp/pair-status.json)."""
+    if not PAIR_STATUS:
+        return set()
     try:
-        d = json.loads((WORK / "datasets" / "lbp" / "pair-status.json").read_text(encoding="utf-8"))
+        d = json.loads((WORK / PAIR_STATUS).read_text(encoding="utf-8"))
     except Exception:
         return set()
     parked = set()
@@ -104,7 +109,10 @@ def load_parked() -> set:
 
 
 def pick_pair(conn, rng: random.Random):
-    rows = conn.execute("SELECT id,best_score,attempts FROM pairs WHERE solved=0").fetchall()
+    # pairs without a base probe cannot be variant-generated yet — keep them out of
+    # the selection so the loop never spins on "no base input" (added 2026-11-13)
+    rows = conn.execute(
+        "SELECT id,best_score,attempts FROM pairs WHERE solved=0 AND best_input IS NOT NULL").fetchall()
     parked = load_parked()
     if parked:
         rows = [r for r in rows if r["id"] not in parked]
@@ -156,7 +164,7 @@ def make_variant(conn, lease, key: str, rng: random.Random):
     delta = ucb[0][1]
     nonce = f"{time.strftime('%Y%m%d-%H%M%S')}-{rng.randint(1000, 9999)}"
     text = generation.generate(base_text, delta, nonce)
-    out = WORK / "inputs" / f"lbp-{sid}-loop2-{delta}-{int(time.time())}-{rng.randint(100, 999)}.txt"
+    out = WORK / "inputs" / loop_input_name(sid, delta, int(time.time()), rng.randint(100, 999))
     out.write_text(text, encoding="utf-8")
     attempt_id = attempts.allocate(
         conn, lease, pair_id=key, board=BOARD_NAME, scenario=sid, model=model,
@@ -196,12 +204,12 @@ def run_attempt_v2(target: str, key: str, input_path: str, wait_s: int,
 
 def judge_path(key: str) -> pathlib.Path:
     sid, model = key.split("|")
-    return WORK / "artifacts" / f"lbp-{sid}-{slug(model)}-judge.json"
+    return core_judge_path(sid, model)
 
 
 def transcript_path(key: str) -> pathlib.Path:
     sid, model = key.split("|")
-    return WORK / "artifacts" / f"lbp-{sid}-{slug(model)}-submit-transcript.json"
+    return core_transcript_path(sid, model)
 
 
 def transcript_info(key: str):
@@ -283,7 +291,8 @@ def main() -> int:
             store.heartbeat(conn, lease)
             key = pick_pair(conn, rng)
             if not key:
-                log("all 20 pairs solved — nothing left")
+                total = conn.execute("SELECT COUNT(*) AS c FROM pairs").fetchone()["c"]
+                log(f"all {total} pairs solved — nothing left")
                 return 0
             en = energy_now(target)
             if 0 <= en < a.energy_floor:
@@ -353,9 +362,10 @@ def main() -> int:
                                             "verdict": result.get("verdict"),
                                             "status": result.get("status")})
             store.heartbeat(conn, lease)
-            solved_count = conn.execute(
-                "SELECT COUNT(*) AS c FROM pairs WHERE solved=1").fetchone()["c"]
-            log(f"BOARD {solved_count}/20")
+            stats = conn.execute(
+                "SELECT SUM(CASE WHEN solved=1 THEN 1 ELSE 0 END) AS s, COUNT(*) AS c "
+                "FROM pairs").fetchone()
+            log(f"BOARD {int(stats['s'] or 0)}/{int(stats['c'] or 0)}")
             if errors >= a.max_errors:
                 log(f"BACKOFF {errors} consecutive failures — sleep 300, not stopping")
                 time.sleep(300)
