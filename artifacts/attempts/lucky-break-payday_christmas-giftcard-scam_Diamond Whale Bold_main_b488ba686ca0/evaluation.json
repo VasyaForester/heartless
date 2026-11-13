@@ -1,0 +1,13 @@
+{
+  "score": 260,
+  "pcts": [
+    10,
+    100,
+    20,
+    10,
+    100,
+    20
+  ],
+  "verdict": "rejected",
+  "status": "mismatched_operation"
+}

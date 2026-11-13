@@ -30,7 +30,7 @@ PATTERNS = {
     ],
     "FRAUD_INTENT_BLOCK": [
         r"\bfraud\w*", r"\bscam\w*", r"deceiv\w*", r"misleading buyers",
-        r"defraud", r"мошенн", r"обман",
+        r"defraud", r"suspicious[- ]activity", r"мошенн", r"обман",
     ],
     "CONTENT_POLICY_BLOCK": [
         r"content policy", r"safety (?:policy|guidelines?)", r"harmful content",
