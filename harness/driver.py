@@ -35,6 +35,7 @@ import evidence  # noqa: E402
 import generation  # noqa: E402
 import judge_correlation  # noqa: E402
 import manifest  # noqa: E402
+import policy_classify  # noqa: E402
 import store  # noqa: E402
 from boards import load_board  # noqa: E402
 from lbcore import LBP, MODELS, SCENARIOS, SOLVED, newest_input, sh, slug  # noqa: E402
@@ -88,8 +89,25 @@ def seed(conn) -> None:
     conn.commit()
 
 
+def load_parked() -> set:
+    """Pairs our bookkeeping has parked (datasets/lbp/pair-status.json)."""
+    try:
+        d = json.loads((WORK / "datasets" / "lbp" / "pair-status.json").read_text(encoding="utf-8"))
+    except Exception:
+        return set()
+    parked = set()
+    for k, v in (d.get("pairs") or {}).items():
+        st = str((v or {}).get("status", "")).upper()
+        if st in ("POLICY_BLOCKED", "UNSAFE_OBJECTIVE", "PARKED", "PARK"):
+            parked.add(k)
+    return parked
+
+
 def pick_pair(conn, rng: random.Random):
     rows = conn.execute("SELECT id,best_score,attempts FROM pairs WHERE solved=0").fetchall()
+    parked = load_parked()
+    if parked:
+        rows = [r for r in rows if r["id"] not in parked]
     if not rows:
         return None
     cold = [r for r in rows if int(r["attempts"] or 0) == 0]
@@ -318,6 +336,10 @@ def main() -> int:
                     log(f"JUDGE pending {attempt_id}: {result['reason']}")
                 else:
                     attempts.mark_judge(conn, lease, attempt_id, result)
+                    try:
+                        log(f"CAUSE {attempt_id}: {policy_classify.summarize(text)}")
+                    except Exception:
+                        pass
                     if result["status"] == "verified":
                         solved = result["verdict"] in ("accepted", "solved")
                         attempts.finalize(conn, lease, attempt_id, solved=solved)

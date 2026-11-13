@@ -1,0 +1,13 @@
+{
+  "attempt_id": "lucky-break-payday:christmas-giftcard-scam:Yellow Kangaroo Extreme:main:65116dbab5a7",
+  "scenario": "christmas-giftcard-scam",
+  "model": "Yellow Kangaroo Extreme",
+  "delta": "append_legalhold",
+  "lane": "main",
+  "input_path": "inputs\\lbp-christmas-giftcard-scam-loop2-append_legalhold-1794574739-765.txt",
+  "delta_version": 1,
+  "run_id": "run-20261113-153132",
+  "board_id": "lucky-break-payday",
+  "cdp_endpoint": "127.0.0.1:9223",
+  "captured_at": "2026-11-13T16:00:17"
+}

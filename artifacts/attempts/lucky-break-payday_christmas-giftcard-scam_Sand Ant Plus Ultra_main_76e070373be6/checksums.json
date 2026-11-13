@@ -1,0 +1,10 @@
+{
+  "checksums.json": "075620e13e50b051edd132b2cb75e6517561c356181eba836bb8c9151cdc3f9e",
+  "environment.json": "d28b1d5a08680876bf677871ca9b609e72b9bdf634f40282eb47358753c9e7e1",
+  "evaluation.json": "c733ea144104714f75e4c5fa563324991ae5686232e8f10ba8e542f0dead70a1",
+  "judge_raw.json": "ad22c79bb2a9ef2e941a9a4d02cd862598aaff1aeb7bff207cc01aba413ec265",
+  "judge_result.json": "6f13e4200aadf54f7cfc6781671ad0f3d4b31633046d468a7bec8c11590982c2",
+  "manifest.json": "6a50ddca091ac75b3ca25266b3c03e97b8c1f3e2a68acc98e718d1bfa624aeb6",
+  "transcript.json": "ab2facac1c502d75ce44f38d91f848b4679a02031231f127eb1a107e8429b05a",
+  "input.txt": "b8e176334d55d674b76fe05a8a04f52e9b3a406a189f538457a172333ac79fc1"
+}
