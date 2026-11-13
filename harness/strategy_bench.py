@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import pathlib
 import random
 import re
@@ -63,8 +64,38 @@ def delta_of_input(path: str) -> str | None:
     return m.group(1) if m else None
 
 
+def boards_by_scenario() -> dict:
+    """scenario -> board name, taken from the board profiles (data, not guesses).
+
+    The probe ledger `datasets/lbp/repeats.jsonl` is SHARED by every board: it
+    carries 2134 Lucky-Break rows and 62 Proving-Ground ones (measured
+    2026-11-13) with no board field.  A benchmark that filters only by
+    `scenario|model` is therefore measuring an accidental mixture — the same
+    failure mode as an unpinned arm space, one level up.  Scenarios are unique to
+    their board in the profiles, so the board can be resolved from the scenario.
+    """
+    import boards as boards_mod
+    out = {}
+    for name in boards_mod.list_boards():
+        try:
+            profile = boards_mod.load_board(name)
+        except Exception:  # noqa: BLE001 — a broken profile must not kill the bench
+            continue
+        for sid in (profile.get("scenario_titles") or {}):
+            out.setdefault(sid, name)
+    return out
+
+
+def board_of(row: dict, by_scenario: dict | None = None) -> str | None:
+    """Which board wrote this probe row (explicit field first, scenario second)."""
+    explicit = row.get("board") or row.get("board_profile")
+    if explicit:
+        return str(explicit)
+    return (by_scenario or boards_by_scenario()).get(str(row.get("scenario") or ""))
+
+
 def load_history(path=REPEATS, *, arms: str = "catalog",
-                 min_probes_per_context: int = 0,
+                 min_probes_per_context: int = 0, board: str | None = None,
                  reward_map: tuple[bool, bool] = (True, True)) -> list[dict]:
     """Real probes with an arm and an independently validated reward.
 
@@ -79,6 +110,9 @@ def load_history(path=REPEATS, *, arms: str = "catalog",
     import generation
     out = []
     excluded = 0
+    other_board = 0
+    by_scenario = boards_by_scenario()
+    wanted = board if board is not None else os.environ.get("HERMES_BOARD") or "lucky-break-payday"
     p = pathlib.Path(path)
     if not p.is_file():
         return out
@@ -89,6 +123,10 @@ def load_history(path=REPEATS, *, arms: str = "catalog",
         try:
             row = json.loads(line)
         except json.JSONDecodeError:
+            continue
+        row_board = board_of(row, by_scenario)
+        if row_board is not None and row_board != wanted:
+            other_board += 1
             continue
         arm = delta_of_input(row.get("input"))
         if not arm:
@@ -106,6 +144,9 @@ def load_history(path=REPEATS, *, arms: str = "catalog",
     if excluded:
         print(f"[bench] arm space = catalog; {excluded} probes on generated/unknown "
               f"arms excluded (use --arms all to include them)")
+    if other_board:
+        print(f"[bench] board = {wanted}; {other_board} probes of other boards excluded "
+              f"(the probe ledger is shared by all boards)")
     if min_probes_per_context:
         by_ctx = defaultdict(list)
         for row in out:
@@ -422,6 +463,10 @@ def main() -> int:
                     help="keep only contexts with at least this many catalog probes "
                          "(default 20; the workspace now has 52 contexts and most are "
                          "too young to compare policies on)")
+    ap.add_argument("--board", default="",
+                    help="probe ledger board to analyse (default $HERMES_BOARD or "
+                         "lucky-break-payday); the ledger is shared by all boards, so "
+                         "this pins the domain")
     ap.add_argument("--reward-map", default="v2", choices=("v1", "faults", "v2"),
                     help="which local-reward mapping grades the probes: "
                          "v1 = the old one (our own dropped probes graded as refusals, "
@@ -438,6 +483,7 @@ def main() -> int:
     a = ap.parse_args()
     history = load_history(a.history, arms=a.arms,
                            min_probes_per_context=a.min_probes_per_context,
+                           board=a.board or None,
                            reward_map={"v1": (False, False), "faults": (True, False),
                                        "v2": (True, True)}[a.reward_map])
     if not history:

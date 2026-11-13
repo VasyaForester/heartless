@@ -26,6 +26,7 @@ Usage:
 import argparse
 import json
 import math
+import os
 import pathlib
 import sqlite3
 import sys
@@ -57,7 +58,7 @@ def classify(delta: str | None, arm_source: str | None) -> str:
     return "catalog"
 
 
-def load(db_path=DB) -> list[dict]:
+def load(db_path=DB, *, board: str | None = None) -> list[dict]:
     conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     cols = {r[1] for r in conn.execute("pragma table_info(attempts)")}
@@ -65,9 +66,15 @@ def load(db_path=DB) -> list[dict]:
     # the new driver yet is still readable (rows then classify by delta prefix)
     has_tag = "arm_source" in cols
     sel = "pair_id, delta, reward, reward_source, state, started_at"
+    where, params = "WHERE reward IS NOT NULL", []
+    if board:
+        # attempts carry board_profile; without the filter two lanes' boards
+        # would be pooled into one A/B comparison
+        where += " AND board_profile=?"
+        params.append(board)
     rows = conn.execute(
         f"SELECT {sel}{', arm_source' if has_tag else ', NULL AS arm_source'}"
-        " FROM attempts WHERE reward IS NOT NULL").fetchall()
+        f" FROM attempts {where}", params).fetchall()
     out = []
     for r in rows:
         out.append({
@@ -126,9 +133,12 @@ def main() -> int:
     ap.add_argument("--db", default=str(DB))
     ap.add_argument("--min-n", type=int, default=MIN_N,
                     help=f"probes per arm before a verdict is allowed (default {MIN_N})")
+    ap.add_argument("--board", default=os.environ.get("HERMES_BOARD", "lucky-break-payday"),
+                    help="board to compare (attempts of the other lane's board would "
+                         "otherwise be pooled into the same arms)")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
-    rows = load(a.db)
+    rows = load(a.db, board=a.board)
     gen = summarise([r for r in rows if r["arm_source"] == "generated"])
     ctl = summarise([r for r in rows if r["arm_source"] == "control_repeat"])
     cat = summarise([r for r in rows if r["arm_source"] == "catalog"])
