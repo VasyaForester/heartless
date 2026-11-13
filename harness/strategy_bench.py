@@ -55,7 +55,7 @@ from strategy import (AdaptiveScheduler, SUCCESS_THRESHOLD, _wilson, arm_family,
 REPEATS = WORK / "datasets" / "lbp" / "repeats.jsonl"
 OUT_JSON = WORK / "artifacts" / "strategy-bench.json"
 
-_DELTA_RE = re.compile(r"loop\d*-([A-Za-z0-9_]+?)-\d{6,}-\d+\.txt$")
+_DELTA_RE = re.compile(r"loop\d*-([A-Za-z0-9_.]+?)-\d{6,}-\d+\.txt$")
 
 
 def delta_of_input(path: str) -> str | None:

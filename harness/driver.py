@@ -31,7 +31,9 @@ WORK = HERE.parent
 sys.path.insert(0, str(HERE))
 
 import attempts  # noqa: E402
+import candidate  # noqa: E402
 import evidence  # noqa: E402
+import frames  # noqa: E402
 import generation  # noqa: E402
 import judge_correlation  # noqa: E402
 import judge_ledger  # noqa: E402
@@ -159,21 +161,157 @@ def delta_stats(conn, key: str) -> dict:
     return out
 
 
-def make_variant(conn, lease, key: str, rng: random.Random, engine, strategy_policy: str):
-    row = conn.execute("SELECT scenario,model,best_input FROM pairs WHERE id=?", (key,)).fetchone()
+def catalog_exhausted(conn, key: str) -> bool:
+    """True when every fixed delta of the pair has been probed at least once."""
+    seen = {r["delta"] for r in conn.execute(
+        "SELECT delta FROM deltas WHERE pair_id=? AND n>0", (key,))}
+    return bool(generation.DELTAS) and all(d in seen for d in generation.DELTAS)
+
+
+def generator_observations(conn, history_rows=None, limit: int = 4000) -> list[dict]:
+    """(context, spec, reward) rows for the component model.
+
+    Two sources: the live v4 attempts (reward column) and the historical repeats
+    ledger, so a fresh run starts from everything the workspace already knows.
+    """
+    out = []
+    for r in conn.execute(
+            "SELECT pair_id, delta, reward FROM attempts WHERE reward IS NOT NULL"
+            " ORDER BY started_at DESC LIMIT ?", (int(limit),)):
+        spec = frames.decompose(r["delta"])
+        if spec:
+            out.append({"context": f"{BOARD_NAME}|{r['pair_id']}", "spec": spec,
+                        "reward": float(r["reward"])})
+    if history_rows is not None:
+        for row in history_rows:
+            spec = frames.decompose(row.get("arm"))
+            if spec:
+                out.append({"context": row["context"], "spec": spec,
+                            "reward": row["reward"]})
+    return out
+
+
+def load_repeats_observations(limit: int = 4000) -> list[dict]:
+    """Historical probe ledger -> (context, arm, reward); used to seed the model."""
+    path = WORK / "datasets" / "lbp" / "repeats.jsonl"
+    if not path.is_file():
+        return []
+    out = []
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()[-int(limit):]
+    except OSError:
+        return []
+    import strategy_bench
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        arm = strategy_bench.delta_of_input(row.get("input"))
+        if not arm:
+            continue
+        reward, _ = strategy.local_reward(row)
+        if reward is None:
+            continue
+        out.append({"context": f"{BOARD_NAME}|{row.get('scenario')}|{row.get('model')}",
+                    "arm": arm, "reward": reward})
+    return out
+
+
+def make_generated_variant(conn, lease, key: str, rng: random.Random, model_rows: list):
+    """Compose a NEW frame for a pair whose fixed catalog has nothing new to offer.
+
+    Honest framing: the component model is fitted on real rewards, but the
+    offline benchmark could NOT confirm that component effects transfer to
+    unseen combinations (Spearman ≈ 0 on held-out components, see
+    reports/strategy-engine-v2-2026-11-13.md).  So the model is used only as a
+    weak prior for ORDERING, and the actual pick is random among the top
+    proposals — pure exploration where the fixed catalog is exhausted, with the
+    reward recorded exactly like any other arm, so the bandit can learn which
+    generated frames survive.
+    """
+    row = conn.execute("SELECT scenario,model FROM pairs WHERE id=?", (key,)).fetchone()
     if not row:
         return None
+    sid, model = row["scenario"], row["model"]
+    base_text, base_path = base_of(conn, key)
+    if base_text is None:
+        return None
+    cmodel = candidate.ComponentModel().fit(model_rows)
+    got = candidate.propose(cmodel, context=f"{BOARD_NAME}|{sid}|{model}", scenario=sid,
+                            k=6, seen=spec_seen(conn, key))
+    if not got:
+        return None
+    pick = rng.choice(got)                       # exploration, not exploitation
+    spec = tuple(pick["spec"])
+    arm = frames.spec_id(spec)
+    nonce = f"{time.strftime('%Y%m%d-%H%M%S')}-{rng.randint(1000, 9999)}"
+    text = frames.compose(spec, base_text, nonce)
+    out = WORK / "inputs" / loop_input_name(sid, arm, int(time.time()), rng.randint(100, 999))
+    out.write_text(text, encoding="utf-8")
+    attempt_id = attempts.allocate(conn, lease, pair_id=key, board=BOARD_NAME,
+                                   scenario=sid, model=model, lane=lease.lane)
+    attempts.prepare(conn, lease, attempt_id, input_text=text,
+                     input_path=str(out.relative_to(WORK)),
+                     parent_input_hash=attempts.sha256_text(base_text),
+                     parent_input_path=rel_or_abs(base_path),
+                     delta=arm, delta_version=generation.DELTA_VERSION,
+                     seed=None, nonce=nonce, strategy_version=4)
+    log(f"GENERATED {attempt_id} spec={arm} p_win={pick['p_win']} "
+        f"conf={pick['confidence']} (component model: weak prior, exploratory pick)")
+    return attempt_id, arm, str(out.relative_to(WORK)), sid, model
+
+
+def rel_or_abs(path) -> str:
+    """Workspace-relative path when possible; absolute otherwise.
+
+    A pair's base pointer may legitimately live outside the workspace (imported
+    fixtures, tests): silently raising there used to kill the probe.
+    """
+    try:
+        return str(pathlib.Path(path).relative_to(WORK))
+    except ValueError:
+        return str(path)
+
+
+def base_of(conn, key: str):
+    """The read-only search base of a pair: (text, path) or (None, None).
+
+    v4: `best_input` is read-only here.  The old code promoted the newest input
+    file to the base whenever it was 60s fresher, which silently replaced the
+    best confirmed probe with an arbitrary later one (defect #2).
+    """
+    row = conn.execute("SELECT scenario,model,best_input FROM pairs WHERE id=?", (key,)).fetchone()
+    if not row:
+        return None, None
     sid, model, best = row["scenario"], row["model"], row["best_input"]
     base = (WORK / best) if best else None
-    # v4: `best_input` is READ-ONLY here.  The old code promoted the newest
-    # input file to the base whenever it was 60s fresher, which silently
-    # replaced the best confirmed probe with an arbitrary later one (defect #2).
     if base is None or not base.is_file():
         base = newest_input(sid, model)
         if base is None or not base.is_file():
-            return None
+            return None, None
         log(f"BASE fallback for {key}: best_input missing -> {base.name}")
-    base_text = base.read_text(encoding="utf-8", errors="replace")
+    return base.read_text(encoding="utf-8", errors="replace"), base
+
+
+def spec_seen(conn, key: str) -> set:
+    """Already-probed generated frames of a pair (never propose one twice)."""
+    return {r["delta"] for r in conn.execute(
+        "SELECT delta FROM deltas WHERE pair_id=? AND n>0", (key,))
+        if frames.parse_spec(r["delta"])}
+
+
+def make_variant(conn, lease, key: str, rng: random.Random, engine, strategy_policy: str):
+    row = conn.execute("SELECT scenario,model FROM pairs WHERE id=?", (key,)).fetchone()
+    if not row:
+        return None
+    sid, model = row["scenario"], row["model"]
+    base_text, base = base_of(conn, key)
+    if base_text is None:
+        return None
     arms = list(generation.DELTAS)
     if not arms:
         log(f"no delta catalog for board {BOARD_NAME}; cannot generate a variant")
@@ -206,7 +344,7 @@ def make_variant(conn, lease, key: str, rng: random.Random, engine, strategy_pol
         conn, lease, attempt_id, input_text=text,
         input_path=str(out.relative_to(WORK)),
         parent_input_hash=attempts.sha256_text(base_text),
-        parent_input_path=str(base.relative_to(WORK)),
+        parent_input_path=rel_or_abs(base),
         delta=delta, delta_version=generation.DELTA_VERSION,
         seed=None, nonce=nonce, strategy_version=3)
     return attempt_id, delta, str(out.relative_to(WORK)), sid, model
@@ -352,6 +490,10 @@ def main() -> int:
     ap.add_argument("--strategy", default=os.environ.get("HERMES_STRATEGY", "ucb_improved"),
                     choices=strategy.POLICIES,
                     help="adaptive-search policy (see strategy_bench.py for the evidence)")
+    ap.add_argument("--generate", default=os.environ.get("HERMES_GENERATE", "exhausted"),
+                    choices=("off", "exhausted", "always"),
+                    help="compose NEW frames (frames.py/candidate.py): off | only when the "
+                         "fixed catalog of a pair is exhausted | always")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
@@ -392,6 +534,14 @@ def main() -> int:
 
     # v4: the strategy engine (standalone; see harness/strategy.py)
     engine = strategy.StrategyEngine(list(generation.DELTAS), policy=a.strategy, seed=a.seed)
+    # v5: the candidate generator (frames.py + candidate.py).  Its component
+    # model is fitted once from everything the workspace knows; the loop only
+    # consults it where the fixed catalog has nothing new to offer.
+    gen_rows = generator_observations(conn, load_repeats_observations()) \
+        if a.generate != "off" else []
+    if a.generate != "off":
+        log(f"GENERATOR on ({a.generate}); component model fitted on {len(gen_rows)} "
+            f"observations; space={len(frames.catalog())} frames")
     try:
         late = judge_ledger.reconcile_unjudged(conn, lease)
         if late:
@@ -434,7 +584,15 @@ def main() -> int:
                     if en >= a.energy_floor:
                         break
                 continue
-            mv = make_variant(conn, lease, key, rng, engine, a.strategy)
+            mv = None
+            if a.generate != "off" and (a.generate == "always" or catalog_exhausted(conn, key)):
+                try:
+                    mv = make_generated_variant(conn, lease, key, rng, gen_rows)
+                except Exception as exc:  # noqa: BLE001
+                    log(f"GENERATE failed ({type(exc).__name__}: {exc}); falling back to the catalog")
+                    mv = None
+            if not mv:
+                mv = make_variant(conn, lease, key, rng, engine, a.strategy)
             if not mv:
                 log(f"no base input for {key}; sleep 30")
                 time.sleep(30)
