@@ -1,8 +1,8 @@
 {
- "ts": "2026-11-12T23:28:50",
- "key": "negative-quantity-exploit|Yellow Kangaroo Extreme",
- "delta": "prepend_controlicd",
- "input": "inputs\\lbp-negative-quantity-exploit-loop-prepend_controlicd-1794515330-285.txt",
- "energy": 745,
- "elapsed_h": 0.021
+ "ts": "2026-11-13T13:03:07",
+ "key": "christmas-giftcard-scam|Diamond Whale Bold",
+ "delta": "append_authority",
+ "input": "inputs\\lbp-christmas-giftcard-scam-loop-append_authority-1794564187-453.txt",
+ "energy": 995,
+ "elapsed_h": 0.0
 }
