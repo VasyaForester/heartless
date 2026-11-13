@@ -15,6 +15,16 @@
 7. Efficient LLM Safety Evaluation through Multi-Agent Debate (EMNLP 2026) — https://aclanthology.org/2026.emnlp-main.76/ — 11 100 человеческих разметок; multi-agent judge на малых моделях, качество близко к GPT-4o.
 8. WorkBench Revisited: Workplace Agents Two Years On (2026) — https://arxiv.org/abs/2606.13715 — 24 модели, включая GPT-5.5 и Claude Opus 4.8; 690 задач, 26 инструментов, оценка реальных побочных эффектов.
 
+## FENCE — Financial and Multimodal Jailbreak Detection Dataset (LREC 2026)
+
+- GitHub: https://github.com/kakaobank/FENCE
+- arXiv: https://arxiv.org/abs/2602.18154
+- LREC: https://lrec.elra.info/lrec2026-main-712
+- DOI: https://doi.org/10.63317/4a35sc6sgwwv
+- Source card: `prompt_injection_ctf/knowledge_base/source-cards/fence-2026.md`
+- 1 000 публичных запросов (500 harmful / 500 benign), 967 изображений, 5 типов изображений (`baseimg`, `textimg`, `eng_textimg`, `figstep`, `eng_figstep`); в статье описаны 10k финансовых text–image пар и 15+ категорий; baseline-детектор 99% in-distribution. Лицензия CC-BY-NC-4.0 + Pixabay.
+- Что внутри / какой файл открывать / чего нет — в source card.
+
 ## Новое (чего ещё нет в базе)
 
 - https://github.com/SaFo-Lab/JailBreakV_28K — HTTP 200

@@ -10,3 +10,5 @@ browser-data-2/
 *.log
 artifacts/*.png
 artifacts/*.jpg
+prompt_injection_ctf/raw/agentdojo/
+prompt_injection_ctf/raw/tensortrust_repo/

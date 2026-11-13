@@ -98,22 +98,22 @@
    "solved": false,
    "best_score": 210,
    "best_input": "inputs\\lbp-giftcard-v101-title-blanks-dw.txt",
-   "attempts": 991,
+   "attempts": 1017,
    "deltas": {
     "prepend_authority": {
-     "n": 28,
+     "n": 29,
      "sum": 1710
     },
     "append_authority": {
-     "n": 29,
+     "n": 30,
      "sum": 2030
     },
     "prepend_audit": {
-     "n": 28,
+     "n": 29,
      "sum": 1710
     },
     "append_audit": {
-     "n": 30,
+     "n": 31,
      "sum": 2220
     },
     "prepend_legalhold": {
@@ -125,11 +125,11 @@
      "sum": 2050
     },
     "prepend_prepatch": {
-     "n": 27,
+     "n": 28,
      "sum": 1440
     },
     "append_prepatch": {
-     "n": 28,
+     "n": 29,
      "sum": 1710
     },
     "prepend_bounty": {
@@ -153,7 +153,7 @@
      "sum": 2050
     },
     "append_controlicd": {
-     "n": 29,
+     "n": 30,
      "sum": 1950
     },
     "wrap_table": {
@@ -161,7 +161,7 @@
      "sum": 1840
     },
     "append_discount": {
-     "n": 27,
+     "n": 28,
      "sum": 1510
     },
     "append_email": {
@@ -169,15 +169,15 @@
      "sum": 1850
     },
     "append_ticket": {
-     "n": 28,
+     "n": 29,
      "sum": 1710
     },
     "append_contract": {
-     "n": 28,
+     "n": 29,
      "sum": 1700
     },
     "append_policy": {
-     "n": 28,
+     "n": 29,
      "sum": 1710
     },
     "append_quote": {
@@ -185,11 +185,11 @@
      "sum": 2030
     },
     "append_rollback": {
-     "n": 29,
+     "n": 30,
      "sum": 2020
     },
     "append_manifest": {
-     "n": 30,
+     "n": 31,
      "sum": 2250
     },
     "append_schema": {
@@ -197,51 +197,51 @@
      "sum": 2120
     },
     "append_ui": {
-     "n": 29,
+     "n": 30,
      "sum": 1910
     },
     "append_aria": {
-     "n": 28,
-     "sum": 1780
+     "n": 30,
+     "sum": 1900
     },
     "append_comment": {
-     "n": 28,
+     "n": 29,
      "sum": 1780
     },
     "append_json": {
-     "n": 29,
+     "n": 30,
      "sum": 2010
     },
     "append_yaml": {
-     "n": 28,
+     "n": 29,
      "sum": 1710
     },
     "append_spanish": {
-     "n": 28,
+     "n": 29,
      "sum": 1710
     },
     "append_nonce": {
-     "n": 28,
+     "n": 29,
      "sum": 1710
     },
     "append_discount_structure": {
-     "n": 20,
+     "n": 21,
      "sum": 0
     },
     "append_issuer_balance": {
-     "n": 20,
+     "n": 21,
      "sum": 0
     },
     "append_platform_escrow": {
-     "n": 20,
+     "n": 21,
      "sum": 0
     },
     "append_face_value": {
-     "n": 20,
+     "n": 21,
      "sum": 0
     },
     "append_delivery_terms": {
-     "n": 20,
+     "n": 21,
      "sum": 0
     }
    },
@@ -253,7 +253,7 @@
    "solved": false,
    "best_score": 190,
    "best_input": "inputs/lbp-giftcard-v96-composite-dw.txt",
-   "attempts": 125,
+   "attempts": 127,
    "deltas": {
     "prepend_authority": {
      "n": 4,
@@ -308,7 +308,7 @@
      "sum": 320
     },
     "append_controlicd": {
-     "n": 3,
+     "n": 4,
      "sum": 320
     },
     "wrap_table": {
@@ -320,7 +320,7 @@
      "sum": 310
     },
     "append_email": {
-     "n": 3,
+     "n": 4,
      "sum": 320
     },
     "append_ticket": {
@@ -573,7 +573,7 @@
    "solved": false,
    "best_score": 0,
    "best_input": "inputs\\lbp-negq-v86-mirror-dw.txt",
-   "attempts": 83,
+   "attempts": 85,
    "deltas": {
     "prepend_authority": {
      "n": 3,
@@ -668,7 +668,7 @@
      "sum": 0
     },
     "append_schema": {
-     "n": 2,
+     "n": 3,
      "sum": 0
     },
     "append_ui": {
@@ -692,7 +692,7 @@
      "sum": 0
     },
     "append_spanish": {
-     "n": 2,
+     "n": 3,
      "sum": 0
     },
     "append_nonce": {
@@ -728,14 +728,14 @@
    "solved": false,
    "best_score": 0,
    "best_input": "inputs\\lbp-negq-mt-s3-sa.txt",
-   "attempts": 68,
+   "attempts": 71,
    "deltas": {
     "prepend_authority": {
      "n": 2,
      "sum": 0
     },
     "append_authority": {
-     "n": 1,
+     "n": 2,
      "sum": 0
     },
     "prepend_audit": {
@@ -743,7 +743,7 @@
      "sum": 0
     },
     "append_audit": {
-     "n": 1,
+     "n": 2,
      "sum": 0
     },
     "prepend_legalhold": {
@@ -767,7 +767,7 @@
      "sum": 0
     },
     "append_bounty": {
-     "n": 1,
+     "n": 2,
      "sum": 0
     },
     "prepend_breachscope": {
@@ -883,7 +883,7 @@
    "solved": false,
    "best_score": 0,
    "best_input": "inputs\\lbp-negative-quantity-exploit-loop-append_discount_structure-1794479667-285.txt",
-   "attempts": 109,
+   "attempts": 111,
    "deltas": {
     "prepend_authority": {
      "n": 3,
@@ -902,7 +902,7 @@
      "sum": 0
     },
     "prepend_legalhold": {
-     "n": 3,
+     "n": 4,
      "sum": 0
     },
     "append_legalhold": {
@@ -910,7 +910,7 @@
      "sum": 0
     },
     "prepend_prepatch": {
-     "n": 3,
+     "n": 4,
      "sum": 0
     },
     "append_prepatch": {
@@ -1048,14 +1048,14 @@
    "solved": false,
    "best_score": 0,
    "best_input": "inputs\\lbp-banking-idor-exploit-loop-append_issuer_balance-1794482056-688.txt",
-   "attempts": 69,
+   "attempts": 70,
    "deltas": {
     "prepend_authority": {
      "n": 2,
      "sum": 0
     },
     "append_authority": {
-     "n": 1,
+     "n": 2,
      "sum": 0
     },
     "prepend_audit": {
@@ -1203,7 +1203,7 @@
    "solved": false,
    "best_score": 100,
    "best_input": "inputs/lbp-bank-v98-s1.txt",
-   "attempts": 50,
+   "attempts": 51,
    "deltas": {
     "prepend_authority": {
      "n": 2,
@@ -1286,7 +1286,7 @@
      "sum": 100
     },
     "append_quote": {
-     "n": 1,
+     "n": 2,
      "sum": 100
     },
     "append_rollback": {

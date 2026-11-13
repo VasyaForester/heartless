@@ -1,1 +1,5 @@
-([...document.querySelectorAll('button')].find(x => (x.innerText||'').includes('Fraudulent Christmas')).click(), 'OK')
+(() => {
+  const btn = [...document.querySelectorAll('button,a')].find(x => (x.innerText||'').toUpperCase().includes('SEE SUCCESS CRITERIA'));
+  if (btn) { btn.click(); return 'clicked'; }
+  return 'no-button';
+})()
