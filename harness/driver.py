@@ -53,10 +53,17 @@ PROFILE_HASH = BOARD["_profile_hash"]
 
 
 def log(msg: str) -> None:
+    """Append one line to the lane log.
+
+    `HERMES_DRIVER_LOG` redirects it: the offline test suite imports this module
+    and would otherwise write its synthetic attempts (":test:" ids) into the
+    operational log the lane watchdog and the operator read.
+    """
     line = f"[{time.strftime('%Y-%m-%dT%H:%M:%S')}] {msg}"
     print(line, flush=True)
     try:
-        with open(WORK / "artifacts" / "driver.log", "a", encoding="utf-8") as f:
+        path = os.environ.get("HERMES_DRIVER_LOG") or str(WORK / "artifacts" / "driver.log")
+        with open(path, "a", encoding="utf-8") as f:
             f.write(line + "\n")
     except OSError:
         pass

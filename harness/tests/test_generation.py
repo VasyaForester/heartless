@@ -10,6 +10,11 @@ import unittest
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 
+# keep the operational lane log clean: anything this suite's imports log goes to
+# a throwaway file instead of artifacts/driver.log (the operator reads that one)
+os.environ.setdefault("HERMES_DRIVER_LOG",
+                      str(pathlib.Path(tempfile.gettempdir()) / "hermes-test-driver.log"))
+
 import candidate  # noqa: E402
 import frames  # noqa: E402
 import generation  # noqa: E402
