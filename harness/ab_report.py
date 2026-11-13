@@ -98,18 +98,72 @@ def summarise(rows: list[dict]) -> dict:
             "success_rate": round(wins / n, 4), "success_ci95": [round(lo, 4), round(hi, 4)]}
 
 
+def _norm_ppf(p: float) -> float:
+    """Inverse standard normal CDF (Acklam's approximation) — enough for power."""
+    a = (-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02,
+         1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00)
+    b = (-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02,
+         6.680131188771972e+01, -1.328068155288572e+01)
+    c = (-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00,
+         -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00)
+    d = (7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00,
+         3.754408661907416e+00)
+    plow, phigh = 0.02425, 1 - 0.02425
+    if p <= 0:
+        return float("-inf")
+    if p >= 1:
+        return float("inf")
+    if p < plow:
+        q = math.sqrt(-2 * math.log(p))
+        return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / \
+               ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+    if p > phigh:
+        q = math.sqrt(-2 * math.log(1 - p))
+        return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / \
+               ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+    q = p - 0.5
+    r = q * q
+    return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / \
+           (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1)
+
+
+def probes_needed(gen: dict, ctl: dict, power: float = 0.8, alpha: float = 0.05) -> dict:
+    """How many probes per arm to separate the two success rates.
+
+    "Undecided" without a plan is a permanent state; this turns it into a number.
+    Two-proportion test: n = (z_{1-a/2} + z_power)^2 (p1(1-p1) + p2(1-p2)) / (p1-p2)^2.
+    """
+    p1, p2 = gen.get("success_rate"), ctl.get("success_rate")
+    if p1 is None or p2 is None:
+        return {"needed_per_arm": None, "reason": "no success data yet"}
+    gap = abs(p1 - p2)
+    if gap < 1e-9:
+        return {"needed_per_arm": None, "reason": "observed gap is zero: no finite n separates them"}
+    z_a = _norm_ppf(1 - alpha / 2)
+    z_b = _norm_ppf(power)
+    n = ((z_a + z_b) ** 2) * (p1 * (1 - p1) + p2 * (1 - p2)) / (gap ** 2)
+    n = int(math.ceil(n))
+    return {"needed_per_arm": n, "observed_gap": round(gap, 4),
+            "have": {"generated": gen["n"], "control_repeat": ctl["n"]},
+            "still_needed": max(0, n - gen["n"]) + max(0, n - ctl["n"]),
+            "note": f"80% power at alpha={alpha}, two-proportion test on the observed rates"}
+
+
 def verdict(gen: dict, ctl: dict, min_n: int) -> dict:
     """Undecided unless there is enough evidence AND the intervals separate."""
     if gen["n"] < min_n or ctl["n"] < min_n:
         need = {"generated": max(0, min_n - gen["n"]), "control_repeat": max(0, min_n - ctl["n"])}
-        return {"call": "undecided", "reason": "not enough samples yet", "still_needed": need}
+        out = {"call": "undecided", "reason": "not enough samples yet", "still_needed": need}
+        out["power"] = probes_needed(gen, ctl)
+        return out
     d_mean = (gen["mean_reward"] or 0.0) - (ctl["mean_reward"] or 0.0)
     g_lo, g_hi = gen["success_ci95"] or (0, 0)
     c_lo, c_hi = ctl["success_ci95"] or (0, 0)
     separated = g_lo > c_hi or c_lo > g_hi
     if not separated:
         return {"call": "undecided", "reason": "success intervals overlap",
-                "delta_mean_reward": round(d_mean, 4)}
+                "delta_mean_reward": round(d_mean, 4),
+                "power": probes_needed(gen, ctl)}
     better = "generated" if d_mean > 0 else "control_repeat"
     return {"call": better, "reason": "success intervals separated",
             "delta_mean_reward": round(d_mean, 4),
@@ -166,6 +220,13 @@ def main() -> int:
         print(f"  still needed: " + ", ".join(f"{k} +{n}" for k, n in v["still_needed"].items()))
     if v.get("delta_mean_reward") is not None:
         print(f"  mean-reward difference (generated - control): {v['delta_mean_reward']:+.4f}")
+    power = v.get("power") or {}
+    if power.get("needed_per_arm"):
+        print(f"  decision needs ~{power['needed_per_arm']} probes PER ARM "
+              f"(gap {power['observed_gap']}): have generated {power['have']['generated']}, "
+              f"control {power['have']['control_repeat']} -> {power['still_needed']} more probes")
+    elif power.get("reason"):
+        print(f"  decision plan: {power['reason']}")
     pairs = [(k, v["generated"]["n"], v["control_repeat"]["n"]) for k, v in report["per_pair"].items()]
     if pairs:
         print("\nper pair (generated / control probes):")
