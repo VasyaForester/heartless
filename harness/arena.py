@@ -23,6 +23,7 @@ registration instead of by hope.
 from __future__ import annotations
 
 import json
+import importlib
 import os
 import pathlib
 import subprocess
@@ -104,7 +105,7 @@ class ArenaAdapter(Protocol):
 
     # --- naming / layout ------------------------------------------------
     def input_name(self, scenario: str, arm: str, ts: int, rnd: int) -> str: ...
-    def newest_input(self, scenario: str, model: str): ...
+    def newest_input(self, scenario: str, model: str): ...  # path-like (str or Path), or None
     def delta_module(self) -> str: ...
     def check_module(self) -> str: ...
 
@@ -286,15 +287,38 @@ def get_adapter(board: dict | None = None):
 
     A board that names an unknown platform fails loudly here — silently falling
     back to Gray Swan would run the wrong arena's transport against a new board.
+    Before failing, one autoload attempt is made: a module named after the
+    platform (`fake-arena` -> `arena_fake.py`) is imported if it exists, so a new
+    arena is "drop in the file + register in it" rather than an edit of this list.
     """
     profile: dict = load_board() if board is None else board
     name = adapter_name(profile)
+    if name not in ADAPTERS:
+        module = "arena_" + str(name).replace("-", "_")
+        expected = pathlib.Path(__file__).resolve().parent / f"{module}.py"
+        try:
+            importlib.import_module(module)
+        except ModuleNotFoundError as exc:
+            # only "there is no such module" is a legitimate miss; a module that
+            # EXISTS but fails to import must be loud, otherwise a broken adapter
+            # looks exactly like an unregistered platform
+            if exc.name != module:
+                raise
+            if expected.is_file():
+                print(f"[arena] {expected.name} is present but not importable "
+                      f"(sys.path[0]={sys.path[0]!r}, cwd={os.getcwd()!r})",
+                      file=sys.stderr)
+        except Exception as exc:  # noqa: BLE001
+            raise SystemExit(f"adapter module {module!r} failed to import: "
+                             f"{type(exc).__name__}: {exc}") from exc
     try:
         cls = ADAPTERS[name]
     except KeyError:
+        hint = (f"a module named arena_{str(name).replace('-', '_')}.py in harness/ "
+                f"would be autoloaded")
         raise SystemExit(
             f"board {profile.get('name')!r} needs platform adapter {name!r}, "
-            f"which is not registered (have: {sorted(ADAPTERS)})") from None
+            f"which is not registered (have: {sorted(ADAPTERS)}); {hint}") from None
     return cls(board=profile)
 
 

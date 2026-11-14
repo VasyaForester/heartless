@@ -243,6 +243,28 @@ def bench_quick() -> dict:
     return {"rc": rc, "winner": line[-1].strip() if line else out[-120:].strip()}
 
 
+def efficiency_block() -> dict:
+    """The mission metric each pass: confirmed decisions per unit of energy.
+
+    Reporting only — the standing rule is never to stop solving tasks on our own,
+    so a bad loss share produces an alarm (a line in the chat), not a stop.
+    """
+    import efficiency
+    try:
+        rep = efficiency.report(1.0)
+    except Exception as exc:  # noqa: BLE001 — the custodian must not die on this
+        return {"ok": False, "detail": f"{type(exc).__name__}: {exc}"}
+    total = rep.get("total", {})
+    return {"ok": True,
+            "probes_1h": total.get("probes"),
+            "judged_1h": total.get("judged"),
+            "judge_positive_1h": total.get("judge_positive"),
+            "fault_share": total.get("fault_share_of_ledger"),
+            "boards": {b: {"probes": v["probes"], "judged": v["judged"],
+                           "decision_per_1000_energy": v["decision_per_1000_energy"]}
+                       for b, v in (rep.get("boards") or {}).items()}}
+
+
 def console_audit() -> dict:
     """Any VISIBLE console window from our chain is a defect (2026-11-14).
 
@@ -274,6 +296,7 @@ def main() -> int:
     record["ab"] = ab_verdict(a.dry_run)
     record["calibration"] = calibration()
     record["bench"] = bench_quick()
+    record["efficiency"] = efficiency_block()
     record["console"] = console_audit()
     import sqlite3
     try:
@@ -316,6 +339,13 @@ def main() -> int:
         problems.append(f"A/B report error: {record['ab'].get('detail')}")
     if not record["console"].get("ok", True):
         problems.append(f"console leak: {record['console'].get('leaks')}")
+    eff = record.get("efficiency") or {}
+    share = eff.get("fault_share")
+    if share is not None and share > 0.45:
+        # Severe plumbing loss: alarm, never a stop (the standing rule forbids
+        # stopping the lane on our own initiative).
+        problems.append(f"plumbing loss share {share:.2f} of probe attempts "
+                        f"(probes_1h={eff.get('probes_1h')}, judged={eff.get('judged_1h')})")
     record["problems"] = problems
     if problems and not a.dry_run:
         print("PROBLEMS: " + "; ".join(problems))

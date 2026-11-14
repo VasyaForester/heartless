@@ -35,6 +35,13 @@ def validate(profile: dict, path: pathlib.Path | None = None) -> dict:
     missing = [k for k in REQUIRED if k not in profile]
     if missing:
         raise ValueError(f"board profile{where} missing fields: {missing}")
+    if profile.get("sandbox"):
+        # An offline sandbox arena (e.g. fake-arena) is not a live target: it must
+        # say so, and it is exempt from the live-URL rule.  Everything else about
+        # the profile is validated exactly like a real board.
+        if not str(profile.get("_note") or "").strip():
+            raise ValueError(f"board profile{where}: sandbox boards need a _note")
+        return profile
     if not str(profile["url"]).startswith("https://app.grayswan.ai/arena/challenge/"):
         raise ValueError(f"board profile{where}: url must be an arena challenge URL")
     cost = profile["cost"]

@@ -132,6 +132,13 @@ def check_boards() -> dict:
         except Exception as exc:  # noqa: BLE001
             problems.append(f"{name}: {exc}")
             continue
+        if p.get("sandbox"):
+            # An offline sandbox board (fake arena) is allowed a non-live URL, but
+            # it must SAY it is one — otherwise a sandbox could be mistaken for a
+            # real target and get probed.
+            if not str(p.get("_note") or "").strip():
+                problems.append(f"{name}: sandbox board without a _note")
+            continue
         if not p.get("url", "").startswith("https://"):
             problems.append(f"{name}: non-https url")
         if not isinstance(p.get("models"), list):

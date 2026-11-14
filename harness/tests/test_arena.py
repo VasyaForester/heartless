@@ -108,12 +108,15 @@ class AdapterContractTest(unittest.TestCase):
             arena.get_adapter(board)
 
     def test_board_platform_field_is_optional_and_explicit_here(self):
-        """Boards may name their platform; when they do, it must be registered."""
+        """Boards may name their platform; when they do, it must be resolvable —
+        either already registered or autoloadable as arena_<platform>.py."""
         for name in boards.list_boards():
             profile = boards.load_board(name)
             if profile.get("platform"):
-                self.assertIn(profile["platform"], arena.ADAPTERS,
-                              f"board {name} names an unregistered platform")
+                with self.subTest(board=name):
+                    adapter = arena.get_adapter(profile)  # autoloads if needed
+                    self.assertEqual(adapter.name(), profile["platform"])
+                    self.assertEqual(adapter.version(), arena.INTERFACE_VERSION)
 
 
 if __name__ == "__main__":

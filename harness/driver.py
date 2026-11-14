@@ -88,8 +88,9 @@ def seed(conn) -> None:
             key = f"{sid}|{model}"
             b = board.get(key) or {}
             solved = 1 if (b.get("solved") or model in SOLVED.get(sid, set())) else 0
-            best = b.get("best_input") or newest_input(sid, model)
+            best = b.get("best_input") or PLATFORM.newest_input(sid, model)
             if best:
+                best = str(best)  # the protocol says path-like (str or Path)
                 bp = pathlib.Path(best)
                 if bp.is_absolute():
                     try:
@@ -375,7 +376,7 @@ def base_of(conn, key: str):
     sid, model, best = row["scenario"], row["model"], row["best_input"]
     base = (WORK / best) if best else None
     if base is None or not base.is_file():
-        base = newest_input(sid, model)
+        base = PLATFORM.newest_input(sid, model)
         if base is None or not base.is_file():
             return None, None
         log(f"BASE fallback for {key}: best_input missing -> {base.name}")
@@ -605,8 +606,14 @@ def main(argv=None) -> int:
         rc, out, err = sh([sys.executable, str(WORK / "harness" / "pick_target.py")], timeout=30)
         target = (out or "").strip()
     if not target:
-        log("no target (pick_target empty); is the lane browser up?")
-        return 3
+        # An adapter can declare that it needs no browser (the offline sandbox:
+        # harness/arena_fake.py).  Every other arena keeps the loud refusal, so a
+        # missing browser is still a hard error rather than a silent no-op.
+        if getattr(PLATFORM, "NEEDS_BROWSER", True):
+            log("no target (pick_target empty); is the lane browser up?")
+            return 3
+        target = "no-browser"
+        log(f"target not required by platform {PLATFORM.name()!r}; using {target!r}")
 
     lease = store.acquire_lease(conn, a.lane, target)
     if not lease:
