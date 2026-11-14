@@ -27,6 +27,7 @@ WORK = HERE.parent
 sys.path.insert(0, str(HERE))
 
 from boards import load_board  # noqa: E402
+import winquiet  # noqa: E402
 
 LBP = HERE / "lbp.py"
 BOARD = load_board()
@@ -67,7 +68,8 @@ except Exception as _exc:  # noqa: BLE001
 
 def sh(cmd, timeout=300, cwd=None):
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
-                       encoding="utf-8", errors="replace", cwd=cwd or str(WORK))
+                       encoding="utf-8", errors="replace", cwd=cwd or str(WORK),
+                       **winquiet.windowless_kwargs())
     return p.returncode, (p.stdout or ""), (p.stderr or "")
 
 

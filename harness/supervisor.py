@@ -26,6 +26,7 @@ sys.path.insert(0, str(HERE))
 from boards import load_board  # noqa: E402
 import manifest as manifest_mod  # noqa: E402
 from store import pid_alive  # noqa: E402
+from winquiet import windowless_kwargs  # noqa: E402
 
 CHROME_DEFAULT = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 # board comes from $HERMES_BOARD (default: lucky-break-payday)
@@ -101,7 +102,8 @@ def pick_target(env: dict) -> str:
     try:
         p = subprocess.run([sys.executable, str(WORK / "harness" / "pick_target.py")],
                            capture_output=True, text=True, encoding="utf-8",
-                           errors="replace", timeout=30, env=env)
+                           errors="replace", timeout=30, env=env,
+                           **windowless_kwargs())
         return (p.stdout or "").strip()
     except Exception:
         return ""
@@ -163,8 +165,12 @@ def main() -> int:
             elif a.once:
                 args.append("--once")
             with open(out_path, "a", encoding="utf-8") as out:
+                # windowless: without this the driver (and every python it spawns)
+                # opens a VISIBLE console titled with the interpreter path whenever
+                # the supervisor itself has no console (2026-11-14).
                 p = subprocess.Popen(args, cwd=str(WORK), env=env,
-                                     stdout=out, stderr=subprocess.STDOUT)
+                                     stdout=out, stderr=subprocess.STDOUT,
+                                     **windowless_kwargs())
                 log(f"driver start pid={p.pid} target={target}")
                 # Watchdog: p.wait() alone cannot distinguish "attempt in flight"
                 # from "driver wedged" — on 2026-11-13 a wedged driver kept the

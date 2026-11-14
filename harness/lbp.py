@@ -78,11 +78,13 @@ CARD_HINTS = dict(_PROFILE.get("card_hints") or {})
 
 sys.path.insert(0, str(HERE))
 import chat_ops  # noqa: E402
+import winquiet  # noqa: E402
 
 
 def sh(cmd, timeout=300):
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
-                       encoding="utf-8", errors="replace")
+                       encoding="utf-8", errors="replace",
+                       **winquiet.windowless_kwargs())
     return p.returncode, (p.stdout or ""), (p.stderr or "")
 
 

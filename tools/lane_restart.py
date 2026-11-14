@@ -20,6 +20,8 @@ import pathlib
 
 W = pathlib.Path(__file__).resolve().parent.parent
 A = W / "artifacts"
+sys.path.insert(0, str(W / "harness"))
+from winquiet import windowless_kwargs  # noqa: E402
 
 
 def winpids() -> set:
@@ -76,12 +78,16 @@ kill(sup, "supervisor")
 time.sleep(2)
 
 out = open(A / "supervisor.out", "a", encoding="utf-8")
-flags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0) | getattr(subprocess, "DETACHED_PROCESS", 0)
+# 2026-11-14: was DETACHED_PROCESS — that is exactly what made every python the
+# supervisor later spawned (the driver, pick_target, lbp.py) open a NEW VISIBLE
+# console window branded with the WindowsApps interpreter path; closing that
+# window even killed the driver (STATUS_CONTROL_C_EXIT 0xC000013A).  CREATE_NO_WINDOW
+# keeps the supervisor equally outliving while leaving its children windowless.
 p = subprocess.Popen(
     [sys.executable, str(W / "harness" / "supervisor.py"),
      "--lane", "main", "--port", "9223", "--max-hours", "0"],
     cwd=str(W), stdout=out, stderr=subprocess.STDOUT,
-    env=os.environ.copy(), creationflags=flags)
+    env=os.environ.copy(), **windowless_kwargs(new_process_group=True))
 print(f"new supervisor pid={p.pid}")
 
 deadline = time.time() + 120

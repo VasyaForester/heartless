@@ -30,6 +30,9 @@ from datetime import datetime, timezone
 from functools import lru_cache
 from urllib.parse import urlsplit
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import winquiet  # noqa: E402
+
 TRACKS = frozenset({"Chat", "Image", "Agent", "Indirect"})
 STATUSES = frozenset({"pending", "completed", "error"})
 JUDGE_STATUSES = frozenset({"pending", "passed", "failed", "unknown"})
@@ -150,7 +153,8 @@ def managed_environment() -> dict:
     if cli:
         try:
             result = subprocess.run([cli, "pm", "env", "node", "chromium"],
-                                    capture_output=True, text=True, timeout=15, check=False)
+                                    capture_output=True, text=True, timeout=15, check=False,
+                                    **winquiet.windowless_kwargs())
             value = json.loads(result.stdout)
             if result.returncode == 0 and isinstance(value, dict):
                 return {key: value[key] for key in ("PATH", "AGENT_BROWSER_EXECUTABLE_PATH")
@@ -176,6 +180,7 @@ def discover_node() -> tuple[str, dict]:
             result = subprocess.run(
                 [node, "-e", "console.log(JSON.stringify({version:process.versions.node,webSocket:typeof WebSocket==='function'}))"],
                 capture_output=True, text=True, timeout=10, check=False,
+                **winquiet.windowless_kwargs(),
             )
             info = json.loads(result.stdout)
             if result.returncode or int(info["version"].split(".")[0]) < 22 or info.get("webSocket") is not True:
@@ -252,7 +257,8 @@ def engine(layout: Layout, command: str, extra=()) -> dict:
     env["HACKATHON_CDP_URL"] = CDP_URL
     try:
         result = subprocess.run([node, str(script), command, *extra], cwd=layout.workspace,
-                                env=env, capture_output=True, text=True, timeout=360, check=False)
+                                env=env, capture_output=True, text=True, timeout=360, check=False,
+                                **winquiet.windowless_kwargs())
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise HelperError(f"Engine {command} could not finish: {type(exc).__name__}.") from exc
     try:
@@ -372,7 +378,8 @@ def make_image(layout: Layout, text_file: Path, destination: Path, width=1280, h
                    "--html", str(page), "--out", str(screenshot),
                    "--width", str(width), "--height", str(height)]
         try:
-            process = subprocess.run(command, capture_output=True, text=True, timeout=60, check=False)
+            process = subprocess.run(command, capture_output=True, text=True, timeout=60,
+                                     check=False, **winquiet.windowless_kwargs())
         except (OSError, subprocess.TimeoutExpired) as exc:
             raise HelperError(f"Image renderer failed: {type(exc).__name__}.") from exc
         if process.returncode or not screenshot.is_file():

@@ -52,6 +52,8 @@ HERE = pathlib.Path(__file__).resolve().parent
 WORK = HERE.parent
 sys.path.insert(0, str(HERE))
 
+import winquiet  # noqa: E402
+
 ARTIFACTS = WORK / "artifacts"
 NIGHTLY_LOG = ARTIFACTS / "nightly.log"
 NIGHTLY_JSONL = ARTIFACTS / "nightly.jsonl"
@@ -76,7 +78,7 @@ def stamp() -> str:
 def run(cmd: list, timeout: int = 900) -> tuple[int, str]:
     try:
         p = subprocess.run(cmd, cwd=str(WORK), capture_output=True, text=True,
-                           timeout=timeout)
+                           timeout=timeout, **winquiet.windowless_kwargs())
         return p.returncode, (p.stdout or "") + (p.stderr or "")
     except subprocess.TimeoutExpired:
         return -9, f"timeout after {timeout}s"
@@ -215,6 +217,23 @@ def bench_quick() -> dict:
     return {"rc": rc, "winner": line[-1].strip() if line else out[-120:].strip()}
 
 
+def console_audit() -> dict:
+    """Any VISIBLE console window from our chain is a defect (2026-11-14).
+
+    The windows flash because a console program was spawned by a parent without a
+    console (a DETACHED supervisor, a GUI app, a scheduler).  Closing such a window
+    kills the child (STATUS_CONTROL_C_EXIT).  Run the audit every pass so a leak is
+    reported instead of being rediscovered by the user.
+    """
+    rc, out = run([sys.executable, str(WORK / "tools" / "console_audit.py"), "--json"],
+                  timeout=120)
+    try:
+        leaks = json.loads(out)
+    except json.JSONDecodeError:
+        return {"ok": False, "detail": out[-160:].strip()}
+    return {"ok": not leaks, "leaks": leaks[:5], "n": len(leaks)}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=(__doc__ or "").split("\n")[0])
     ap.add_argument("--dry-run", action="store_true")
@@ -229,6 +248,7 @@ def main() -> int:
     record["ab"] = ab_verdict(a.dry_run)
     record["calibration"] = calibration()
     record["bench"] = bench_quick()
+    record["console"] = console_audit()
     import sqlite3
     try:
         conn = sqlite3.connect(f"file:{ARTIFACTS / 'harness.db'}?mode=ro", uri=True)
@@ -258,7 +278,8 @@ def main() -> int:
     # a non-zero exit is reserved for things a human must look at
     bad = (not health["alive"] and not health["paused"]) or \
           (record.get("regression") and not record["regression"]["ok"]) or \
-          record["ab"].get("call") == "error"
+          record["ab"].get("call") == "error" or \
+          not record["console"].get("ok", True)
     return 1 if bad else 0
 
 
