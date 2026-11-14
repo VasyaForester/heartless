@@ -1,5 +1,6 @@
 {
-  "strategy": "contextual_ts",
+  "strategy": "ucb_improved",
   "ab_generate": 0.5,
-  "_note": "Live lane flags, read by harness/driver.py as CLI defaults (precedence: CLI > env > this file > built-in). strategy=contextual_ts: leads on the CORRECTED reward channel (mean 0.2326 / success 0.2222 / good-arm 0.355 vs ucb_improved 0.1603 / 0.1700 / 0.250, budget 300, 21 seeds, non-overlapping CI; ablated with strategy_bench.py --reward-map v1|faults|v2). ab_generate=0.5: randomized control for the frame generator (see harness/ab_report.py)."
+  "_note": "Live lane flags, read by harness/driver.py as CLI defaults (precedence: CLI > env > this file > built-in). strategy=contextual_ts: leads on the CORRECTED reward channel (mean 0.2326 / success 0.2222 / good-arm 0.355 vs ucb_improved 0.1603 / 0.1700 / 0.250, budget 300, 21 seeds, non-overlapping CI; ablated with strategy_bench.py --reward-map v1|faults|v2). ab_generate=0.5: randomized control for the frame generator (see harness/ab_report.py).",
+  "_strategy_note": "switched back 2026-11-14 after the policy ranking proved UNSTABLE across reward mappings/windows: contextual_ts led under v1/faults but collapsed under the live graded mapping (0.089 vs ucb 0.239, 21 seeds), because its prior_k=40 had been tuned under the old mapping. ucb_improved is the robust choice (top-1 on v2, top-2 on v1/faults, no mapping-sensitive hyperparameter). See RULES 84."
 }

@@ -55,7 +55,10 @@ SUCCESS_THRESHOLD = 0.5
 # lose to the plain UCB; at the tuned value they reach parity with it
 # (contextual_ts 0.0856 vs 0.0814) and thompson leads on confirmed successes
 # (0.0293 vs 0.017).  The defaults below are therefore policy-specific.
-POLICY_PRIOR_K = {"thompson": 25.0, "contextual_ts": 40.0}
+POLICY_PRIOR_K = {"thompson": 25.0, "contextual_ts": 6.0}
+# 2026-11-14: the graded mapping moved the optimum (measured: prior_k 6/12/25/40 ->
+# 0.133/0.120/0.104/0.083 on v2).  A prior tuned under one mapping does NOT carry
+# over to another — re-tune whenever the reward mapping changes (RULES 84).
 DEFAULT_PRIOR_K = 6.0
 
 MEMORY_PATH = WORK / "artifacts" / "strategy-memory.db"
@@ -305,7 +308,19 @@ class IndependentEvaluator:
 
     The judge is one input among several — never the only teacher (advice #6).
     Disagreement is recorded, not averaged away silently.
+
+    Weights, and why (measured 2026-11-14 on 54 paired probes): the local proxy
+    SATURATES at the current operating point — it reports "engaged" (0.6-0.7) for
+    probes the judge scores 0.00-0.04, 22 of 22 times in the disagreement log.  An
+    even blend therefore let the saturated proxy speak with 30% of the voice and
+    flattened every judged attempt to ~0.2, hiding the judge's categorical
+    rejection.  When the judge has spoken it dominates; the proxy keeps 10% only
+    to order attempts the judge scored EQUALLY (all zeros) by structural
+    progress.  Unjudged attempts still ride the proxy alone.
     """
+
+    JUDGE_SHARE = 0.9
+    PROXY_SHARE = 0.1
 
     WEIGHTS = {"correctness": 0.35, "safety": 0.15, "coverage": 0.20,
                "evidence": 0.15, "cost": 0.15}
@@ -314,7 +329,7 @@ class IndependentEvaluator:
         loc, loc_conf = local_reward(signals)
         jud, jud_conf = judge_reward(judge)
         if jud is not None and loc is not None:
-            reward = round(0.7 * jud + 0.3 * loc, 4)
+            reward = round(self.JUDGE_SHARE * jud + self.PROXY_SHARE * loc, 4)
             source, conf = "composite", max(jud_conf, loc_conf)
         elif jud is not None:
             reward, source, conf = jud, "judge", jud_conf
@@ -628,12 +643,18 @@ class StrategyEngine:
                         scenario=scenario, model=model, board=board, novelty=nov,
                         lineage=lineage, dimensions=ev["dimensions"],
                         payload={"signals": _slim(signals), "judge_verdict": ev["verdict"]})
-        if ev["judge_reward"] is not None and ev["local_reward"] is not None \
-                and ev["disagreement"] is not None and ev["disagreement"] >= 0.5:
-            self.memory.record_disagreement(context=context, arm=arm,
-                                            judge_reward=ev["judge_reward"],
-                                            local_reward=ev["local_reward"],
-                                            note="judge and local validator disagree")
+        if ev["judge_reward"] is not None and ev["local_reward"] is not None:
+            # EVERY paired observation is logged, not only the loud disagreements:
+            # the pair (judge, proxy) is the raw material the reward channel is
+            # calibrated on, and a log that only keeps |gap|>=0.5 silently biases
+            # that calibration toward conflicts (found 2026-11-14: 22 rows from 42
+            # judged attempts).
+            self.memory.record_disagreement(
+                context=context, arm=arm,
+                judge_reward=ev["judge_reward"], local_reward=ev["local_reward"],
+                note=("judge and local validator disagree"
+                      if (ev["disagreement"] or 0.0) >= 0.5
+                      else "both observed (order agrees)"))
         return ev
 
     def pick(self, *, context: str, scenario: str = "") -> str:
