@@ -124,13 +124,19 @@ def audit(rows: list[dict]) -> dict:
     }
 
 
-def calibrate(rows: list[dict], db_path=DB) -> dict:
-    """Mean judge score per proxy level — the monotonicity check.
+def calibrate(rows: list, db_path=DB, memory_path=None) -> dict:
+    """Pair proxy levels with judge scores and issue a verdict.
 
-    Two sources of pairs: (a) ledger rows that carry judge fields, (b) attempts
-    in the live DB whose reward came from the composite evaluator (they hold a
-    verified judge score AND a local proxy value).
+    `memory_path` is parameterised on purpose: the arm-level observation log
+    (strategy-memory.db) lives in the workspace, and a unit test that inherited
+    that live path silently started reading production rows — the test then failed
+    the moment the workspace had enough pairs (found by the hourly custodian,
+    2026-11-14).  Tests pass a path that does not exist.
     """
+    mem_path = pathlib.Path(memory_path) if memory_path else (WORK / "artifacts" / "strategy-memory.db")
+    # Two sources of pairs: (a) ledger rows that carry judge fields, (b) the
+    # arm-level observation log and the composite rows of the live DB — the
+    # verdict itself is computed from RAW pairs only (see the note in the result).
     buckets: dict[str, list[float]] = collections.defaultdict(list)
     paired = 0
     for row in rows:
@@ -151,28 +157,31 @@ def calibrate(rows: list[dict], db_path=DB) -> dict:
     path = pathlib.Path(db_path)
     if path.is_file():
         conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
-        conn.row_factory = sqlite3.Row
-        cols = {r[1] for r in conn.execute("pragma table_info(attempts)")}
-        if {"reward", "score", "judge_status"} <= cols:
-            for r in conn.execute("SELECT reward, score FROM attempts"
-                                  " WHERE reward IS NOT NULL AND score IS NOT NULL"
-                                  " AND reward_source='composite'"):
-                # labelled apart on purpose: the DB stores the COMPOSITE reward
-                # (judge + proxy blend), a different scale from the raw proxy
-                # levels of the ledger — mixing them in one column would be a
-                # fake monotonicity claim.
-                buckets[f"composite:{float(r['reward']):.2f}"].append(
-                    float(r["score"]) / 100.0)
-                db_pairs += 1
+        try:
+            conn.row_factory = sqlite3.Row
+            cols = {r[1] for r in conn.execute("pragma table_info(attempts)")}
+            if {"reward", "score", "judge_status"} <= cols:
+                for r in conn.execute("SELECT reward, score FROM attempts"
+                                      " WHERE reward IS NOT NULL AND score IS NOT NULL"
+                                      " AND reward_source='composite'"):
+                    # labelled apart on purpose: the DB stores the COMPOSITE reward
+                    # (judge + proxy blend), a different scale from the raw proxy
+                    # levels of the ledger — mixing them in one column would be a
+                    # fake monotonicity claim.
+                    buckets[f"composite:{float(r['reward']):.2f}"].append(
+                        float(r["score"]) / 100.0)
+                    db_pairs += 1
+        finally:
+            conn.close()  # Windows keeps the file locked while a handle is open
     # RAW pairs (judge vs proxy, no blend) from the arm-level disagreement log —
     # this is the column the monotonicity verdict is allowed to use, because both
     # numbers are independent measurements of the same probe.
     raw_pairs: list = []
-    mem = pathlib.Path("artifacts/strategy-memory.db")
+    mem = mem_path
     if mem.is_file():
         conn = sqlite3.connect(f"file:{mem}?mode=ro", uri=True)
-        conn.row_factory = sqlite3.Row
         try:
+            conn.row_factory = sqlite3.Row
             for r in conn.execute("SELECT judge_reward, local_reward FROM disagreements"
                                   " WHERE judge_reward IS NOT NULL"
                                   " AND local_reward IS NOT NULL"):
@@ -180,6 +189,8 @@ def calibrate(rows: list[dict], db_path=DB) -> dict:
                 dis_pairs += 1
         except sqlite3.OperationalError:
             pass
+        finally:
+            conn.close()
     # plus every ledger probe that carries both a proxy level and judge pcts
     for row in rows:
         pcts = row.get("pcts")

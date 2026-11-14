@@ -40,6 +40,10 @@ class LedgerTest(unittest.TestCase):
 
 
 class AuditTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
     def test_faults_and_levels_are_separated(self):
         rows = [
             {"probe_ok": False},                                        # our fault
@@ -61,12 +65,38 @@ class AuditTest(unittest.TestCase):
     def test_calibration_says_when_it_lacks_evidence(self):
         rows = [{"probe_ok": True, "fill_ok": True, "tool_invoked": True,
                  "failure_class": "NONE_READY", "pcts": [100, 50]}]
-        cal = reward_audit.calibrate(rows, db_path=pathlib.Path("does-not-exist.db"))
+        cal = reward_audit.calibrate(rows, db_path=pathlib.Path("does-not-exist.db"),
+                                     memory_path=pathlib.Path("also-missing.db"))
         self.assertEqual(cal["pairs"], 1)
         self.assertFalse(cal["enough_evidence"])
         # NONE_READY + a tool call is the top proxy level; the judge says 75%
         self.assertEqual(cal["by_level"]["0.85"]["mean_judge"], 0.75)
         self.assertEqual(cal["by_level"]["0.85"]["n"], 1)
+
+    def test_calibration_verdict_uses_the_observation_log(self):
+        """30+ raw (proxy, judge) pairs from strategy-memory decide the verdict —
+        and the verdict is allowed to say the proxy is saturated."""
+        import sqlite3
+        mem = pathlib.Path(self.tmp.name) / "memory.db"
+        conn = sqlite3.connect(mem)
+        conn.execute("CREATE TABLE disagreements (id INTEGER PRIMARY KEY, ts REAL,"
+                     " context TEXT, arm TEXT, judge_reward REAL, local_reward REAL,"
+                     " delta REAL, note TEXT)")
+        for i in range(32):
+            conn.execute("INSERT INTO disagreements(ts,context,arm,judge_reward,local_reward)"
+                         " VALUES(?,?,?,?,?)", (i, "ctx", f"arm{i % 4}", 0.0, 0.65))
+        conn.commit()
+        conn.close()
+        cal = reward_audit.calibrate([], db_path=pathlib.Path("nope.db"), memory_path=mem)
+        self.assertTrue(cal["enough_evidence"])
+        self.assertEqual(cal["verdict"]["pairs"], 32)
+        self.assertIn("saturated", cal["verdict"]["call"])
+        self.assertEqual(cal["verdict"]["judge_positive_n"], 0)
+
+    def test_calibration_without_enough_pairs_refuses_a_verdict(self):
+        cal = reward_audit.calibrate([], db_path=pathlib.Path("nope.db"),
+                                     memory_path=pathlib.Path("also-missing.db"))
+        self.assertIsNone(cal["verdict"])
 
 
 if __name__ == "__main__":

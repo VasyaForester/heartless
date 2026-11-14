@@ -27,6 +27,7 @@ from boards import load_board  # noqa: E402
 import manifest as manifest_mod  # noqa: E402
 from store import pid_alive  # noqa: E402
 from winquiet import windowless_kwargs  # noqa: E402
+import logwatch  # noqa: E402
 
 CHROME_DEFAULT = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 # board comes from $HERMES_BOARD (default: lucky-break-payday)
@@ -174,24 +175,25 @@ def main() -> int:
                 log(f"driver start pid={p.pid} target={target}")
                 # Watchdog: p.wait() alone cannot distinguish "attempt in flight"
                 # from "driver wedged" — on 2026-11-13 a wedged driver kept the
-                # lane dark for 2.5 h. Treat a non-growing log as stale.
+                # lane dark for 2.5 h. Treat a non-growing log as stale, but count
+                # THIS LANE's markers, not file bytes: artifacts/driver.log is
+                # shared by every lane, so another lane's chatter would mask the
+                # wedge (2026-11-14).
                 stale_s = max(int(a.stale_min), 5) * 60
                 last_mark = time.time()
-                last_sz = -1
+                last_progress = -1
                 rc = None
                 while True:
                     rc = p.poll()
                     if rc is not None:
                         break
-                    try:
-                        sz = out_path.stat().st_size
-                    except OSError:
-                        sz = last_sz
+                    progress = logwatch.lane_progress(out_path, a.lane)
                     now = time.time()
-                    if sz != last_sz:
-                        last_sz, last_mark = sz, now
+                    if progress != last_progress:
+                        last_progress, last_mark = progress, now
                     elif now - last_mark > stale_s:
-                        log(f"driver STALE {int(now - last_mark)}s (log not growing); terminate")
+                        log(f"driver STALE {int(now - last_mark)}s "
+                            f"(no new {a.lane}-lane lines in {out_path.name}); terminate")
                         try:
                             p.terminate()
                             time.sleep(10)

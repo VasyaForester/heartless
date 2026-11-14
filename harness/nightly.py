@@ -43,6 +43,7 @@ Usage:
 
 import argparse
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -62,6 +63,7 @@ CALIB = ARTIFACTS / "reward-calibration.json"
 LOCK = ARTIFACTS / "supervisor.lock"
 FLAGS = ARTIFACTS / "lane-flags.json"
 DRIVER_LOG = ARTIFACTS / "driver.log"
+LANE = os.environ.get("HERMES_LANE", "main")
 STALE_LANE_S = 30 * 60
 RESTART_COOLDOWN_S = 10 * 60
 LAST_RESTART = ARTIFACTS / "nightly-last-restart.json"
@@ -85,8 +87,15 @@ def run(cmd: list, timeout: int = 900) -> tuple[int, str]:
 
 
 def lane_health() -> dict:
-    """(alive, log_age_s, note) — read-only."""
+    """(alive, log_age_s, note) — read-only, and LANE-AWARE.
+
+    artifacts/driver.log is shared by every lane, so the file's mtime alone can be
+    refreshed by the other lane while THIS lane is wedged (measured 2026-11-14:
+    main and pg lines interleave in one file).  Progress is therefore counted from
+    this lane's own markers, compared with the previous custodian pass.
+    """
     import store
+    import logwatch
     pid, age = None, None
     try:
         lock = json.loads(LOCK.read_text(encoding="utf-8"))
@@ -97,15 +106,31 @@ def lane_health() -> dict:
     if DRIVER_LOG.is_file():
         age = now() - DRIVER_LOG.stat().st_mtime
     paused = (ARTIFACTS / "supervisor.paused").is_file()
+    progress = logwatch.lane_progress(DRIVER_LOG, LANE) if DRIVER_LOG.is_file() else -1
+    state_path = ARTIFACTS / "nightly-lane-progress.json"
+    previous = {}
+    try:
+        previous = json.loads(state_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        previous = {}
+    advanced = previous.get("progress") != progress
+    if not paused:
+        try:
+            state_path.write_text(json.dumps({"progress": progress, "ts": now(),
+                                              "lane": LANE}), encoding="utf-8")
+        except OSError:
+            pass
     note = "ok"
     if paused:
         note = "paused by operator flag — not restarting"
     elif not alive:
         note = "supervisor not alive"
-    elif age is not None and age > STALE_LANE_S:
-        note = f"driver log stale {age:.0f}s (supervisor alive, watchdog should act)"
+    elif previous and not advanced and now() - float(previous.get("ts") or now()) > STALE_LANE_S:
+        note = (f"no {LANE}-lane lines since the last pass "
+                f"({int(now() - float(previous.get('ts') or now()))}s) — supervisor alive")
     return {"supervisor_pid": pid, "alive": alive, "log_age_s": age,
-            "paused": paused, "note": note}
+            "lane_progress": progress, "lane_advanced": advanced,
+            "paused": paused, "note": note, "lane": LANE}
 
 
 def maybe_restart(health: dict, dry_run: bool) -> dict:
@@ -136,9 +161,10 @@ def maybe_restart(health: dict, dry_run: bool) -> dict:
 def regression_guard() -> dict:
     rc, out = run([sys.executable, str(HERE / "run_offline_tests.py")], timeout=1800)
     tests = [ln for ln in out.splitlines() if ln.startswith("SUMMARY")]
+    failing = " | ".join(ln.strip() for ln in out.splitlines() if ln.startswith("FAIL:"))[:400]
     rc2, out2 = run([sys.executable, str(HERE / "config_check.py"), "--quiet"], timeout=600)
     return {"tests_rc": rc, "tests": tests[-1] if tests else out[-160:].strip(),
-            "config_check_rc": rc2, "ok": rc == 0 and rc2 == 0}
+            "failing": failing, "config_check_rc": rc2, "ok": rc == 0 and rc2 == 0}
 
 
 def apply_decision(call: str, dry_run: bool) -> dict:
@@ -275,12 +301,25 @@ def main() -> int:
         with NIGHTLY_LOG.open("a", encoding="utf-8") as f:
             f.write(line + "\n")
     print(json.dumps(record, ensure_ascii=False, indent=2))
-    # a non-zero exit is reserved for things a human must look at
-    bad = (not health["alive"] and not health["paused"]) or \
-          (record.get("regression") and not record["regression"]["ok"]) or \
-          record["ab"].get("call") == "error" or \
-          not record["console"].get("ok", True)
-    return 1 if bad else 0
+    # A non-zero exit is reserved for things a human must look at — and the message
+    # must say WHICH thing: the earlier version printed the JSON tail, hiding the
+    # failing part (a red suite ran for hours as a wall of numbers).
+    problems = []
+    if not health["alive"] and not health["paused"]:
+        problems.append(f"lane down: {health['note']}")
+    if record.get("restart", {}).get("restarted"):
+        problems.append(f"lane restarted: {record['restart'].get('tail', '')[:120]}")
+    reg = record.get("regression") or {}
+    if reg and not reg.get("ok"):
+        problems.append(f"regression guard failed ({reg.get('tests')}) {reg.get('failing', '')}".strip())
+    if record["ab"].get("call") == "error":
+        problems.append(f"A/B report error: {record['ab'].get('detail')}")
+    if not record["console"].get("ok", True):
+        problems.append(f"console leak: {record['console'].get('leaks')}")
+    record["problems"] = problems
+    if problems and not a.dry_run:
+        print("PROBLEMS: " + "; ".join(problems))
+    return 1 if problems else 0
 
 
 if __name__ == "__main__":
