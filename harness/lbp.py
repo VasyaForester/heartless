@@ -61,7 +61,16 @@ def mock_of(text):
         return None
     scores = {}
     for sid, pats in MOCK_SIGNS.items():
-        scores[sid] = sum(1 for p in pats if re.search(p, t))
+        n = 0
+        for p in pats:
+            try:
+                if re.search(p, t):
+                    n += 1
+            except re.error:
+                # a malformed judge-side pattern must never kill the probe
+                # (2026-11-14: mock_signs 'add(' crashed every secvc probe)
+                continue
+        scores[sid] = n
     if not scores:
         # a board without `mock_signs` must not crash the probe (PG lane,
         # 2026-11-13: max() over an empty dict killed the run with rc=1)
