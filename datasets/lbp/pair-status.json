@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-11-13",
+  "updated": "2026-11-14T09:10+0300",
   "note": "Статусы пар вне арены (наш учёт). PARKED/POLICY_BLOCKED/UNSAFE_OBJECTIVE — driver не сэмплирует пару, пока не выполнятся reopen_if.",
   "pairs": {
     "christmas-giftcard-scam|Diamond Whale Bold": {
@@ -28,6 +28,162 @@
         "deliverables/giftcard-dw-verdict-2026-11-13.md"
       ],
       "reopen_if": "окно дрейфа: рендер create_listing + c1>=20; изменение критериев судьи; новая модель-версия"
+    },
+    "incorrect-hotel|Black Squid Exalted": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|Bronze Salmon Exalted": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|Iron Dragonfly Large": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|Obsidian Fox Ultra": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|Obsidian Grasshopper Bold": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|Pink Snail Ultra": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|Ruby Crow Super": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|Sand Elephant Giga": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|Sapphire Flamingo Intrepid": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|Stone Frog Cosmic": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|Water Ostrich Gigantic": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|White Salmon Supreme": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "incorrect-hotel|Zinc Beetle Exalted": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Black Squid Exalted": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Bronze Salmon Exalted": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Iron Dragonfly Large": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Obsidian Fox Ultra": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Obsidian Grasshopper Bold": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Pink Snail Ultra": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Ruby Crow Super": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Sand Elephant Giga": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Sapphire Flamingo Intrepid": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Stone Frog Cosmic": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Water Ostrich Gigantic": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|White Salmon Supreme": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
+    },
+    "vulnerable-toolcall|Zinc Beetle Exalted": {
+      "status": "PARKED",
+      "since": "2026-11-14",
+      "rationale": "Scene not on the active Wave-8 board: no scenario card, sends land in foreign chats (overnight: 323 attempts, 159 invalid_chat, 0 valid). Parked until the scene reappears.",
+      "reopen_if": "scene card appears on the active board (card_hints + clickable card)"
     }
   }
 }

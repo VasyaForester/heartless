@@ -6,7 +6,7 @@
   let panelTitle = '';
   for (const e of q('h1,h2,h3,h4').filter(vis)) {
     const t = norm(e.innerText);
-    if (/Retail Bot|Double the Refund|Gift Card|Exploit the System|Identity Theft/i.test(t)) { panelTitle = t; break; }
+    if (/Retail Bot|Double the Refund|Gift Card|Exploit the System|Identity Theft|Vishing|after party|tamper-evident|5n4ck3y|Call a tool incorrectly|Vulnerable Tool/i.test(t)) { panelTitle = t; break; }
   }
   let attacking = '';
   const mAtt = body.match(/Attacking:\s*\n\s*([^\n]{2,60})/);

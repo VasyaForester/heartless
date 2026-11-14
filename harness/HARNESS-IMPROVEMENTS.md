@@ -191,3 +191,18 @@ Sanitizer/tag-resistant модели (которые режут <SYSTEM>-payload
 - **Farm behaviorId quirks:** after killing the driver mid-attempt the tab must be reset with
   `arena open --url '...proving-ground?behaviorId=<scene>'` before farm select works; run a
   1-model `--dry-run` to verify `bind: OK` before a full batch.
+
+
+## 2026-11-14 morning — why the PG loop never submitted (root-caused & fixed)
+
+- Overnight: 306 attepts, **0 submits**. Chain: (a) policy correctly skips refusals (191) and
+  short/no-criteria (105); (b) 11 "ready" attempts were answered by FOREIGN mocks (hotel/tool/
+  listing) -> invalid_chat; (c) ROOT: `card_hints` was empty and `state.js`'s panelTitle regex was
+  LBP-only ("Retail Bot|Gift Card|...") -> panelTitle="" on PG pages -> `context_ok` could never
+  pass -> sends landed in stale chats of other scenes; also `cmd_submit`'s panelTitle check would
+  have died on any PG submit. Fixes: card_hints+mock_signs filled in boards/proving-ground.json;
+  state.js heading regex extended with PG scene keywords; pair_status -> shared pair-status.json;
+  incorrect-hotel & vulnerable-toolcall PARKED (not on the active Wave-8 board - 323 wasted
+  attempts overnight); manifest rebuilt after the profile edit (hash changed).
+- Note: autosubmit is ON (participant decision 2026-11-12); smart submit policy unchanged
+  (ready OR non-refusal with criteria, 900s/pair cooldown, 8/h cap).
