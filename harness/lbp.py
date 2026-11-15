@@ -294,6 +294,21 @@ def cmd_cards(a):
 def select_scenario(tid, sid):
     """Переключить сценарий на доске активного профиля (card-клик или ?behaviorId=)."""
     if SCENARIO_SELECTOR == "behaviorId":
+        # The arena's real switch = click BUTTON[data-behavior-id=<sid>]; the
+        # ?behaviorId=<sid> URL param silently no-ops for some scenarios
+        # (5n4ck3y) while the URL-contains verify still "passes", leaking sends
+        # into the previous scenario's chat.  Click first; URL fallback.
+        rc, out, err = arena("select-scenario", "--target", tid, "--value", sid)
+        time.sleep(3)
+        snap = {}
+        try:
+            j = json.loads(out or "{}") or {}
+            snap = (j.get("result") if isinstance(j.get("result"), dict) else j) or {}
+        except Exception:
+            pass
+        sid_now = str(((snap.get("snapshot") or {}).get("scenario") or {}).get("id") or "")
+        if rc == 0 and (sid_now == sid or not sid_now):
+            return True, {"action": "click-behaviorId", "scenario": sid_now or "unknown"}
         ref = f"{BASE_URL}?behaviorId={sid}"
         rc, out, err = arena("open", "--target", tid, "--url", ref, timeout=180)
         time.sleep(6)
