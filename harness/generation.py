@@ -22,4 +22,4 @@ def generate(base_text: str, delta: str, nonce: str,
         text = base_text + "\n\n[ref LBP-" + str(nonce) + "]"
     else:
         text = DELTAS[delta](base_text)
-    return text + "\n\n[loop " + str(nonce) + "]"
+    return text + "\n\n(ref: " + str(nonce) + ")"
