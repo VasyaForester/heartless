@@ -126,3 +126,38 @@ class AttemptProvenanceTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+class FrameComposeTest(unittest.TestCase):
+    """The GENERATOR path carries the profile too (it has its own composer).
+
+    Found by checking the live record after the first attempt: the attempt row carried
+    profile_hash, but the input marker did not — the generated-frame path goes through
+    frames.compose, not generation.generate, and the two must agree on what "pinned to
+    the profile" means.
+    """
+
+    def setUp(self):
+        import frames
+        self.frames = frames
+        carrier = sorted(frames.CARRIERS)[0]
+        delivery = sorted(frames.DELIVERIES)[0]
+        claim = sorted(frames.CLAIMS)[0]
+        self.spec = (carrier, delivery, claim)
+
+    def test_the_marker_names_the_profile(self):
+        text = self.frames.compose(self.spec, BASE, NONCE, profile_hash=PROFILE)
+        self.assertTrue(text.endswith(f"(ref: {NONCE}@{PROFILE[:8]})"), text[-40:])
+
+    def test_a_different_profile_changes_only_the_marker(self):
+        a = self.frames.compose(self.spec, BASE, NONCE, profile_hash=PROFILE)
+        b = self.frames.compose(self.spec, BASE, NONCE, profile_hash="ab" * 16)
+        self.assertNotEqual(a, b)
+        self.assertEqual(a.split("(ref:")[0], b.split("(ref:")[0])
+
+    def test_without_a_profile_the_marker_is_unchanged(self):
+        text = self.frames.compose(self.spec, BASE, NONCE)
+        self.assertTrue(text.endswith(f"(ref: {NONCE})"))
+
+    def test_no_nonce_means_no_marker(self):
+        text = self.frames.compose(self.spec, BASE, "")
+        self.assertNotIn("(ref:", text)
