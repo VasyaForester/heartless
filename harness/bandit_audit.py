@@ -101,7 +101,12 @@ def main() -> int:
     ap.add_argument("--db", default=str(WORK / "artifacts" / "harness.db"))
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
-    conn = sqlite3.connect(a.db, timeout=10)
+    # READ-ONLY (Grok review 2026-11-15, axis "attempt accounting": one writer, the rest
+    # read).  This is an audit tool: it used to open the journal read-write, which meant a
+    # diagnostic run could take a write lock on the live database and, worse, could create
+    # or migrate it.  A reader that cannot write cannot corrupt.
+    conn = sqlite3.connect(f"file:{pathlib.Path(a.db)}?mode=ro", uri=True, timeout=10)
+    conn.row_factory = sqlite3.Row
     try:
         result = {"audit": audit(conn), "ucb_replay": ucb_replay(conn)}
     finally:

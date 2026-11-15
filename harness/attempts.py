@@ -27,7 +27,8 @@ def allocate(conn, lease, *, pair_id: str, board: str, scenario: str,
              model: str, model_version: str | None = None,
              lane: str, chat_id: str | None = None,
              profile_hash: str | None = None,
-             models_hash: str | None = None) -> str:
+             models_hash: str | None = None,
+             target_id: str | None = None) -> str:
     attempt_id = new_attempt_id(board, scenario, model, lane)
     store.insert_attempt(conn, lease, {
         "attempt_id": attempt_id, "pair_id": pair_id, "board_profile": board,
@@ -36,6 +37,7 @@ def allocate(conn, lease, *, pair_id: str, board: str, scenario: str,
         "state": "allocated", "input_path": None,
         # provenance for a later replay: which profile and roster we probed against
         "profile_hash": profile_hash, "models_hash": models_hash,
+        "target_id": target_id,
     })
     return attempt_id
 

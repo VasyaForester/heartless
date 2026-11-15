@@ -438,7 +438,8 @@ def _live(conn, rows):
     return _LIVE[key]
 
 
-def make_generated_variant(conn, lease, key: str, rng: random.Random, model_rows: list):
+def make_generated_variant(conn, lease, key: str, rng: random.Random, model_rows: list,
+                           target: str = ""):
     """Compose a NEW frame for a pair whose fixed catalog has nothing new to offer.
 
     Honest framing: the component model is fitted on real rewards, but the
@@ -474,7 +475,8 @@ def make_generated_variant(conn, lease, key: str, rng: random.Random, model_rows
     out.write_text(text, encoding="utf-8")
     attempt_id = attempts.allocate(conn, lease, pair_id=key, board=BOARD_NAME,
                                    scenario=sid, model=model, lane=lease.lane,
-                                   profile_hash=PROFILE_HASH, models_hash=_models_hash())
+                                   profile_hash=PROFILE_HASH, models_hash=_models_hash(),
+                                   target_id=str(target))
     attempts.prepare(conn, lease, attempt_id, input_text=text,
                      input_path=str(out.relative_to(WORK)),
                      parent_input_hash=attempts.sha256_text(base_text),
@@ -523,6 +525,29 @@ def spec_seen(conn, key: str) -> set:
     return {r["delta"] for r in conn.execute(
         "SELECT delta FROM deltas WHERE pair_id=? AND n>0", (key,))
         if frames.parse_spec(r["delta"])}
+
+
+def _bind_target(conn, lane: str, target: str) -> dict:
+    """Каждая проба привязана к ОДНОМУ target на всю жизнь; смена — НОВАЯ привязка.
+
+    Обзор Grok 2026-11-15 («транспорт», ось-10).  Пишем привязку в журнал при старте
+    полосы: если id вкладки сменился, в журнале появляется `target_rebound` со старым и
+    новым id — смена видна как событие, а не как молчаливое переиспользование.
+    """
+    import store  # noqa: PLC0415
+    prev = store.last_event(conn, "target_binding")
+    rec = {"lane": str(lane), "target": str(target), "pid": os.getpid(),
+           "at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+    if prev and str(prev.get("target") or "") != str(target):
+        rec["previous"] = prev.get("target")
+        store.event(conn, "target_rebound", rec)
+        store.event(conn, "target_binding", rec)
+        log(f"TARGET REBOUND lane={lane} {prev.get('target')} -> {target} "
+            f"(new binding recorded; an in-flight attempt never changes target)")
+        return rec
+    store.event(conn, "target_binding", rec)
+    log(f"TARGET BOUND lane={lane} target={target} (one target per attempt, for life)")
+    return rec
 
 
 def _models_hash() -> str:
@@ -585,7 +610,8 @@ def _pooled_arm_stats(conn, sid: str | None, half_life_probes: float | None = No
     return out
 
 
-def make_variant(conn, lease: str, key: str, rng: random.Random, engine, strategy_policy: str):
+def make_variant(conn, lease: str, key: str, rng: random.Random, engine, strategy_policy: str,
+                 target: str = ""):
     row = conn.execute("SELECT scenario,model FROM pairs WHERE id=?", (key,)).fetchone()
     if not row:
         return None
@@ -619,7 +645,8 @@ def make_variant(conn, lease: str, key: str, rng: random.Random, engine, strateg
     out.write_text(text, encoding="utf-8")
     attempt_id = attempts.allocate(
         conn, lease, pair_id=key, board=BOARD_NAME, scenario=sid, model=model,
-        lane=lease.lane, profile_hash=PROFILE_HASH, models_hash=_models_hash())
+        lane=lease.lane, profile_hash=PROFILE_HASH, models_hash=_models_hash(),
+        target_id=str(target))
     attempts.prepare(
         conn, lease, attempt_id, input_text=text,
         input_path=str(out.relative_to(WORK)),
@@ -837,6 +864,10 @@ def main(argv=None) -> int:
         log(f"MANIFEST ok run_id={man.get('run_id')}")
     else:
         log("MANIFEST missing (supervisor writes it); continuing for this run")
+    try:
+        _bind_target(store.connect(a.db), a.lane, target)
+    except Exception as exc:  # noqa: BLE001 — привязка не должна ронять полосу
+        log(f"target binding not recorded ({type(exc).__name__}: {exc})")
     log(f"DRIVER START lane={a.lane} target={target} pid={os.getpid()} db={a.db} "
         f"board={BOARD_NAME} profile={PROFILE_HASH}")
     log(f"FLAGS strategy={a.strategy} generate={a.generate} ab_generate={a.ab_generate} "
@@ -908,7 +939,7 @@ def main(argv=None) -> int:
                 # them later.  Without it "generation pays off" stays an opinion.
                 if a.ab_generate >= 1.0 or rng.random() < a.ab_generate:
                     try:
-                        mv = make_generated_variant(conn, lease, key, rng, gen_rows)
+                        mv = make_generated_variant(conn, lease, key, rng, gen_rows, target)
                         arm_source = "generated"
                     except Exception as exc:  # noqa: BLE001
                         log(f"GENERATE failed ({type(exc).__name__}: {exc}); falling back to the catalog")
@@ -918,7 +949,7 @@ def main(argv=None) -> int:
                     log(f"AB-CONTROL {key}: coin says re-probe the best catalog delta "
                         f"instead of composing a new frame")
             if not mv:
-                mv = make_variant(conn, lease, key, rng, engine, a.strategy)
+                mv = make_variant(conn, lease, key, rng, engine, a.strategy, target)
             if not mv:
                 log(f"no base input for {key}; sleep 30")
                 time.sleep(30)

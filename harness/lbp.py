@@ -198,6 +198,26 @@ def context_ok(sid: str, model: str, tries: int = 2, target: str | None = None) 
     return ok, f"panel={panel!r} attacking={st.get('attacking')!r}"
 
 
+def scenario_marker(target: str | None = None) -> str:
+    """Маркер АКТИВНОГО сценария: заголовок панели, как его показывает сама арена."""
+    st = get_state(target) or {}
+    return str(st.get("panelTitle") or "")
+
+
+def marker_matches(marker: str, sid: str, titles: dict | None = None) -> bool:
+    """Сменился ли сценарий на нужный — чистая функция, проверяется без браузера.
+
+    Обзор Grok 2026-11-15 («транспорт»): после клика по карточке маркер ЧИТАЕМ и попытку
+    РОНЯЕМ, если он не сменился.  Пустой маркер — это НЕ успех: «не знаю» не должно
+    выглядеть как «ок» (именно на этом класс ошибки ловились отправки в чужой чат:
+    `?behaviorId=` молча не переключал, а проверка «sid есть в URL» проходила).
+    """
+    want = str((titles or SCENARIO_TITLES).get(sid) or "")
+    if not want or not marker:
+        return False
+    return want in marker
+
+
 
 def grayswan_tabs():
     cdp = os.environ.get("HACKATHON_CDP_URL", "http://127.0.0.1:9223")
@@ -596,10 +616,28 @@ def cmd_repeat(a):
         die({"error": "make_fill failed", "detail": (out + err)[:300]})
     ledger = WORK / "datasets/lbp/repeats.jsonl"
     runs = []
+
+    def _persist(run: dict):
+        """Одна строка журнала: дописать, запомнить, напечатать — в одном месте.
+
+        Вынесено, потому что у попытки теперь ДВА выхода: обычный (после отправки) и
+        «попытку роняем до отправки» (маркер сценария не сменился, обзор Grok 2026-11-15).
+        Разъехавшиеся записи в этих двух путях — это как раз то, из-за чего журнал
+        перестаёт быть источником правды.
+        """
+        with open(ledger, "a", encoding="utf-8") as f:
+            f.write(json.dumps(run, ensure_ascii=False) + "\n")
+        runs.append(run)
+        print(json.dumps(run, ensure_ascii=False, indent=1))
+
     for i in range(a.n):
         run = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "i": i + 1, "scenario": sid,
                "model": a.model, "input": a.input, "input_sha256": inp_sha,
-               "opid": getattr(a, "opid", None)}
+               "opid": getattr(a, "opid", None),
+               # Обзор Grok 2026-11-15 («транспорт», ось-10): попытка привязана к одному
+               # target на всю жизнь.  Пишем его в каждую строку журнала, чтобы смена
+               # вкладки была видна как НОВАЯ привязка, а не как молчаливое переиспользование.
+               "target": tid}
         # --- 1) контекст: сценарий и модель должны быть РЕАЛЬНО выбраны (инцидент «чужой мок»)
         # ВАЖНО: если контекст УЖЕ правильный — НИЧЕГО не переключаем (иначе арена постоянно показывает
         # диалог «switch scenario/model» и это раздражает пользователя).
@@ -636,6 +674,20 @@ def cmd_repeat(a):
                 run["context_note"] = note_ctx
                 if ok_ctx:
                     break
+        # --- 1b) МАРКЕР СЦЕНАРИЯ: клик мог не сработать (известный случай: `?behaviorId=`
+        # молча не переключает, а проверка «sid есть в URL» при этом проходит).  Обзор Grok
+        # 2026-11-15, «транспорт»: после переключения читаем маркер и РОНЯЕМ попытку, если
+        # он не сменился — отправка в старый чат дороже пропущенной пробы.  Пустой маркер
+        # считается «не сменился»: «не знаю» не должно выглядеть как «ок».
+        marker = scenario_marker(tid)
+        run["scenario_marker"] = marker
+        switch_ok = bool(ok_ctx) or marker_matches(marker, sid)
+        run["switch_ok"] = switch_ok
+        if not switch_ok:
+            run["invalid"] = True
+            run["send_skipped"] = "scenario_switch_failed: marker did not change"
+            _persist(run)
+            continue
         # --- 2) отправка с проверкой, что вкладка живая
         def _probe_state():
             rc, out, err = chat_ops.evaljs(HERE / "lbp_js" / "probe_state.js", match=MATCH)
@@ -771,18 +823,29 @@ def cmd_repeat(a):
             time.sleep(3)
             arena("select-model", "--target", tid, "--value", a.model)
             time.sleep(2.5)
-            n0 = _send_once(run, tag_2 := "_retry")
-            all_text, last = _await_reply(n0, tag_2)
-            # Последняя попытка определяет пробу: если повтор ДОШЁЛ, запись обязана
-            # это отражать. Иначе успешный heal оставлял базовый тег invalid=True и
-            # дошедшая проба всё равно считалась нашей потерей (дефект найден тут же).
-            if run.get("sent_ok_retry"):
-                for _k in ("sent_ok", "fill_ok", "probe_ok", "invalid",
-                           "chat_n_before", "fresh_chat"):
-                    if _k + "_retry" in run:
-                        run[_k] = run[_k + "_retry"]
-                run["invalid"] = bool(run.get("invalid_retry"))
-                run["healed"] = True
+            # ПЕРЕД повтором читаем маркер сценария (обзор Grok 2026-11-15, «транспорт»):
+            # открытая модалка/несостоявшийся клик глушат отправку, и повтор уехал бы в
+            # СТАРЫЙ чат чужого сценария.  Лучше потерять пробу, чем получить отправку
+            # не туда: попытку роняем, а не повторяем вслепую.
+            heal_marker = scenario_marker(tid)
+            run["heal_marker"] = heal_marker
+            if not marker_matches(heal_marker, sid):
+                run["heal_refused"] = ("scenario marker did not change after reopen: "
+                                       f"{heal_marker[:60]!r}; no resend into the old chat")
+                run["invalid"] = True
+            else:
+                n0 = _send_once(run, tag_2 := "_retry")
+                all_text, last = _await_reply(n0, tag_2)
+                # Последняя попытка определяет пробу: если повтор ДОШЁЛ, запись обязана
+                # это отражать. Иначе успешный heal оставлял базовый тег invalid=True и
+                # дошедшая проба всё равно считалась нашей потерей (дефект найден тут же).
+                if run.get("sent_ok_retry"):
+                    for _k in ("sent_ok", "fill_ok", "probe_ok", "invalid",
+                               "chat_n_before", "fresh_chat"):
+                        if _k + "_retry" in run:
+                            run[_k] = run[_k + "_retry"]
+                    run["invalid"] = bool(run.get("invalid_retry"))
+                    run["healed"] = True
         run["reply_tail"] = last[-600:]
         run["lost_send_suspect"] = not last
         # ПРОВЕРКА МОКА: чат мог принадлежать ДРУГОМУ сценарию (панель ≠ мок) — это делает пробу невалидной
@@ -883,10 +946,7 @@ def cmd_repeat(a):
             run["submit_skipped"] = ("invalid_chat" if run.get("invalid")
                                      else "empty_reply" if not (last or "").strip()
                                      else ("cadence" if by_meaning and not cd_ok else "no_criteria"))
-        with open(ledger, "a", encoding="utf-8") as f:
-            f.write(json.dumps(run, ensure_ascii=False) + "\n")
-        runs.append(run)
-        print(json.dumps(run, ensure_ascii=False, indent=1))
+        _persist(run)
     print(json.dumps({"runs": len(runs), "ledger": str(ledger)}, ensure_ascii=False))
     return 0
 

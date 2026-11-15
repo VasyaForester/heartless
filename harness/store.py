@@ -22,7 +22,7 @@ import time
 import uuid
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 LEASE_TTL = 1800
 
 # Explicit lifecycle.  `judged` is not final: only a verified judge may
@@ -256,6 +256,10 @@ def _add_missing_columns(conn: sqlite3.Connection) -> list[str]:
             # profile and silently produce a different input.
             ("profile_hash", "TEXT"),
             ("models_hash", "TEXT"),
+            # v5 -> v6 (Grok review 2026-11-15, axis "transport"): the attempt is bound
+            # to ONE browser target for its whole life.  Recording it is what makes a
+            # tab-id change visible as a NEW binding instead of a silent reuse.
+            ("target_id", "TEXT"),
         ),
     }
     for table, cols in plans.items():
@@ -363,6 +367,19 @@ def release(conn: sqlite3.Connection, lease: Lease) -> None:
         pass
 
 
+def last_event(conn: sqlite3.Connection, kind: str) -> dict | None:
+    """The newest payload of a kind (used for bindings that must not be reused silently)."""
+    import json
+    row = conn.execute("SELECT payload FROM events WHERE kind=? ORDER BY id DESC LIMIT 1",
+                       (kind,)).fetchone()
+    if not row or row["payload"] is None:
+        return None
+    try:
+        return json.loads(row["payload"])
+    except Exception:  # noqa: BLE001 — a corrupt row is not a reason to stop a lane
+        return None
+
+
 def event(conn: sqlite3.Connection, kind: str, payload=None) -> None:
     import json
     conn.execute("INSERT INTO events(ts,kind,payload) VALUES(?,?,?)",
@@ -421,7 +438,7 @@ def insert_attempt(conn: sqlite3.Connection, lease: Lease, attempt: dict) -> Non
         assert_owner(conn, lease)
         cols = ["attempt_id", "pair_id", "board_profile", "scenario", "model",
                 "model_version", "lane", "chat_id", "started_at", "state",
-                "input_path", "profile_hash", "models_hash"]
+                "input_path", "profile_hash", "models_hash", "target_id"]
         vals = [(attempt.get("state") or "allocated") if c == "state" else attempt.get(c)
                 for c in cols]
         conn.execute(f"INSERT INTO attempts({','.join(cols)}) VALUES({','.join('?'*len(cols))})",
