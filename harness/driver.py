@@ -647,6 +647,21 @@ def apply_verdict(conn, lease, attempt_id: str, key: str, sid: str, model: str,
         which threw away every reward and blinded the selector.
     """
     status = result.get("status")
+    # Immutability of a finished attempt (Grok review 2026-11-15, axis "judge
+    # reconciliation": 8/10).  The judge ARTIFACT is a cache: it can be rewritten by a
+    # later attempt, a re-render or a manual edit, and a rewrite is NOT evidence.  The
+    # binding recorded WITH the attempt is.  So once an attempt is terminal, nothing —
+    # not even a fresher, better verdict for the same operation id — may change it.
+    row = store.get_attempt(conn, attempt_id)
+    if row and str(row["state"]) in ("finalized", "execution_failed",
+                                     "submission_uncertain", "judge_failed", "cancelled"):
+        # `attempts` has no `solved` column (that lives on `pairs`): a finalized attempt
+        # is the proof of a solve, everything else terminal is not.
+        log(f"{log_prefix}IMMUTABLE {attempt_id}: state={row['state']} "
+            f"verdict={row['judge_status']} reward={row['reward']} kept; "
+            f"ignoring a fresh judge result (status={status})")
+        return {"outcome": "immutable", "reward": row["reward"],
+                "solved": str(row["state"]) == "finalized"}
     if status == "pending":
         attempts.mark_awaiting(conn, lease, attempt_id, judge_ref=result.get("judge_ref"))
         log(f"{log_prefix}JUDGE pending {attempt_id}: {result.get('reason')}")
