@@ -1,0 +1,28 @@
+{
+ "taken_at": "2026-11-15T16:34:56",
+ "window_hours": 24.0,
+ "total": {
+  "probes": 409,
+  "judged": 11,
+  "judge_positive": 1,
+  "faults": 111,
+  "ledger_probes": 391,
+  "fault_share_of_ledger": 0.2839
+ },
+ "boards": {
+  "lucky-break-payday": {
+   "probes": 320,
+   "judged": 8,
+   "judge_positive": 0,
+   "energy": 328.0,
+   "decision_per_1000_energy": 0.0
+  },
+  "proving-ground": {
+   "probes": 89,
+   "judged": 3,
+   "judge_positive": 1,
+   "energy": 92.0,
+   "decision_per_1000_energy": 10.87
+  }
+ }
+}
