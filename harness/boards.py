@@ -14,6 +14,7 @@ driver read board facts from here instead of carrying their own constants.
 """
 from __future__ import annotations
 
+import functools
 import json
 import os
 import pathlib
@@ -24,17 +25,62 @@ DEFAULT_BOARD = "lucky-break-payday"
 REQUIRED = ("name", "board", "match", "url", "scenario_selector",
             "model_confirm", "win_string", "cost")
 DICT_FIELDS = ("scenario_titles", "card_hints", "mock_signs")
+SCHEMA_NAME = "schema"
+SCHEMA_PATH = BOARD_DIR / f"{SCHEMA_NAME}.json"
+_TYPE_OF = {"str": str, "int": int, "float": (int, float), "bool": bool,
+            "list": list, "dict": dict}
+
+
+@functools.lru_cache(maxsize=1)
+def profile_schema() -> dict:
+    """The machine-readable contract in boards/schema.json (empty if unreadable)."""
+    try:
+        return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _check_types(profile: dict, where: str) -> None:
+    """Type-level validation driven by the schema, so the contract lives in ONE place.
+
+    Unknown extra keys are allowed on purpose (a profile may carry notes), but a
+    known key with the wrong type is a loud error: a typo like `"cost": 2` or a
+    stringified list used to slip through and fail deep inside the driver.
+    """
+    props = (profile_schema().get("properties") or {})
+    for key, spec in props.items():
+        if key not in profile or not isinstance(spec, dict):
+            continue
+        want = _TYPE_OF.get(str(spec.get("type")))
+        value = profile[key]
+        if want is None or value is None:
+            continue
+        if isinstance(value, bool) and want is int:  # bool is an int subclass
+            raise ValueError(f"board profile{where}: {key!r} must be int, got bool")
+        if not isinstance(value, want):
+            raise ValueError(f"board profile{where}: {key!r} must be "
+                             f"{spec.get('type')}, got {type(value).__name__}")
+        sub = spec.get("keys")
+        if isinstance(sub, dict) and isinstance(value, dict):
+            for sk, skind in sub.items():
+                if sk in value and value[sk] is not None and \
+                        not isinstance(value[sk], _TYPE_OF.get(str(skind), object)):
+                    raise ValueError(f"board profile{where}: {key}.{sk} must be {skind}")
 
 
 def list_boards() -> list[str]:
-    return sorted(p.stem for p in BOARD_DIR.glob("*.json"))
+    """.json files in boards/, minus the profile SCHEMA itself (boards/schema.json)."""
+    skip = {SCHEMA_NAME}
+    return sorted(p.stem for p in BOARD_DIR.glob("*.json") if p.stem not in skip)
 
 
 def validate(profile: dict, path: pathlib.Path | None = None) -> dict:
     where = f" ({path})" if path else ""
-    missing = [k for k in REQUIRED if k not in profile]
+    schema_required = tuple(profile_schema().get("required") or REQUIRED)
+    missing = [k for k in schema_required if k not in profile]
     if missing:
         raise ValueError(f"board profile{where} missing fields: {missing}")
+    _check_types(profile, where)
     if profile.get("sandbox"):
         # An offline sandbox arena (e.g. fake-arena) is not a live target: it must
         # say so, and it is exempt from the live-URL rule.  Everything else about

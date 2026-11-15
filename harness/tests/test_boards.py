@@ -37,3 +37,46 @@ class BoardsTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class BoardSchemaTest(unittest.TestCase):
+    """The profile contract lives in boards/schema.json and is enforced on load.
+
+    A new arena must be "fill in data + write an adapter", never "edit the driver":
+    these tests keep the contract itself honest.
+    """
+
+    def test_schema_file_is_valid_and_not_a_board(self):
+        schema = boards.profile_schema()
+        self.assertTrue(schema.get("required"), "the schema must name required fields")
+        self.assertTrue(schema.get("properties"))
+        self.assertNotIn("schema", boards.list_boards(),
+                         "boards/schema.json must not be listed as a board")
+
+    def test_every_board_passes_the_schema(self):
+        for name in boards.list_boards():
+            with self.subTest(board=name):
+                profile = boards.load_board(name)
+                self.assertIn(profile["name"], (name, profile["name"]))
+                self.assertIsInstance(profile["cost"]["message"], (int, float))
+
+    def test_wrong_type_is_loud(self):
+        profile = dict(boards.load_board("lucky-break-payday"))
+        profile["cost"] = 2
+        with self.assertRaises(ValueError):
+            boards.validate(profile)
+
+    def test_a_stringified_list_is_loud(self):
+        profile = dict(boards.load_board("lucky-break-payday"))
+        profile["models"] = "not a list"
+        with self.assertRaises(ValueError):
+            boards.validate(profile)
+
+    def test_sandbox_boards_need_a_note(self):
+        profile = {"name": "x", "board": "X", "match": "x", "url": "sandbox://x",
+                   "scenario_selector": "card", "model_confirm": "Attacking:",
+                   "win_string": "SOLVED", "cost": {"message": 1, "judge": 1},
+                   "sandbox": True}
+        with self.assertRaises(ValueError):
+            boards.validate(profile)
+        profile["_note"] = "offline sandbox for tests"
+        boards.validate(profile)
