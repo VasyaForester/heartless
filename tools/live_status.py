@@ -13,20 +13,43 @@ def fmt(ts):
     return time.strftime("%H:%M", time.localtime(ts)) if isinstance(ts, (int, float)) and ts > 1e9 else ts
 
 
-print("== last 12 attempts ==")
-for r in conn.execute("SELECT pair_id,state,verdict,score,reward,started_at,submitted_at,"
+print("\n== last 12 attempts ==")
+for r in conn.execute("SELECT pair_id,state,verdict,score,reward,reward_source,started_at,submitted_at,"
                       "finished_at,delta FROM attempts ORDER BY started_at DESC LIMIT 12"):
     d = dict(r)
     print(f"  {fmt(d['started_at'])} {str(d['pair_id'])[:46]:46s} st={str(d['state'])[:16]:16s} "
-          f"v={str(d['verdict'])[:10]:10s} sc={d['score']} rw={d['reward']} d={str(d['delta'])[:22]}")
+          f"v={str(d['verdict'])[:10]:10s} sc={d['score']} rw={d['reward']} "
+          f"src={d['reward_source']} d={str(d['delta'])[:22]}")
 
-print("\n== attempts last 2h by pair ==")
-cut = time.time() - 7200
-for r in conn.execute("SELECT pair_id, COUNT(*) n, SUM(CASE WHEN submitted_at IS NOT NULL THEN 1 ELSE 0 END) sub,"
-                      " AVG(reward) arw FROM attempts WHERE started_at > ? GROUP BY pair_id ORDER BY n DESC",
-                      (cut,)):
+# Task 2026-11-15, item 5: the live view counts the JUDGE, not the surrogate.  The mean
+# local reward is gone on purpose: it was the number the operator was reading while the
+# selector learned from it (0.32 mean against the judge's 0.08), and it is a diagnostic now.
+print("\n== last 6h by pair: attempts / verified / accepted / mean verified score ==")
+cut = time.time() - 6 * 3600
+tot = {"n": 0, "ver": 0, "acc": 0}
+rows6 = list(conn.execute(
+    "SELECT pair_id, COUNT(*) n,"
+    " SUM(CASE WHEN judge_status='verified' THEN 1 ELSE 0 END) ver,"
+    " SUM(CASE WHEN judge_status='verified' AND verdict IN ('accepted','solved')"
+    "          THEN 1 ELSE 0 END) acc,"
+    " AVG(CASE WHEN judge_status='verified' AND score IS NOT NULL THEN score END) msc"
+    " FROM attempts WHERE COALESCE(started_at,0) > ? GROUP BY pair_id ORDER BY n DESC",
+    (cut,)))
+for r in rows6:
     d = dict(r)
-    print(f"  n={d['n']:>3} sub={d['sub']:>3} avg_rw={round(d['arw'] or 0, 2)}  {d['pair_id']}")
+    n = int(d["n"] or 0)
+    ver = int(d["ver"] or 0)
+    acc = int(d["acc"] or 0)
+    tot["n"] += n
+    tot["ver"] += ver
+    tot["acc"] += acc
+    share = (ver / n) if n else 0.0
+    msc = "-" if d["msc"] is None else round(float(d["msc"]), 1)
+    print(f"  n={n:>3} verified={ver:>3} ({share:5.1%}) accepted={acc} "
+          f"mean_verified_score={msc}  {d['pair_id']}")
+if tot["n"]:
+    print(f"  TOTAL n={tot['n']} verified={tot['ver']} "
+          f"({tot['ver'] / tot['n']:.1%}) accepted={tot['acc']}")
 
 print("\n== judges table (schema + last 8) ==")
 cols = [r[1] for r in conn.execute("PRAGMA table_info(judges)")]

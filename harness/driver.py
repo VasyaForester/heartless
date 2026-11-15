@@ -88,7 +88,11 @@ def seed(conn) -> None:
         for model in models_for(sid):
             key = f"{sid}|{model}"
             b = board.get(key) or {}
-            solved = 1 if (b.get("solved") or model in SOLVED.get(sid, set())) else 0
+            # Never a flag without an attempt (task 2026-11-15, item 4): the seed
+            # file's `solved` and SOLVED's seed truth both claimed pairs solved that have
+            # no accepted+verified attempt in this database (12 pairs Payday, 5 Proving
+            # Ground).  `recompute_solved` sets the flag from the attempts themselves.
+            solved = 0
             best = b.get("best_input") or PLATFORM.newest_input(sid, model)
             if best:
                 best = str(best)  # the protocol says path-like (str or Path)
@@ -108,6 +112,36 @@ def seed(conn) -> None:
                     "INSERT OR IGNORE INTO deltas(pair_id,delta,n,sum_score) VALUES(?,?,?,?)",
                     (key, delta, int(st.get("n", 0)), int(st.get("sum", 0))))
     conn.commit()
+
+
+def recompute_solved(conn) -> dict:
+    """`pairs.solved` follows the ATTEMPTS, not the bookkeeping (task 2026-11-15, item 4).
+
+    `solved=1` only where some attempt of the pair carries `judge_status='verified'` AND a
+    verdict of `accepted`/`solved`.  Every other flag is cleared, and each change is written
+    to `events` with the reason, so a pair that loses its flag can be traced to the attempt
+    that never existed.  Local reward, the judge file's name and a seed flag are all NOT
+    evidence of a solve.
+    """
+    changed: list = []
+    solved_now = 0
+    for r in conn.execute(
+            "SELECT p.id AS id, p.solved AS flag,"
+            " (SELECT COUNT(*) FROM attempts a WHERE a.pair_id=p.id"
+            "   AND a.judge_status='verified' AND a.verdict IN ('accepted','solved')) AS hits"
+            " FROM pairs p"):
+        want = 1 if int(r["hits"] or 0) > 0 else 0
+        solved_now += want
+        if int(r["flag"] or 0) != want:
+            conn.execute("UPDATE pairs SET solved=? WHERE id=?", (want, r["id"]))
+            changed.append({"pair": r["id"], "from": int(r["flag"] or 0), "to": want,
+                            "verified_accepted": int(r["hits"] or 0)})
+    for c in changed:
+        store.event(conn, "solved_recomputed", c)
+        log(f"SOLVED {c['pair']}: {c['from']} -> {c['to']} "
+            f"(verified accepted/solved attempts: {c['verified_accepted']})")
+    conn.commit()
+    return {"changed": changed, "solved": solved_now}
 
 
 def load_parked() -> set:
@@ -190,9 +224,15 @@ def _give_up_pairs(conn, ids: list, now: float) -> set:
     """Pairs parked by the give-up rule (advice #6), decided from a RECENT window.
 
     Pre-registered (RULES 92, written before the live data): a pair with at least
-    `min_probes` probes inside the last `window_hours` and NO reward at or above
-    `max_reward` in that window has stopped moving, so it yields its slot for
-    `park_hours`.
+    `min_probes` probes inside the last `window_hours` and NOTHING the judge ever paid for
+    has stopped moving, so it yields its slot for `park_hours`.
+
+    Task 2026-11-15 (item 2): the decision reads the VERIFIED JUDGE, never the `reward`
+    column.  "No movement" now means: no attempt in the window with
+    `judge_status='verified'` and a score above zero.  The reward column carried the local
+    surrogate (0.32 mean against the judge's 0.08), which sits almost always above the old
+    0.02 threshold — so a pair with hundreds of judge zeros never yielded its slot
+    (Negative-quantity: 921 attempts, best verified score 0).
 
     Two corrections paid for with data (2026-11-15, before enabling it live):
       * the first version asked about the LIFETIME best reward — every one of our
@@ -215,20 +255,22 @@ def _give_up_pairs(conn, ids: list, now: float) -> set:
         if k in parked:
             continue
         row = conn.execute(
-            "SELECT COUNT(*) AS n, COALESCE(MAX(reward), -1.0) AS best"
-            " FROM attempts WHERE pair_id=? AND reward IS NOT NULL"
-            " AND COALESCE(started_at, 0) >= ?", (k, since)).fetchone()
+            "SELECT COUNT(*) AS n,"
+            " SUM(CASE WHEN judge_status='verified' AND COALESCE(score, 0) > 0"
+            "          THEN 1 ELSE 0 END) AS paid"
+            " FROM attempts WHERE pair_id=? AND COALESCE(started_at, 0) >= ?",
+            (k, since)).fetchone()
         if not row or int(row["n"] or 0) < GIVE_UP["min_probes"]:
             continue
-        if float(row["best"]) >= GIVE_UP["max_reward"]:
+        if int(row["paid"] or 0) > 0:
             continue
         state[k] = {"until": now + GIVE_UP["park_hours"] * 3600.0,
                     "parked_at": now, "probes": int(row["n"]),
-                    "best_reward": float(row["best"]),
+                    "verified_paid": int(row["paid"] or 0),
                     "window_hours": GIVE_UP["window_hours"],
                     "reason": (f"{row['n']} probes in the last "
-                               f"{GIVE_UP['window_hours']:g}h, best reward "
-                               f"{row['best']:.3f}")}
+                               f"{GIVE_UP['window_hours']:g}h, none with a verified "
+                               f"judge score above zero")}
         parked.add(k)
         log(f"GIVE-UP park {k}: {state[k]['reason']}; free again in "
             f"{GIVE_UP['park_hours']:.0f}h")
@@ -367,6 +409,89 @@ def delta_stats(conn, key: str, half_life_probes: float | None = None) -> dict:
     return legacy
 
 
+def verified_delta_stats(conn, key: str) -> dict:
+    """Per-delta statistics from the VERIFIED JUDGE alone (task 2026-11-15, item 3).
+
+    "Выбор среди старых дельт — по среднему проверенному счёту": the arm chosen inside a
+    pair must be ranked by what the JUDGE paid, not by the local proxy — and not by the
+    composite either, which still carries 10% of the surrogate.  A delta with no verified
+    observation simply does not appear, so it cannot enter any mean.
+
+    Score is normalised to [0, 1] by /100 — the same rule `strategy.judge_reward` uses for
+    a bare score, and the same scale the legacy aggregate used before v4.
+    """
+    out: dict = {}
+    for r in conn.execute(
+            "SELECT delta, score FROM attempts"
+            " WHERE pair_id=? AND delta IS NOT NULL AND judge_status='verified'"
+            " AND score IS NOT NULL ORDER BY COALESCE(started_at, 0), attempt_id", (key,)):
+        b = out.setdefault(r["delta"], {"n": 0, "sum": 0.0, "sq": 0.0, "wins": 0})
+        value = max(0.0, min(1.0, float(r["score"]) / 100.0))
+        b["n"] += 1
+        b["sum"] += value
+        b["sq"] += value * value
+        if value >= 0.5:
+            b["wins"] += 1
+    for arm, b in out.items():
+        n = b["n"]
+        mean = b["sum"] / n
+        var = max(0.0, b["sq"] / n - mean * mean)
+        out[arm] = {"n": n, "mean": round(mean, 4), "sd": round(math.sqrt(var), 4),
+                    "var": round(var, 6), "wins": b["wins"]}
+    return out
+
+
+MIN_VERIFIED_FOR_NEW_DELTA = 2
+
+
+def verified_count(conn, key: str) -> int:
+    """Verified judges this pair has.  The gate for PROPOSING a delta nobody tried."""
+    row = conn.execute(
+        "SELECT COUNT(*) AS n FROM attempts"
+        " WHERE pair_id=? AND judge_status='verified'", (key,)).fetchone()
+    return int(row["n"] or 0)
+
+
+def probed_deltas(conn, key: str) -> list:
+    """Deltas of this pair that were already sent (order of first probe)."""
+    seen: list = []
+    for r in conn.execute(
+            "SELECT delta, MIN(COALESCE(started_at, 0)) AS first FROM attempts"
+            " WHERE pair_id=? AND delta IS NOT NULL GROUP BY delta ORDER BY first",
+            (key,)):
+        seen.append(r["delta"])
+    return seen
+
+
+def choosable_arms(conn, key: str, catalog: list, log_fn=None) -> tuple:
+    """(arms, stats_source) for a pair — the ONE place the new-delta gate lives.
+
+    Task 2026-11-15, item 3: do not propose a delta nobody has tried until the pair has
+    `MIN_VERIFIED_FOR_NEW_DELTA` verified judges; choose among the already-probed deltas by
+    their mean VERIFIED score.  A pair that has never been probed is allowed its catalogue:
+    the gate exists to stop expanding the catalogue under a silent judge, not to stall a
+    fresh pair (RULES: the lane must never stall).
+    """
+    probed = probed_deltas(conn, key)
+    verified = verified_delta_stats(conn, key)
+    if not probed:
+        return list(catalog), "catalog (fresh pair: first probe)"
+    if verified_count(conn, key) < MIN_VERIFIED_FOR_NEW_DELTA:
+        arms = [a for a in probed]
+        if log_fn:
+            log_fn("DELTA GATE %s: %d verified judge(s) < %d — staying inside the %d "
+                   "already-probed delta(s), no new one"
+                   % (key, verified_count(conn, key), MIN_VERIFIED_FOR_NEW_DELTA, len(arms)))
+        return arms, "probed (gate)"
+    if verified:
+        return list(catalog), "verified means"
+    if log_fn:
+        log_fn("DELTA GATE %s: %d verified judges but none with a score — staying inside "
+               "the %d probed delta(s)"
+               % (key, verified_count(conn, key), len(probed)))
+    return [a for a in probed], "probed (no scored judge yet)"
+
+
 def catalog_exhausted(conn, key: str) -> bool:
     """True when every fixed delta of the pair has been probed at least once."""
     seen = {r["delta"] for r in conn.execute(
@@ -451,6 +576,13 @@ def make_generated_variant(conn, lease, key: str, rng: random.Random, model_rows
     reward recorded exactly like any other arm, so the bandit can learn which
     generated frames survive.
     """
+    # Task 2026-11-15, item 3: a composed frame IS a new delta, so it waits for the same
+    # two verified judges as any other catalogue expansion.  Under a silent judge the lane
+    # keeps probing deltas that were already sent (choosable_arms); it does not invent more.
+    if verified_count(conn, key) < MIN_VERIFIED_FOR_NEW_DELTA:
+        log(f"GENERATED SKIP {key}: {verified_count(conn, key)} verified judge(s) < "
+            f"{MIN_VERIFIED_FOR_NEW_DELTA} — no new delta until the judge has spoken twice")
+        return None
     row = conn.execute("SELECT scenario,model FROM pairs WHERE id=?", (key,)).fetchone()
     if not row:
         return None
@@ -624,7 +756,15 @@ def make_variant(conn, lease: str, key: str, rng: random.Random, engine, strateg
         log(f"no delta catalog for board {BOARD_NAME}; cannot generate a variant")
         return None
     hl = strategy.half_life_probes(strategy_policy)
-    stats = delta_stats(conn, key, hl)
+    # The gate and the ranking of item 3 live in ONE place (choosable_arms): how many
+    # deltas may compete, and by whose numbers.  The verified channel is the teacher when
+    # it exists; the local/reward channel survives only as the documented fallback.
+    arms, stats_source = choosable_arms(conn, key, arms, log)
+    verified = verified_delta_stats(conn, key)
+    stats = verified or delta_stats(conn, key, hl)
+    if not verified:
+        log(f"delta choice for {key}: no verified judge score yet — falling back to the "
+            f"reward channel ({stats_source})")
     pooled = None
     board_stats = None
     novelty = None
@@ -736,17 +876,24 @@ def apply_verdict(conn, lease, attempt_id: str, key: str, sid: str, model: str,
         log(f"{log_prefix}RESULT {attempt_id} verdict={result.get('verdict')} "
             f"score={result.get('score')} solved={solved} reward={ev['reward']} ({ev['source']})")
         return {"outcome": "verified", "solved": solved, "reward": ev["reward"]}
-    # no verdict attributable to this attempt
+    # No verdict attributable to this attempt.  The attempt stays `unjudged` and a LATE
+    # judge can still claim it (judge_ledger.reconcile_unjudged), but there is NO teaching
+    # signal: `evaluate` returns reward=None/source="missing" and the local validator stays
+    # a diagnostic.  Teaching the selector from the surrogate here is what made it optimise
+    # the tool-call proxy on 87% of the data (task 2026-11-15): calling a tool pays 0.70 and
+    # `check_ready` pays 0.80, while the judge pays 0.00-0.04 on the same attempts.
     ev = engine.observe(context=strategy.context_key(board=BOARD_NAME, scenario=sid, model=model),
                         arm=delta, signals=signals, judge=None, scenario=sid, model=model,
                         board=BOARD_NAME, lineage=attempt_id)
     attempts.mark_unjudged(conn, lease, attempt_id,
                            reason=f"{status}: {result.get('reason')}")
     store.set_reward(conn, lease, attempt_id, ev["reward"], ev["source"])
-    store.bump_delta(conn, lease, key, delta, ev["reward"])
-    log(f"{log_prefix}UNJUDGED {attempt_id} judge={status} "
-        f"({result.get('reason')}) local_reward={ev['reward']} ({ev['source']})")
-    return {"outcome": "unjudged", "reward": ev["reward"]}
+    if ev["reward"] is not None:  # belt and braces: bump_delta refuses None as well
+        store.bump_delta(conn, lease, key, delta, ev["reward"])
+    log(f"{log_prefix}UNJUDGED {attempt_id} judge={status} ({result.get('reason')}) "
+        f"teacher=missing local_diagnostic={ev['local_reward']} "
+        f"(this attempt teaches the selector nothing)")
+    return {"outcome": "unjudged", "reward": None}
 
 
 def lane_flags() -> dict:
@@ -827,6 +974,10 @@ def main(argv=None) -> int:
 
     conn = store.connect(a.db)
     seed(conn)
+    # Task 2026-11-15, item 4: the solve flag follows the attempts, and this runs on every
+    # driver start so a flag seeded from bookkeeping (or re-added by hand) is cleared the
+    # next time the lane comes up.  The reason for each change lands in `events`.
+    recompute_solved(conn)
     store.insert_board_profile(conn, BOARD, PROFILE_HASH)
     target = a.target
     if not target:

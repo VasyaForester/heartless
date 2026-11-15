@@ -71,14 +71,32 @@ class GiveUpTest(unittest.TestCase):
         self.assertIn("dead|model", state)
         self.assertGreater(state["dead|model"]["until"], now)
 
-    def test_a_single_movement_in_the_window_resets_the_clock(self):
+    def test_a_surrogate_reward_does_not_reset_the_clock(self):
+        """Task 2026-11-15, item 2: the park decision reads the verified judge, never the
+        `reward` column.  A 0.5 surrogate used to look like movement; it is not."""
         now = time.time()
         want = driver.GIVE_UP["min_probes"]
         for i in range(want + 2):
             self.add("dead|model", 0.0, now - 3600 + i)
-        self.add("dead|model", 0.5, now - 60)  # one real sign of life, recently
+        self.add("dead|model", 0.5, now - 60)          # a loud surrogate, no judge
         parked = driver._give_up_pairs(self.conn, ["dead|model"], now)
-        self.assertEqual(parked, set(), "a recent rewarded probe must not be parked")
+        self.assertEqual(parked, {"dead|model"},
+                         "the surrogate must not buy a pair another window")
+
+    def test_a_verified_score_above_zero_resets_the_clock(self):
+        now = time.time()
+        want = driver.GIVE_UP["min_probes"]
+        for i in range(want + 2):
+            self.add("dead|model", 0.0, now - 3600 + i)
+        self.conn.execute(
+            "INSERT INTO attempts(attempt_id,pair_id,board_profile,scenario,model,lane,"
+            "started_at,delta,reward,reward_source,judge_status,verdict,score,state)"
+            " VALUES('judged','dead|model',?,?,?,?,?,?,?,?,?,?,?,?)",
+            (driver.BOARD_NAME, "dead", "model", "test", now - 60, "arm", 0.2, "composite",
+             "verified", "rejected", 20, "finalized"))
+        self.conn.commit()
+        parked = driver._give_up_pairs(self.conn, ["dead|model"], now)
+        self.assertEqual(parked, set(), "a paid judge score is the movement that counts")
 
     def test_old_probes_outside_the_window_do_not_count(self):
         """The first version of this rule looked at the lifetime best reward and

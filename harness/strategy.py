@@ -351,7 +351,9 @@ class IndependentEvaluator:
     flattened every judged attempt to ~0.2, hiding the judge's categorical
     rejection.  When the judge has spoken it dominates; the proxy keeps 10% only
     to order attempts the judge scored EQUALLY (all zeros) by structural
-    progress.  Unjudged attempts still ride the proxy alone.
+    progress.  An attempt the judge never spoke about gets NO reward at all
+    (`reward=None`, `source="missing"`): 87% of the live data had no judge, and
+    the saturated proxy was teaching the selector there (task 2026-11-15).
     """
 
     JUDGE_SHARE = 0.9
@@ -369,7 +371,12 @@ class IndependentEvaluator:
         elif jud is not None:
             reward, source, conf = jud, "judge", jud_conf
         else:
-            reward, source, conf = loc, "local", loc_conf
+            # No judge for THIS attempt: the evaluator refuses to teach.  The local
+            # validator stays a DIAGNOSTIC (still in `local_reward` and `dimensions`),
+            # never the teacher.  Measured 2026-11-14: the surrogate pays 0.6-0.7 exactly
+            # where the judge pays 0.00-0.04 (22 of 22), and it was the ONLY teacher on
+            # 87% of the data (task 2026-11-15: stop learning from the surrogate).
+            reward, source, conf = None, "missing", 0.0
         dims = {
             "correctness": loc if loc is not None else 0.0,
             "safety": 0.0 if signals.get("refusal_category") in ("category_block", "risk_flags") else 1.0,

@@ -589,9 +589,11 @@ def bump_delta(conn: sqlite3.Connection, lease: Lease, pair_id: str, delta: str,
     probe reaches one, so the statistics would stay frozen at the seed.  The
     selector needs the counts from every rewarded probe (v4).
     """
-    if not delta:
+    if not delta or reward is None:
+        # No teacher, no observation: a missing judge must not enter the aggregate as a
+        # zero either — silence is not a verdict (task 2026-11-15).
         return
-    value = int(round(float(reward) * 100)) if reward is not None else 0
+    value = int(round(float(reward) * 100))
     conn.execute("BEGIN IMMEDIATE")
     try:
         assert_owner(conn, lease)

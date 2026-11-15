@@ -63,8 +63,13 @@ class RewardTest(unittest.TestCase):
                         {"status": "verified", "pcts": [80], "verdict": "rejected"})
         self.assertEqual(a["source"], "composite")
         self.assertIsNotNone(a["disagreement"])
+        # The judge did not speak: no teaching reward at all (task 2026-11-15, item 1).
+        # This used to assert source == "local" — that is exactly the surrogate the task
+        # removes: measured 0.6-0.7 where the judge pays 0.00-0.04, on 87% of the data.
         b = ev.evaluate({"failure_class": "A_TOOL_NOT_CALLED"}, None)
-        self.assertEqual(b["source"], "local")
+        self.assertEqual(b["source"], "missing")
+        self.assertIsNone(b["reward"])
+        self.assertIsNotNone(b["local_reward"], "the proxy stays a diagnostic")
         self.assertIsNone(b["disagreement"])
 
 
@@ -156,10 +161,14 @@ class MemoryTest(unittest.TestCase):
             eng = strategy.StrategyEngine(["append_a", "append_b"], policy="ucb_improved",
                                           memory=mem, seed=5)
             ctx = strategy.context_key(board="b", scenario="s", model="m")
+            # The judge is the only teacher (task 2026-11-15): a round trip needs one.
             eng.observe(context=ctx, arm="append_a", signals={"failure_class": "NONE_READY"},
-                        scenario="s", model="m", board="b")
+                        scenario="s", model="m", board="b",
+                        judge={"status": "verified", "pcts": [80], "verdict": "rejected"})
             eng.observe(context=ctx, arm="append_b",
-                        signals={"failure_class": "A_TOOL_NOT_CALLED"}, scenario="s", model="m")
+                        signals={"failure_class": "A_TOOL_NOT_CALLED"}, scenario="s", model="m",
+                        board="b",
+                        judge={"status": "verified", "pcts": [10], "verdict": "rejected"})
             report = eng.report(context=ctx)
             self.assertEqual(report["experiments"], 2)
             self.assertEqual(report["by_arm"]["append_a"]["n"], 1)
@@ -171,8 +180,40 @@ class MemoryTest(unittest.TestCase):
             eng.observe(context=ctx, arm="append_a", signals={"failure_class": "A_TOOL_NOT_CALLED"},
                         judge={"status": "verified", "pcts": [100], "verdict": "accepted"})
             n = mem.conn.execute("SELECT COUNT(*) AS c FROM disagreements").fetchone()["c"]
-            self.assertEqual(n, 1)
+            # Every PAIRED observation is archived (2026-11-14), so all three observes land
+            # here now that each of them carries a judge.  Before the judge became the only
+            # teacher, the first two had no verdict and were silently absent from this log.
+            self.assertEqual(n, 3)
             self.assertEqual(mem.count(family="carrier_append"), 3)
+            mem.close()
+
+    def test_a_judgeless_observation_is_archived_but_not_taught(self):
+        """Task 2026-11-15, item 1: silence adds no observation to the statistics.
+
+        The row is still written (the archive keeps the signals for a late judge and for
+        the disagreement log), but it has no reward, so `stats` — the map the bandit reads
+        — must not change at all.
+        """
+        with tempfile.TemporaryDirectory() as td:
+            mem = strategy.ExperienceMemory(pathlib.Path(td) / "m.db")
+            eng = strategy.StrategyEngine(["append_a"], policy="ucb_improved", memory=mem, seed=5)
+            ctx = strategy.context_key(board="b", scenario="s", model="m")
+            eng.observe(context=ctx, arm="append_a", signals={"failure_class": "NONE_READY"},
+                        scenario="s", model="m", board="b",
+                        judge={"status": "verified", "pcts": [40], "verdict": "rejected"})
+            before = eng.report(context=ctx)
+            eng.observe(context=ctx, arm="append_a", signals={"failure_class": "NONE_READY"},
+                        scenario="s", model="m", board="b")
+            after = eng.report(context=ctx)
+            self.assertEqual(after["experiments"], before["experiments"] + 1,
+                             "the archive keeps the row")
+            self.assertEqual(after["by_arm"]["append_a"]["n"], 1,
+                             "but the arm's count — and so its mean — does not move")
+            self.assertEqual(after["by_arm"]["append_a"]["mean"],
+                             before["by_arm"]["append_a"]["mean"])
+            rows = mem.conn.execute("SELECT COUNT(*) AS c FROM experience WHERE reward IS NULL"
+                                    ).fetchone()["c"]
+            self.assertEqual(rows, 1, "the judge-less row is stored with reward=NULL")
             mem.close()
 
     def test_arm_family_generalises_wording(self):

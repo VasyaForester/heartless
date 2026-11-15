@@ -218,6 +218,24 @@ class DriverGeneratorTest(unittest.TestCase):
                      encoding="utf-8")
         return p
 
+    def _two_verified(self, key: str = "s|m"):
+        """Two verified judges for the pair.
+
+        Task 2026-11-15, item 3: a composed frame is a NEW delta, and a new delta waits until
+        the pair has `MIN_VERIFIED_FOR_NEW_DELTA` verified judges.  These fixtures are about
+        the wiring of a generated frame, so they satisfy the gate explicitly instead of
+        depending on live data.
+        """
+        for i in range(self.driver.MIN_VERIFIED_FOR_NEW_DELTA):
+            self.conn.execute(
+                "INSERT INTO attempts(attempt_id,pair_id,board_profile,scenario,model,lane,"
+                "started_at,delta,judge_status,verdict,score,state)"
+                " VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                (f"verified-{i}", key, "lucky-break-payday", "negative-quantity-exploit",
+                 "m", "test", time.time() + i, "arm", "verified", "rejected", 0,
+                 "finalized"))
+        self.conn.commit()
+
     def test_catalog_exhausted_requires_every_delta(self):
         f = self.driver
         self.assertFalse(f.catalog_exhausted(self.conn, "s|m"))
@@ -233,6 +251,7 @@ class DriverGeneratorTest(unittest.TestCase):
         self.conn.execute("UPDATE pairs SET best_input=? WHERE id='s|m'",
                           (str(base),))
         self.conn.commit()
+        self._two_verified()
         rows = [{"context": "lucky-break-payday|negative-quantity-exploit|m",
                  "spec": ("authority", "prose_pre", "keep_verbatim"), "reward": 0.8},
                 {"context": "lucky-break-payday|negative-quantity-exploit|m",
@@ -262,6 +281,7 @@ class DriverGeneratorTest(unittest.TestCase):
         self.conn.execute("UPDATE pairs SET best_input=? WHERE id='s|m'", (str(base),))
         self.conn.commit()
         import random
+        self._two_verified()
         rows = [{"context": "c", "spec": ("authority", "prose_pre", "keep_verbatim"),
                  "reward": 0.8}]
         arms = set()

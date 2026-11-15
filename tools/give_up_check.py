@@ -42,13 +42,14 @@ def main() -> int:
             " AND board_profile=? ORDER BY id", (board,)):
         key = r["id"]
         w = conn.execute(
-            "SELECT COUNT(*) AS n, COALESCE(MAX(reward), -1.0) AS best"
-            " FROM attempts WHERE pair_id=? AND reward IS NOT NULL"
-            " AND COALESCE(started_at,0) >= ?", (key, since)).fetchone()
-        n, best = int(w["n"] or 0), float(w["best"])
-        rows.append({"pair": key, "probes_in_window": n, "best_in_window": best,
-                     "would_park": (n >= driver.GIVE_UP["min_probes"]
-                                    and best < driver.GIVE_UP["max_reward"])})
+            "SELECT COUNT(*) AS n,"
+            " SUM(CASE WHEN judge_status='verified' AND COALESCE(score,0) > 0"
+            "          THEN 1 ELSE 0 END) AS paid"
+            " FROM attempts WHERE pair_id=? AND COALESCE(started_at,0) >= ?",
+            (key, since)).fetchone()
+        n, paid = int(w["n"] or 0), int(w["paid"] or 0)
+        rows.append({"pair": key, "probes_in_window": n, "verified_paid_in_window": paid,
+                     "would_park": (n >= driver.GIVE_UP["min_probes"] and paid == 0)})
     conn.close()
 
     if a.json:
@@ -56,13 +57,14 @@ def main() -> int:
                          ensure_ascii=False, indent=1))
         return 0
     print(f"board {board}; правило: >= {driver.GIVE_UP['min_probes']} проб за "
-          f"{driver.GIVE_UP['window_hours']:g}ч и лучшая награда < "
-          f"{driver.GIVE_UP['max_reward']} → парковка на {driver.GIVE_UP['park_hours']:g}ч\n")
-    print(f"{'пара':<50}{'проб':>6}{'лучшая':>9}  решение")
+          f"{driver.GIVE_UP['window_hours']:g}ч и НИ ОДНОЙ проверенной судьи со счётом выше "
+          f"нуля → парковка на {driver.GIVE_UP['park_hours']:g}ч "
+          f"(колонка reward в решении не читается)\n")
+    print(f"{'пара':<50}{'проб':>6}{'судья>0':>9}  решение")
     for r in rows:
         verdict = "ПАРКОВКА" if r["would_park"] else ""
-        best = "—" if r["best_in_window"] < 0 else f"{r['best_in_window']:.3f}"
-        print(f"  {r['pair']:<48}{r['probes_in_window']:>6}{best:>9}  {verdict}")
+        print(f"  {r['pair']:<48}{r['probes_in_window']:>6}"
+              f"{r['verified_paid_in_window']:>9}  {verdict}")
     print(f"\nзапарковалось бы: {sum(1 for r in rows if r['would_park'])} из {len(rows)}")
     return 0
 
