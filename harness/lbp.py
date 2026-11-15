@@ -920,7 +920,7 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     def add_target(p):
-        p.add_argument("--target", help="tab id override (default: the single lucky-break-payday tab)")
+        p.add_argument("--target", help="tab id override (default: the single tab matching the current board profile)")
 
     p = sub.add_parser("state"); add_target(p); p.set_defaults(fn=cmd_state)
     p = sub.add_parser("cards"); p.set_defaults(fn=cmd_cards)

@@ -155,7 +155,10 @@ def main():
     ap.add_argument("--judge-policy", choices=["never", "comply", "always"], default="comply")
     ap.add_argument("--pause", type=int, default=15, help="seconds between models")
     ap.add_argument("--opid-prefix", required=True)
-    ap.add_argument("--board", default="lucky-break-payday")
+    # Board comes from the environment or an explicit flag — never from a literal
+    # (Grok review 2026-11-15: a hardcoded default made one board the only one that
+    # works out of the box).
+    ap.add_argument("--board", default=os.environ.get("HERMES_BOARD") or DEFAULT_BOARD)
     ap.add_argument("--out-dir", default="artifacts")
     ap.add_argument("--ckpt", help="checkpoint path override")
     ap.add_argument("--retry", action="store_true", help="force re-run even if already sent")
@@ -192,7 +195,7 @@ def main():
     # ?behaviorId= modal — the profile's selector does the binding (arena open +
     # card click, the same path as lbp.py newchat / run1.sh). No PG branch here.
     try:
-        from boards import load_board as _load_board_prof
+        from boards import DEFAULT_BOARD, load_board as _load_board_prof
         _selector = _load_board_prof(slug(a.board)).get("scenario_selector", "card")
     except Exception:
         _selector = "card"

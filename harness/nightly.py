@@ -60,7 +60,9 @@ NIGHTLY_LOG = ARTIFACTS / "nightly.log"
 NIGHTLY_JSONL = ARTIFACTS / "nightly.jsonl"
 AB_DECISION = ARTIFACTS / "ab-decision.json"
 CALIB = ARTIFACTS / "reward-calibration.json"
-LOCK = ARTIFACTS / "supervisor.lock"
+# Same rule as supervisor.py: the state suffix follows the LANE, not the board.
+_NIGHTLY_LANE = os.environ.get("HERMES_LANE", "main")
+LOCK = ARTIFACTS / (f"supervisor{'' if _NIGHTLY_LANE == 'main' else '-' + _NIGHTLY_LANE}.lock")
 FLAGS = ARTIFACTS / "lane-flags.json"
 DRIVER_LOG = ARTIFACTS / "driver.log"
 LANE = os.environ.get("HERMES_LANE", "main")

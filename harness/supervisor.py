@@ -33,7 +33,14 @@ CHROME_DEFAULT = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 # board comes from $HERMES_BOARD (default: lucky-break-payday)
 URL_DEFAULT = load_board()["url"]
 BOARD_NAME = load_board()["name"]
-_SUFFIX = "" if BOARD_NAME == "lucky-break-payday" else f"-{BOARD_NAME}"
+# State-file suffix comes from the LANE, never from the board (Grok review
+# 2026-11-15, axis "board universality": 7/10).  The old rule returned "" for
+# lucky-break-payday, which made one board the invisible default in file names —
+# a third board would have inherited a naming rule that only made sense for the
+# first one.  Lane main keeps the historical paths (supervisor.lock etc.), so
+# existing keepers and the custodian stay valid.
+LANE_ENV = os.environ.get("HERMES_LANE", "main")
+_SUFFIX = "" if LANE_ENV == "main" else f"-{LANE_ENV}"
 LOCK = WORK / "artifacts" / f"supervisor{_SUFFIX}.lock"
 LOG_PATH = WORK / "artifacts" / f"supervisor{_SUFFIX}.log"
 OUT_PATH = WORK / "artifacts" / f"driver{_SUFFIX}.out"

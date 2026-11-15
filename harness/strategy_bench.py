@@ -183,7 +183,8 @@ def legacy_pick(arms, stats, rng: random.Random, *, c: float = 45.0) -> str:
 
 
 def policy_pick(policy: str, arms, stats, rng: random.Random,
-                pooled: dict | None = None, prior_k: float | None = None) -> str:
+                pooled: dict | None = None, prior_k: float | None = None,
+                board_stats: dict | None = None) -> str:
     if policy == "current":
         return legacy_pick(arms, stats, rng)
     kw: dict[str, float | int] = {"seed": rng.randint(0, 10**6)}
@@ -191,7 +192,25 @@ def policy_pick(policy: str, arms, stats, rng: random.Random,
         kw["prior_k"] = float(prior_k)
     sch = AdaptiveScheduler(policy, **kw)
     return sch.choose(arms, _norm_stats(stats), rng=rng,
-                      pooled_stats=_norm_stats(pooled) if pooled else None)
+                      pooled_stats=_norm_stats(pooled) if pooled else None,
+                      board_stats=_norm_stats(board_stats) if board_stats else None)
+
+
+def _merge_stats(target: dict, source: dict) -> None:
+    """Accumulate one level's statistics into another (same shape)."""
+    for arm, s in source.items():
+        tgt = target.setdefault(arm, {"n": 0, "sum": 0.0, "sumsq": 0.0, "max": -1.0,
+                                      "wins": 0, "reward": None})
+        tgt["n"] += s["n"]
+        tgt["sum"] += s["sum"]
+        tgt["sumsq"] += s["sumsq"]
+        tgt["wins"] += s["wins"]
+        tgt["max"] = max(tgt["max"], s.get("max", -1.0))
+        mean = tgt["sum"] / tgt["n"] if tgt["n"] else 0.0
+        tgt["mean"] = mean
+        tgt["var"] = (max(0.0, tgt["sumsq"] / tgt["n"] - mean * mean)
+                      if tgt["n"] else 0.0)
+        tgt["sd"] = math.sqrt(tgt["var"])
 
 
 def _norm_stats(stats: dict) -> dict:
@@ -269,19 +288,12 @@ def run_policy(history: list[dict], policy: str, *, budget: int, seed: int,
     scen_stats: dict[str, dict] = {}
     for ctx, st in stats.items():
         scene = ctx.split("|")[0]
-        pool = scen_stats.setdefault(scene, {})
-        for arm, s in st.items():
-            tgt = pool.setdefault(arm, {"n": 0, "sum": 0.0, "sumsq": 0.0, "max": -1.0,
-                                        "wins": 0, "reward": None})
-            tgt["n"] += s["n"]
-            tgt["sum"] += s["sum"]
-            tgt["sumsq"] += s["sumsq"]
-            tgt["wins"] += s["wins"]
-            tgt["max"] = max(tgt["max"], s["max"])
-            mean = tgt["sum"] / tgt["n"] if tgt["n"] else 0.0
-            tgt["mean"] = mean
-            tgt["var"] = max(0.0, tgt["sumsq"] / tgt["n"] - mean * mean) if tgt["n"] else 0.0
-            tgt["sd"] = math.sqrt(tgt["var"])
+        _merge_stats(scen_stats.setdefault(scene, {}), st)
+    # board-level pool (advice #5): everything this board showed, across scenarios.
+    # The bench pins the board, so this is the top of the chain that exists here.
+    board_stats: dict = {}
+    for st in stats.values():
+        _merge_stats(board_stats, st)
 
     rng = random.Random(seed)
     contexts = sorted(test)
@@ -304,7 +316,8 @@ def run_policy(history: list[dict], policy: str, *, budget: int, seed: int,
         st = stats.setdefault(ctx, {})
         scene = ctx.split("|")[0]
         pool = scen_stats.setdefault(scene, {})
-        arm = policy_pick(policy, arms, st, rng, pooled=pool, prior_k=prior_k)
+        arm = policy_pick(policy, arms, st, rng, pooled=pool, prior_k=prior_k,
+                          board_stats=(board_stats if policy != "current" else None))
         picks.append(arm)
         arms_used.add(arm)
         fams_used.add(arm_family(arm))
