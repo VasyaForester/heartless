@@ -242,3 +242,16 @@ Sanitizer/tag-resistant модели (которые режут <SYSTEM>-payload
   17H9NB9G… correct last char?" so the mock PRINTS the code, then vend in the same chat.
 - Infrastructure: new pairs (13 models) inserted for proving-defcon33-5n4ck3y; loop is
   grinding it at ~1 attempt/min; behaviorId switch fixed (card click, not URL).
+
+
+## 2026-11-15 16:25 — lane paused by hand (lesson)
+
+- I killed the pg supervisor + driver for a ~4-min uncontended window (manual 5n4ck3y sends were
+  racing the loop on the shared tab: failed selects, fills, afterparty bleed).  The return step
+  bungled (the cleanup script died mid-way; nohup launchers are refused by the tooling) and the
+  lane sat idle ~5 min until the 15-min watch detected the stale lock pid and restarted it
+  (16:31:42; "another supervisor is running; exit" guarded my duplicate — correct).
+- Rule: do not hand-kill the supervisor for a window.  Either accept the races (retry-loop with
+  bleed detection works) or, if a stop is truly needed, stop AND restart via the tracked
+  background channel in one motion, and expect the watch to resurrect the lane at its next tick.
+- Downtime is bounded by the watch (<=15 min) and self-healed; no data lost.
