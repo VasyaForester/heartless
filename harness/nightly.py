@@ -251,7 +251,7 @@ def efficiency_block() -> dict:
     """
     import efficiency
     try:
-        rep = efficiency.report(1.0)
+        rep = efficiency.report(1.0, fail_over=0.45)
     except Exception as exc:  # noqa: BLE001 — the custodian must not die on this
         return {"ok": False, "detail": f"{type(exc).__name__}: {exc}"}
     total = rep.get("total", {})
@@ -260,6 +260,7 @@ def efficiency_block() -> dict:
             "judged_1h": total.get("judged"),
             "judge_positive_1h": total.get("judge_positive"),
             "fault_share": total.get("fault_share_of_ledger"),
+            "loss_gate": total.get("loss_gate"),
             "boards": {b: {"probes": v["probes"], "judged": v["judged"],
                            "decision_per_1000_energy": v["decision_per_1000_energy"]}
                        for b, v in (rep.get("boards") or {}).items()}}
@@ -340,12 +341,14 @@ def main() -> int:
     if not record["console"].get("ok", True):
         problems.append(f"console leak: {record['console'].get('leaks')}")
     eff = record.get("efficiency") or {}
-    share = eff.get("fault_share")
-    if share is not None and share > 0.45:
+    gate = eff.get("loss_gate")
+    if gate and gate.get("tripped"):
         # Severe plumbing loss: alarm, never a stop (the standing rule forbids
-        # stopping the lane on our own initiative).
-        problems.append(f"plumbing loss share {share:.2f} of probe attempts "
-                        f"(probes_1h={eff.get('probes_1h')}, judged={eff.get('judged_1h')})")
+        # stopping the lane on our own initiative).  The gate carries its own
+        # minimum sample, so a two-probe window cannot trip it.
+        problems.append(f"plumbing loss share {gate['fault_share']:.2f} over "
+                        f"{gate.get('sample')} probe attempts "
+                        f"(judged={eff.get('judged_1h')})")
     record["problems"] = problems
     if problems and not a.dry_run:
         print("PROBLEMS: " + "; ".join(problems))

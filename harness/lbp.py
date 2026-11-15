@@ -677,14 +677,40 @@ def cmd_repeat(a):
                     break
                 time.sleep(4)
             _sent_ok = False
+            _sent_via = None
+            _diag = {}
             for _ in range(8):
                 time.sleep(2.5)
                 st = _probe_state()
                 _u_first = st.get("lastUserFirst") or ""
                 _u_tail = st.get("lastUserTail") or ""
+                _n_now = st.get("n")
+                _diag = {"needle_head": text[:40].strip(),
+                         "needle_tail": text[-40:].strip(),
+                         "seen_head": _u_first[:80],
+                         "seen_tail": _u_tail[-80:],
+                         "n_now": _n_now, "n_before": n_before}
                 if text[:40].strip() in _u_first or text[-40:].strip() in _u_tail:
-                    _sent_ok = True
+                    _sent_ok, _sent_via = True, "text"
                     break
+                # Count-based confirmation (2026-11-15).  The text comparison above
+                # produced FALSE NEGATIVES: the probe had landed and been answered,
+                # but the element read as "last user message" was not ours, so
+                # invalid=True blocked the probe from ever reaching the judge —
+                # the check itself was destroying judge events.  A landed message
+                # plus its reply moves the counter by TWO; a mere late reply to an
+                # older message moves it by one, so this stays a real confirmation.
+                try:
+                    if _n_now is not None and int(_n_now) >= int(n_before) + 2:
+                        _sent_ok, _sent_via = True, "count"
+                        break
+                except (TypeError, ValueError):
+                    pass
+            # Keep both sides of a failed comparison — only that shows WHICH side
+            # was wrong the next time this fires.
+            if not _sent_ok:
+                run["send_diag" + tag] = _diag
+            run["sent_via" + tag] = _sent_via
             run["sent_ok" + tag] = _sent_ok
             run["invalid" + tag] = (not _sent_ok)
             return n_before
@@ -706,8 +732,13 @@ def cmd_repeat(a):
 
         n0 = _send_once(run)
         all_text, last = _await_reply(n0)
-        if not last:
+        if not last or run.get("sent_ok") is False:
             # мёртвая вкладка / открытая модалка CHATS гасит отправки: сброс доски и одна повторная отправка
+            # Условие расширено 2026-11-15: если отправку не удалось ПОДТВЕРДИТЬ
+            # (sent_ok=False), то найденный текст может быть СТАРЫМ ответом на
+            # предыдущее сообщение в этом же чате — «текст есть» не значит «проба
+            # дошла». Из 1500 строк журнала 349 терялись именно так (fill не дошёл,
+            # прочитан чужой ответ), и без повтора цикл просто сгорал.
             run["heal"] = "board-reopen+resend"
             arena("open", "--target", tid, "--url", BASE_URL)
             time.sleep(8)
@@ -717,6 +748,16 @@ def cmd_repeat(a):
             time.sleep(2.5)
             n0 = _send_once(run, tag_2 := "_retry")
             all_text, last = _await_reply(n0, tag_2)
+            # Последняя попытка определяет пробу: если повтор ДОШЁЛ, запись обязана
+            # это отражать. Иначе успешный heal оставлял базовый тег invalid=True и
+            # дошедшая проба всё равно считалась нашей потерей (дефект найден тут же).
+            if run.get("sent_ok_retry"):
+                for _k in ("sent_ok", "fill_ok", "probe_ok", "invalid",
+                           "chat_n_before", "fresh_chat"):
+                    if _k + "_retry" in run:
+                        run[_k] = run[_k + "_retry"]
+                run["invalid"] = bool(run.get("invalid_retry"))
+                run["healed"] = True
         run["reply_tail"] = last[-600:]
         run["lost_send_suspect"] = not last
         # ПРОВЕРКА МОКА: чат мог принадлежать ДРУГОМУ сценарию (панель ≠ мок) — это делает пробу невалидной

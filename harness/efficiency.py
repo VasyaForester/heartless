@@ -186,11 +186,22 @@ def report(since_hours: float = 6.0, db=None, repeats=REPEATS,
     # A loss share that high is not an arm-quality problem: it is OUR plumbing
     # burning lane time (the review's "stop and call the operator" rule).  The
     # call is data, not a guess — the caller decides what to do with it.
+    # A minimum sample is mandatory: 1.00 over two probes (after a machine sleep)
+    # is not a loss rate, it is an empty window — the same rule as "never print a
+    # winner from a handful of probes".
+    MIN_LOSS_SAMPLE = 20
     gate = None
     if fail_over is not None and total["fault_share_of_ledger"] is not None:
+        tiny = (total["ledger_probes"] or 0) < MIN_LOSS_SAMPLE
         gate = {"threshold": fail_over,
                 "fault_share": total["fault_share_of_ledger"],
-                "tripped": total["fault_share_of_ledger"] > fail_over}
+                "sample": total["ledger_probes"],
+                "min_sample": MIN_LOSS_SAMPLE,
+                "tripped": (not tiny) and total["fault_share_of_ledger"] > fail_over}
+        if tiny:
+            gate["note"] = (f"only {total['ledger_probes']} probe attempts in the "
+                            f"window — a loss share would be noise; the lane may have "
+                            f"been asleep")
     total["loss_gate"] = gate
     return {"since_hours": since_hours, "since": since.strftime(TS),
             "dbs": [str(p) for p in dbs], "boards": boards_out, "total": total}

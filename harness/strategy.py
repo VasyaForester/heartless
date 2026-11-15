@@ -192,7 +192,12 @@ def harness_fault(signals: dict) -> str | None:
     if signals.get("mock_ok") is False:
         return "mock_mismatch"
     if signals.get("invalid"):
-        return "invalid_chat"
+        # Renamed 2026-11-15 (was "invalid_chat", which reads like a platform
+        # problem): the flag is set when our message could not be confirmed as the
+        # last user message, i.e. OUR send did not land.  The dominant real cause is
+        # a dead tab / an open modal — the retry path in lbp.py heals it, and a
+        # healed probe no longer carries this flag.
+        return "send_not_landed"
     if signals.get("empty_reply"):
         return "empty_reply"
     # most specific first: a tool call that died in OUR fill step is worse than a
