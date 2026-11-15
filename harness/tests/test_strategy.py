@@ -213,3 +213,54 @@ class BenchTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class PriorChainTest(unittest.TestCase):
+    """Advice #5 (2026-11-13): the parent must be a CHAIN, not one level.
+
+    pair -> scenario -> board -> global, each level contributing with its own
+    observation count, so a scenario with two probes cannot outvote a board with
+    two hundred.
+    """
+
+    def _sch(self):
+        return strategy.AdaptiveScheduler("contextual_ts")
+
+    def test_the_board_level_pulls_the_parent_rate_towards_itself(self):
+        sch = self._sch()
+        stats = {"a": {"n": 4, "mean": 0.2, "sd": 0.1, "var": 0.01, "wins": 1}}
+        scenario = {"a": {"n": 30, "mean": 0.5, "sd": 0.1, "var": 0.01, "wins": 15}}
+        board = {"a": {"n": 400, "mean": 0.1, "sd": 0.1, "var": 0.01, "wins": 40}}
+        alone = sch._parent_rate(stats, scenario, "a")
+        mixed = sch._parent_rate(stats, scenario, "a", board)
+        self.assertGreater(alone, 0.4, "the scenario level alone should dominate")
+        self.assertLess(mixed, alone, "a richer board level must pull the rate down")
+        self.assertGreater(mixed, 0.1, "and not all the way to the board rate")
+
+    def test_a_rich_scenario_outweighs_a_poor_board(self):
+        sch = self._sch()
+        stats = {"a": {"n": 1, "mean": 0.0, "sd": 0.0, "var": 0.0, "wins": 0}}
+        scenario = {"a": {"n": 500, "mean": 0.4, "sd": 0.1, "var": 0.01, "wins": 200}}
+        board = {"a": {"n": 5, "mean": 0.0, "sd": 0.0, "var": 0.0, "wins": 0}}
+        rate = sch._parent_rate(stats, scenario, "a", board)
+        self.assertGreater(rate, 0.35, f"scenario evidence must dominate, got {rate}")
+
+    def test_the_board_level_is_optional(self):
+        sch = self._sch()
+        stats = {"a": {"n": 2, "mean": 0.0, "sd": 0.0, "var": 0.0, "wins": 0}}
+        scenario = {"a": {"n": 10, "mean": 0.3, "sd": 0.1, "var": 0.01, "wins": 3}}
+        self.assertEqual(sch._parent_rate(stats, scenario, "a"),
+                         sch._parent_rate(stats, scenario, "a", None))
+
+    def test_nothing_anywhere_falls_back_to_the_prior_mean(self):
+        sch = self._sch()
+        self.assertEqual(sch._parent_rate({}, None, "ghost"), sch.prior_mean)
+
+    def test_choose_accepts_the_board_level_without_changing_the_contract(self):
+        sch = self._sch()
+        rng = random.Random(7)
+        stats = {"a": {"n": 3, "mean": 0.2, "sd": 0.1, "var": 0.01, "wins": 1},
+                 "b": {"n": 3, "mean": 0.1, "sd": 0.1, "var": 0.01, "wins": 0}}
+        board = {"b": {"n": 100, "mean": 0.9, "sd": 0.0, "var": 0.0, "wins": 90}}
+        picks = {sch.choose(["a", "b"], stats, rng=rng, board_stats=board)
+                 for _ in range(40)}
+        self.assertTrue(picks <= {"a", "b"})

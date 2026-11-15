@@ -202,7 +202,18 @@ def pick_pair(conn, rng: random.Random, *, cooldown_s: float = 900.0,
     return best[0]
 
 
-def delta_stats(conn, key: str) -> dict:
+def _num(x: float):
+    """Keep whole numbers integral (decay makes counts fractional).
+
+    Rounding first matters: with a huge half-life the decay factor is 0.9999993,
+    so a count of three comes out as 2.9999979 — a float that would leak into
+    downstream code comparing counts to integers.
+    """
+    v = round(float(x), 4)
+    return int(v) if float(v).is_integer() else v
+
+
+def delta_stats(conn, key: str, half_life_probes: float | None = None) -> dict:
     """Per-delta statistics of a pair, normalised to [0, 1].
 
     v5: computed from `attempts.reward` — the judge-anchored, fault-excluded
@@ -213,26 +224,49 @@ def delta_stats(conn, key: str) -> dict:
 
     Falls back to the legacy aggregate only when the pair has no rewarded
     attempts at all (a fresh workspace), and says so in the log.
+
+    `half_life_probes` (advice #7, per-policy default from strategy.py): with a
+    half-life an observation ages by 0.5 ** (probes_since / half_life), so an arm
+    that paid an hour ago outranks one that paid a day ago at the same rate.  The
+    unit is PROBES, not hours: an idle night must not erase what the lane learned.
     """
-    out: dict = {}
-    for r in conn.execute(
-            "SELECT delta, reward FROM attempts"
-            " WHERE pair_id=? AND delta IS NOT NULL AND reward IS NOT NULL", (key,)):
-        arm = r["delta"]
-        bucket = out.setdefault(arm, {"n": 0, "sum": 0.0, "wins": 0, "sq": 0.0})
-        value = float(r["reward"])
-        bucket["n"] += 1
-        bucket["sum"] += value
-        bucket["sq"] += value * value
-        if value >= 0.5:
-            bucket["wins"] += 1
+    if half_life_probes is None:
+        out: dict = {}
+        for r in conn.execute(
+                "SELECT delta, reward FROM attempts"
+                " WHERE pair_id=? AND delta IS NOT NULL AND reward IS NOT NULL", (key,)):
+            arm = r["delta"]
+            bucket = out.setdefault(arm, {"n": 0, "sum": 0.0, "wins": 0, "sq": 0.0})
+            value = float(r["reward"])
+            bucket["n"] += 1
+            bucket["sum"] += value
+            bucket["sq"] += value * value
+            if value >= 0.5:
+                bucket["wins"] += 1
+        if out:
+            for arm, b in out.items():
+                n = b["n"]
+                mean = b["sum"] / n
+                var = max(0.0, b["sq"] / n - mean * mean)
+                out[arm] = {"n": n, "mean": round(mean, 4), "sd": round(math.sqrt(var), 4),
+                            "var": round(var, 6), "wins": b["wins"]}
+    else:
+        accs: dict = {}
+        step = 0
+        for r in conn.execute(
+                "SELECT delta, reward FROM attempts"
+                " WHERE pair_id=? AND delta IS NOT NULL AND reward IS NOT NULL"
+                " ORDER BY COALESCE(started_at, 0), attempt_id", (key,)):
+            acc = accs.setdefault(r["delta"], strategy.ArmAcc())
+            acc.add(step, float(r["reward"]), half_life_probes)
+            step += 1
+        out = {}
+        for arm, acc in accs.items():
+            s = acc.stats(step, half_life_probes)
+            out[arm] = {"n": _num(s["n"]), "mean": round(s["mean"], 4),
+                        "sd": round(s["sd"], 4), "var": round(s["var"], 6),
+                        "wins": _num(s["wins"])}
     if out:
-        for arm, b in out.items():
-            n = b["n"]
-            mean = b["sum"] / n
-            var = max(0.0, b["sq"] / n - mean * mean)
-            out[arm] = {"n": n, "mean": round(mean, 4), "sd": round(math.sqrt(var), 4),
-                        "var": round(var, 6), "wins": b["wins"]}
         return out
     legacy = {}
     for r in conn.execute("SELECT delta,n,sum_score FROM deltas WHERE pair_id=?", (key,)):
@@ -390,7 +424,52 @@ def spec_seen(conn, key: str) -> set:
         if frames.parse_spec(r["delta"])}
 
 
-def make_variant(conn, lease, key: str, rng: random.Random, engine, strategy_policy: str):
+def _pooled_arm_stats(conn, sid: str | None, half_life_probes: float | None = None) -> dict:
+    """Arm statistics from the authoritative reward channel (attempts.reward).
+
+    `sid` = one scenario (the arm's own task family); None = the whole board.  Both
+    levels feed the parent chain in strategy.py (advice #5: pair -> scenario ->
+    board -> global), so a scenario with two probes cannot outvote a board with
+    two hundred.
+    """
+    sql = ("SELECT a.delta AS delta, a.reward AS reward FROM attempts a"
+           " JOIN pairs p ON p.id=a.pair_id"
+           " WHERE p.board_profile=? AND a.reward IS NOT NULL AND a.delta IS NOT NULL")
+    params: tuple = (BOARD_NAME,)
+    if sid:
+        sql += " AND p.scenario=?"
+        params = (BOARD_NAME, sid)
+    if half_life_probes is not None:
+        sql += " ORDER BY COALESCE(a.started_at, 0), a.attempt_id"
+        accs: dict = {}
+        step = 0
+        for r in conn.execute(sql, params):
+            acc = accs.setdefault(r["delta"], strategy.ArmAcc())
+            acc.add(step, float(r["reward"]), half_life_probes)
+            step += 1
+        out = {}
+        for arm, acc in accs.items():
+            s = acc.stats(step, half_life_probes)
+            out[arm] = {"n": _num(s["n"]), "mean": round(s["mean"], 4),
+                        "sd": round(s["sd"], 4), "var": round(s["var"], 6),
+                        "wins": _num(s["wins"])}
+        return out
+    acc: dict = {}
+    for r in conn.execute(sql, params):
+        b = acc.setdefault(r["delta"], {"n": 0, "sum": 0.0, "wins": 0})
+        b["n"] += 1
+        b["sum"] += float(r["reward"])
+        if float(r["reward"]) >= 0.5:
+            b["wins"] += 1
+    out = {}
+    for arm, b in acc.items():
+        n = b["n"]
+        out[arm] = {"n": n, "mean": b["sum"] / n, "sd": 0.0, "var": 0.0,
+                    "wins": b["wins"]}
+    return out
+
+
+def make_variant(conn, lease: str, key: str, rng: random.Random, engine, strategy_policy: str):
     row = conn.execute("SELECT scenario,model FROM pairs WHERE id=?", (key,)).fetchone()
     if not row:
         return None
@@ -402,32 +481,22 @@ def make_variant(conn, lease, key: str, rng: random.Random, engine, strategy_pol
     if not arms:
         log(f"no delta catalog for board {BOARD_NAME}; cannot generate a variant")
         return None
-    stats = delta_stats(conn, key)
+    hl = strategy.half_life_probes(strategy_policy)
+    stats = delta_stats(conn, key, hl)
     pooled = None
+    board_stats = None
     novelty = None
     if strategy_policy == "contextual_ts":
-        # Pooled scenario statistics: same authoritative channel as delta_stats
-        # (attempts.reward), not the legacy mixed-scale aggregate.
-        pooled = {}
-        acc: dict = {}
-        for r in conn.execute(
-                "SELECT a.delta AS delta, a.reward AS reward FROM attempts a"
-                " JOIN pairs p ON p.id=a.pair_id"
-                " WHERE p.scenario=? AND p.board_profile=?"
-                " AND a.reward IS NOT NULL AND a.delta IS NOT NULL",
-                (sid, BOARD_NAME)):
-            b = acc.setdefault(r["delta"], {"n": 0, "sum": 0.0, "wins": 0})
-            b["n"] += 1
-            b["sum"] += float(r["reward"])
-            if float(r["reward"]) >= 0.5:
-                b["wins"] += 1
-        for arm, b in acc.items():
-            n = b["n"]
-            mean = b["sum"] / n
-            pooled[arm] = {"n": n, "mean": mean, "sd": 0.0, "var": 0.0,
-                           "wins": b["wins"]}
+        # Pooled statistics come from the same authoritative channel as delta_stats
+        # (attempts.reward), never from the legacy mixed-scale aggregate.  Two levels
+        # are built here: the scenario (the arm's own task family) and the board
+        # (everything else this board ever tried) — the chain in strategy.py mixes
+        # them by observation count.
+        pooled = _pooled_arm_stats(conn, sid, hl)
+        board_stats = _pooled_arm_stats(conn, None, hl)
         novelty = {a: engine.generator.novelty(a) for a in arms}
-    delta = engine.scheduler.choose(arms, stats, rng=rng, pooled_stats=pooled, novelty=novelty)
+    delta = engine.scheduler.choose(arms, stats, rng=rng, pooled_stats=pooled,
+                                    novelty=novelty, board_stats=board_stats)
     nonce = f"{time.strftime('%Y%m%d-%H%M%S')}-{rng.randint(1000, 9999)}"
     text = generation.generate(base_text, delta, nonce)
     out = WORK / "inputs" / PLATFORM.input_name(sid, delta, int(time.time()), rng.randint(100, 999))
@@ -635,7 +704,8 @@ def main(argv=None) -> int:
     log(f"DRIVER START lane={a.lane} target={target} pid={os.getpid()} db={a.db} "
         f"board={BOARD_NAME} profile={PROFILE_HASH}")
     log(f"FLAGS strategy={a.strategy} generate={a.generate} ab_generate={a.ab_generate} "
-        f"pair_cooldown={a.pair_cooldown:.0f}s"
+        f"pair_cooldown={a.pair_cooldown:.0f}s "
+        f"decay_half_life={strategy.half_life_probes(a.strategy) or 'off'}probes"
         + (" [from lane-flags.json]" if flags.get("ab_generate") is not None else ""))
     recovered = attempts.recover(conn, lease)
     if recovered:

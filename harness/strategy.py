@@ -55,6 +55,36 @@ SUCCESS_THRESHOLD = 0.5
 # lose to the plain UCB; at the tuned value they reach parity with it
 # (contextual_ts 0.0856 vs 0.0814) and thompson leads on confirmed successes
 # (0.0293 vs 0.017).  The defaults below are therefore policy-specific.
+POLICY_HALF_LIFE_PROBES = {"ucb_improved": 150.0, "legacy": 150.0}
+
+"""How fast old observations stop counting, IN PROBES (advice #7, measured).
+
+Decay is a per-policy switch because the measurement says so — synthetic bench,
+budget 1500 pulls, 8 seeds, `harness/bench_synth.py` 2026-11-15:
+
+  world       policy          decay off -> best            best-arm share
+  stationary  ucb_improved    0.2185 -> 0.2368 (150)        0.36 -> 0.60
+  rotate      ucb_improved    0.1120 -> 0.1880 (60)         0.17 -> 0.35
+  window      ucb_improved    0.1463 -> 0.1967 (60)         0.32 -> 0.60
+  stationary  thompson        0.2353 -> 0.1512 (60)  <-- HURTS
+  stationary  contextual_ts   0.2636 -> 0.1637 (60)  <-- HURTS
+
+The Beta/Thompson family already shrinks by a hierarchical prior; decaying their
+counts on top of that destroys the evidence they depend on, so they keep decay OFF
+(a slow half-life of 400 is neutral for them, not worth the extra knob).  The UCB
+family gains in every world, drift included, so it gets a half-life of 150 PROBES.
+
+Probes, not hours, on purpose: a half-life in hours would erase our knowledge after
+an idle night (the lane slept 19 h on 2026-11-15 and lost nothing), while "150 probes
+ago" ages only as fast as the lane actually works.  At the observed ~65 probes/h it
+is ~2.3 h of work.
+"""
+
+
+def half_life_probes(policy: str) -> float | None:
+    """Decay half-life for a policy, in probes; None = keep everything (no decay)."""
+    return POLICY_HALF_LIFE_PROBES.get(policy)
+
 POLICY_PRIOR_K = {"thompson": 25.0, "contextual_ts": 6.0}
 # 2026-11-14: the graded mapping moved the optimum (measured: prior_k 6/12/25/40 ->
 # 0.133/0.120/0.104/0.083 on v2).  A prior tuned under one mapping does NOT carry
@@ -467,6 +497,58 @@ def _wilson(wins: int, n: int, z: float = 1.96) -> tuple[float, float]:
     return (max(0.0, (centre - margin) / denom), min(1.0, (centre + margin) / denom))
 
 
+class ArmAcc:
+    """Incremental exponentially-decayed accumulator for one arm.
+
+    A naive implementation recomputes `sum(w_i * r_i)` over all past observations
+    every time the statistics are read — O(n) per read, O(n^2) per run, which made
+    the first version of this bench take hours.  Decaying the accumulated sums
+    between touches is mathematically the same thing and costs O(1) per step:
+
+        S(t) = sum_i f^(t - t_i) * r_i,   f = 0.5 ** (1 / half_life)
+
+    so multiplying the running sums by f^(t - last) and adding the new observation
+    with weight 1 gives exactly the decayed sums at time t.
+    """
+
+    __slots__ = ("n", "s1", "s2", "wins", "last")
+
+    def __init__(self) -> None:
+        self.n = 0.0
+        self.s1 = 0.0
+        self.s2 = 0.0
+        self.wins = 0.0
+        self.last = 0
+
+    def _decay_to(self, now: int, half_life: float | None) -> None:
+        if half_life is None or now == self.last or self.n <= 0:
+            self.last = now
+            return
+        f = 0.5 ** ((now - self.last) / float(half_life))
+        self.n *= f
+        self.s1 *= f
+        self.s2 *= f
+        self.wins *= f
+        self.last = now
+
+    def add(self, now: int, reward: float, half_life: float | None) -> None:
+        self._decay_to(now, half_life)
+        self.n += 1.0
+        self.s1 += reward
+        self.s2 += reward * reward
+        if reward >= SUCCESS_THRESHOLD:
+            self.wins += 1.0
+
+    def stats(self, now: int, half_life: float | None) -> dict:
+        self._decay_to(now, half_life)
+        if self.n <= 0:
+            return {"n": 0, "mean": 0.0, "sd": 0.0, "var": 0.0, "wins": 0.0}
+        mean = self.s1 / self.n
+        var = max(0.0, self.s2 / self.n - mean * mean)
+        return {"n": self.n, "mean": mean, "sd": math.sqrt(var), "var": var,
+                "wins": self.wins}
+
+
 class AdaptiveScheduler:
     """Chooses the next arm.  Pure function of the statistics it is given."""
 
@@ -519,7 +601,8 @@ class AdaptiveScheduler:
 
     # -- policies ---------------------------------------------------------
     def choose(self, arms, stats: dict, *, rng: random.Random | None = None,
-               pooled_stats: dict | None = None, novelty: dict | None = None) -> str:
+               pooled_stats: dict | None = None, novelty: dict | None = None,
+               board_stats: dict | None = None) -> str:
         arms = [str(a) for a in arms]
         if not arms:
             raise ValueError("no arms to choose from")
@@ -547,12 +630,13 @@ class AdaptiveScheduler:
             # (reward >= SUCCESS_THRESHOLD: the tool was really called / local
             # check passed).  Beta with a global parent rate, so an arm with two
             # observations cannot outvote one with two hundred.
-            scored = [(self._sample_beta_post(stats, None, a, rng), a) for a in arms]
+            scored = [(self._sample_beta_post(stats, None, a, rng, board_stats), a)
+                      for a in arms]
         else:  # contextual_ts — same posterior, parent rate from the SCENARIO
             pooled = pooled_stats or stats
             scored = []
             for a in arms:
-                draw = self._sample_beta_post(stats, pooled, a, rng)
+                draw = self._sample_beta_post(stats, pooled, a, rng, board_stats)
                 nov = float((novelty or {}).get(a, 0.0))
                 scored.append((draw * (1 - self.novelty_weight) + nov * self.novelty_weight, a))
         best = max(v for v, _ in scored)
@@ -566,7 +650,8 @@ class AdaptiveScheduler:
         return rng.betavariate(alpha, beta)
 
     def _sample_beta_post(self, ctx_stats: dict, pooled: dict | None, arm: str,
-                          rng: random.Random) -> float:
+                          rng: random.Random,
+                          board_stats: dict | None = None) -> float:
         """One draw from a HIERARCHICAL Beta posterior of P(success).
 
         Empirical-Bayes shrinkage: the arm's own wins/losses are augmented with
@@ -578,18 +663,41 @@ class AdaptiveScheduler:
         s = ctx_stats.get(arm) or {}
         n = int(s.get("n", 0) or 0)
         wins = int(s.get("wins", 0) or 0)
-        parent = self._parent_rate(ctx_stats, pooled, arm)
+        parent = self._parent_rate(ctx_stats, pooled, arm, board_stats)
         alpha = 1.0 + wins + self.prior_k * parent
         beta = 1.0 + (n - wins) + self.prior_k * (1.0 - parent)
         return rng.betavariate(alpha, beta)
 
-    def _parent_rate(self, ctx_stats: dict, pooled: dict | None, arm: str) -> float:
-        """Parent success rate: the scenario's (contextual_ts) or the global one."""
+    def _rate_of(self, stats: dict | None, arm: str) -> tuple[float, int]:
+        """(success rate, observation count) of an arm in one level of the pool."""
+        s = (stats or {}).get(arm) or {}
+        n = int(s.get("n", 0) or 0)
+        wins = int(s.get("wins", 0) or 0)
+        return ((wins + 0.5) / (n + 1.0) if n else self.prior_mean), n
+
+    def _parent_rate(self, ctx_stats: dict, pooled: dict | None, arm: str,
+                     board_stats: dict | None = None) -> float:
+        """Parent success rate along the chain pair -> scenario -> board -> global.
+
+        Advice #5 (2026-11-13): the parent should not be a single level.  An arm's
+        own numbers are shrunk towards its SCENARIO rate; the scenario rate is in
+        turn mixed with the BOARD rate by their observation counts, so a scenario
+        with two probes cannot outvote a board with two hundred; with nothing
+        anywhere the chain falls back to the rate over all arms of the context, and
+        finally to `prior_mean`.
+        """
         if pooled is not None:
-            ps = pooled.get(arm) or {}
-            pn, pw = int(ps.get("n", 0) or 0), int(ps.get("wins", 0) or 0)
-            if pn:
-                return (pw + 0.5) / (pn + 1.0)
+            rate, n = self._rate_of(pooled, arm)
+        else:
+            rate, n = self.prior_mean, 0
+        if board_stats:
+            brate, bn = self._rate_of(board_stats, arm)
+            if bn:
+                w = n / (n + bn) if (n + bn) else 0.5
+                rate = rate * w + brate * (1.0 - w)
+                n += bn
+        if n:
+            return rate
         tot = sum(int(v.get("n", 0) or 0) for v in ctx_stats.values())
         wins = sum(int(v.get("wins", 0) or 0) for v in ctx_stats.values())
         if tot:
