@@ -163,6 +163,81 @@ def pair_recent(conn, ids, window_s: float, now: float | None = None) -> dict:
     return out
 
 
+GIVE_UP = {"window_hours": 12.0, "min_probes": 20, "max_reward": 0.02,
+           "park_hours": 6.0, "state": "artifacts/give-up.json"}
+
+
+def _give_up_load() -> dict:
+    try:
+        return json.loads((WORK / GIVE_UP["state"]).read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _give_up_save(state: dict) -> None:
+    path = WORK / GIVE_UP["state"]
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding="utf-8")
+        os.replace(tmp, path)
+    except Exception as exc:  # noqa: BLE001 — bookkeeping must never stop the lane
+        log(f"give-up: cannot persist state ({type(exc).__name__}: {exc})")
+
+
+def _give_up_pairs(conn, ids: list, now: float) -> set:
+    """Pairs parked by the give-up rule (advice #6), decided from a RECENT window.
+
+    Pre-registered (RULES 92, written before the live data): a pair with at least
+    `min_probes` probes inside the last `window_hours` and NO reward at or above
+    `max_reward` in that window has stopped moving, so it yields its slot for
+    `park_hours`.
+
+    Two corrections paid for with data (2026-11-15, before enabling it live):
+      * the first version asked about the LIFETIME best reward — every one of our
+        pairs carries a best of 0.35-0.70 from days ago, so the rule could never
+        fire, ever.  It has to look at a window, not at history;
+      * the thresholds come from the measured pace: a pair here gets ~2 probes/hour
+        (12 per 6 h, ~48 per day), so `min_probes=20` inside 12 h is a full day of
+        that pair's share — long enough not to fire on noise, short enough to notice
+        a patched mock.
+    The park is SOFT: `pick_pair` ignores it when it would leave no candidate (the
+    lane must never stall) and it EXPIRES by itself, so the pair is retested later.
+    """
+    if not ids:
+        return set()
+    state = _give_up_load()
+    parked = {k for k, v in state.items()
+              if float((v or {}).get("until", 0)) > now}
+    since = now - GIVE_UP["window_hours"] * 3600.0
+    for k in ids:
+        if k in parked:
+            continue
+        row = conn.execute(
+            "SELECT COUNT(*) AS n, COALESCE(MAX(reward), -1.0) AS best"
+            " FROM attempts WHERE pair_id=? AND reward IS NOT NULL"
+            " AND COALESCE(started_at, 0) >= ?", (k, since)).fetchone()
+        if not row or int(row["n"] or 0) < GIVE_UP["min_probes"]:
+            continue
+        if float(row["best"]) >= GIVE_UP["max_reward"]:
+            continue
+        state[k] = {"until": now + GIVE_UP["park_hours"] * 3600.0,
+                    "parked_at": now, "probes": int(row["n"]),
+                    "best_reward": float(row["best"]),
+                    "window_hours": GIVE_UP["window_hours"],
+                    "reason": (f"{row['n']} probes in the last "
+                               f"{GIVE_UP['window_hours']:g}h, best reward "
+                               f"{row['best']:.3f}")}
+        parked.add(k)
+        log(f"GIVE-UP park {k}: {state[k]['reason']}; free again in "
+            f"{GIVE_UP['park_hours']:.0f}h")
+    if state:
+        state = {k: v for k, v in state.items()
+                 if float((v or {}).get("until", 0)) > now - 86400}
+        _give_up_save(state)
+    return parked
+
+
 def pick_pair(conn, rng: random.Random, *, cooldown_s: float = 900.0,
               window_s: float = 21600.0):
     """Choose the next pair by COVERAGE, not by the local proxy reward.
@@ -197,6 +272,16 @@ def pick_pair(conn, rng: random.Random, *, cooldown_s: float = 900.0,
         # every unsolved pair is inside the cooldown: fall back to the least
         # recently probed one, so the loop can never lock onto a single cell
         pool = sorted(ids, key=lambda k: recent[k]["last"])[:max(1, len(ids) // 3)]
+    # Give-up rule (advice #6, pre-registered in RULES 92): a pair that has shown no
+    # movement in `min_probes` probes yields its slot for a few hours.  SOFT on both
+    # ends: it never removes the last candidate (the lane must not stall) and the
+    # park expires by itself.
+    given_up = _give_up_pairs(conn, pool, now)
+    trimmed = [k for k in pool if k not in given_up]
+    if trimmed:
+        pool = trimmed
+    elif given_up:
+        log(f"give-up: all {len(given_up)} candidates are parked; probing anyway")
     best = sorted(pool, key=lambda k: (recent[k]["n"], -verified.get(k, 0.0),
                                        recent[k]["last"], rng.random()))
     return best[0]
