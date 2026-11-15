@@ -46,7 +46,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 WORK = HERE.parent
 
 POLICIES = ("random", "ucb", "ucb_improved", "thompson", "contextual_ts")
-REWARD_SOURCES = ("judge", "local", "composite")
+REWARD_SOURCES = ("judge", "local", "composite", "missing")
 SUCCESS_THRESHOLD = 0.5
 
 # Measured prior strengths (harness/strategy_bench.py --tune, 1539 real probes,
@@ -886,8 +886,12 @@ def _selftest() -> int:
         eng = StrategyEngine(["append_a", "append_b"], policy="contextual_ts", memory=mem, seed=3)
         ev = eng.observe(context="b|s|m", arm="append_a",
                          signals={"failure_class": "NONE_READY"}, scenario="s", model="m")
-        if ev["reward"] is None or ev["source"] != "local":
-            ok = False; print("FAIL observe did not store a local reward", ev)
+        # Task 2026-11-15: a judge-less observe teaches NOTHING (reward None, source
+        # "missing").  It used to be required to store the local proxy — that proxy was the
+        # selector's teacher on 87% of the live data, paying 0.6-0.7 where the judge pays
+        # 0.00-0.04.  The ROW is still recorded; the STATISTICS are not.
+        if ev["reward"] is not None or ev["source"] != "missing":
+            ok = False; print("FAIL a judge-less observe must store no reward", ev)
         if mem.count(arm="append_a") != 1 or eng.report(context="b|s|m")["experiments"] != 1:
             ok = False; print("FAIL memory did not record the experiment")
         if arm_family("append_discount_structure") != "carrier_append:pricing":
