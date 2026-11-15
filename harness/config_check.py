@@ -330,7 +330,44 @@ def check_single_journal() -> dict:
     return _result("single_journal", not problems, "; ".join(problems))
 
 
-CHECKS = (check_rules, check_deprecated_stub, check_single_journal, check_infra_files, check_archived_absent,
+def check_owner_order() -> dict:
+    """RULES 0 — the owner's standing order — must be present, and nothing in the code
+    may stop the lane on its own.
+
+    The owner's order (2026-11-15): once told to solve, the lane runs until the owner says
+    otherwise; no self-pauses, no "rotations", no reports instead of work.  This check makes
+    that mechanical: the rule cannot disappear from RULES.md, no source may write the pause
+    flag, and the keeper must be able to bring the lane back without a time limit.
+    """
+    problems = []
+    text = _read(RULES)
+    if "ПРИКАЗ ВЛАДЕЛЬЦА" not in text or "СТОЯЧИЙ РЕЖИМ" not in text:
+        problems.append("RULES.md no longer carries the owner's standing order (section 0)")
+    # nothing in the code sets the pause flag: only the owner does, by hand
+    for base in ("harness", "tools"):
+        for path in sorted((HERE.parent / base).glob("*.py")):
+            if path.name.startswith("_") or "tests" in path.parts:
+                continue
+            body = _read(path)
+            for flag in ("supervisor.paused", "loop.paused"):
+                for line in body.splitlines():
+                    if flag in line and re.search(r"write_text|open\([^)]*['\"][wa]|touch|Path\([^)]*\)\.write", line):
+                        problems.append(f"{base}/{path.name} writes {flag}: only the owner pauses the lane")
+    keeper = pathlib.Path.home() / "AppData" / "Local" / "hermes" / "scripts" / "v3_keeper.sh"
+    if keeper.is_file():
+        kt = _read(keeper)
+        if "--max-hours 0" not in kt:
+            problems.append("v3_keeper.sh no longer starts the supervisor without a time limit")
+        if "supervisor.paused" not in kt:
+            problems.append("v3_keeper.sh lost its single stop condition (the owner's flag)")
+    drv = _read(HERE / "driver.py")
+    if "if a.max_hours and time.time() - started >= a.max_hours * 3600:" not in drv:
+        problems.append("driver max_hours semantics changed: 0 must stay 'unlimited' "
+                        "(update this guard and RULES 0 deliberately if that is intended)")
+    return _result("owner_order", not problems, "; ".join(problems))
+
+
+CHECKS = (check_rules, check_owner_order, check_deprecated_stub, check_single_journal, check_infra_files, check_archived_absent,
           check_boards, check_default_board, check_board_runtime_parity, check_deltas,
           check_checks_module, check_manifest_fields, check_strategy_engine,
           check_docs_claims, check_readme, check_tree_claims, check_live_modules)
