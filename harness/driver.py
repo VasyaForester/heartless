@@ -409,7 +409,65 @@ def delta_stats(conn, key: str, half_life_probes: float | None = None) -> dict:
     return legacy
 
 
-def verified_delta_stats(conn, key: str) -> dict:
+def _pcts_of(raw) -> list:
+    """Criterion percentages of an attempt row (the column stores JSON text)."""
+    if not raw:
+        return []
+    if isinstance(raw, (list, tuple)):
+        return [float(x) for x in raw if isinstance(x, (int, float))]
+    try:
+        data = json.loads(raw)
+    except Exception:  # noqa: BLE001 — one broken cell must not hide the others
+        return []
+    return [float(x) for x in data if isinstance(x, (int, float))] if isinstance(data, list) else []
+
+
+def blocking_criterion(conn, key: str) -> tuple | None:
+    """(index, mean%, layout) of the criterion that blocks this pair — the one worth working on.
+
+    Review 2026-11-15, cause #4: the search maximises the mean score, but a cell is solved
+    only when EVERY criterion stands at 100%, so at [30, 100, 30, 100, 20] the only useful
+    target is the criterion at 20 — lifting the three that already pass buys nothing.
+    Per-criterion means come from the verified attempts' `pcts`; the blocking one is the
+    lowest, ties broken by the earlier index so the choice is stable across runs.
+
+    Vectors of different lengths are NOT mixed: index i would stand for different criteria in
+    different probes (this journal holds both 3- and 6-entry vectors of the same cell), so
+    only the modal layout decides, and the disagreement is reported in `layout.layouts`.
+    None when the pair has no verified attempt carrying a pct vector at all.
+    """
+    sums: dict = {}
+    lengths: dict = {}
+    for r in conn.execute(
+            "SELECT pcts FROM attempts WHERE pair_id=? AND judge_status='verified'"
+            " AND pcts IS NOT NULL", (key,)):
+        pcts = _pcts_of(r["pcts"])
+        if pcts:
+            lengths[len(pcts)] = lengths.get(len(pcts), 0) + 1
+    if not lengths:
+        return None
+    # Criterion VECTORS of different lengths (3 vs 6 entries on the same cell in this
+    # journal) would make index-wise means mix different criteria, so only the modal layout
+    # decides the blocking index.  The disagreement is returned, not hidden.
+    modal = max(lengths, key=lambda n: (lengths[n], n))
+    for r in conn.execute(
+            "SELECT pcts FROM attempts WHERE pair_id=? AND judge_status='verified'"
+            " AND pcts IS NOT NULL", (key,)):
+        pcts = _pcts_of(r["pcts"])
+        if len(pcts) != modal:
+            continue
+        for i, p in enumerate(pcts):
+            acc = sums.setdefault(i, [0.0, 0])
+            acc[0] += p
+            acc[1] += 1
+    means = {i: acc[0] / acc[1] for i, acc in sums.items() if acc[1]}
+    if not means:
+        return None
+    worst = min(means, key=lambda i: (means[i], i))
+    return worst, round(means[worst], 1), {"layout": modal, "layouts": lengths}
+
+
+def verified_delta_stats(conn, key: str, focus: int | None = None) -> dict:
     """Per-delta statistics from the VERIFIED JUDGE alone (task 2026-11-15, item 3).
 
     "Выбор среди старых дельт — по среднему проверенному счёту": the arm chosen inside a
@@ -417,16 +475,33 @@ def verified_delta_stats(conn, key: str) -> dict:
     composite either, which still carries 10% of the surrogate.  A delta with no verified
     observation simply does not appear, so it cannot enter any mean.
 
+    `focus` (review 2026-11-15, cause #4): with a known BLOCKING criterion the arms are
+    ranked by THAT criterion's percentage instead of the overall mean.  An observation whose
+    pct vector does not carry the index falls back to its own criterion mean — the same
+    scale — and only a row with no vector at all uses score/100.
+
+    Why the criterion mean and not `score/100`: on a multi-criterion cell `score` is the SUM
+    (260, 280 in this journal), so dividing it by 100 saturates every probe at 1.0 and the
+    "mean" stops telling arms apart (found by the focus test, 2026-11-15).  The mean over the
+    probe's own criteria is the number the task asked for and is comparable across probes.
+
     Score is normalised to [0, 1] by /100 — the same rule `strategy.judge_reward` uses for
     a bare score, and the same scale the legacy aggregate used before v4.
     """
     out: dict = {}
     for r in conn.execute(
-            "SELECT delta, score FROM attempts"
+            "SELECT delta, score, pcts FROM attempts"
             " WHERE pair_id=? AND delta IS NOT NULL AND judge_status='verified'"
             " AND score IS NOT NULL ORDER BY COALESCE(started_at, 0), attempt_id", (key,)):
         b = out.setdefault(r["delta"], {"n": 0, "sum": 0.0, "sq": 0.0, "wins": 0})
-        value = max(0.0, min(1.0, float(r["score"]) / 100.0))
+        pcts = _pcts_of(r["pcts"])
+        value = None
+        if focus is not None and len(pcts) > focus:
+            value = max(0.0, min(1.0, pcts[focus] / 100.0))
+        elif pcts:
+            value = max(0.0, min(1.0, sum(pcts) / (100.0 * len(pcts))))
+        if value is None:
+            value = max(0.0, min(1.0, float(r["score"]) / 100.0))
         b["n"] += 1
         b["sum"] += value
         b["sq"] += value * value
@@ -760,8 +835,15 @@ def make_variant(conn, lease: str, key: str, rng: random.Random, engine, strateg
     # deltas may compete, and by whose numbers.  The verified channel is the teacher when
     # it exists; the local/reward channel survives only as the documented fallback.
     arms, stats_source = choosable_arms(conn, key, arms, log)
-    verified = verified_delta_stats(conn, key)
+    # Review 2026-11-15, cause #4: rank the arms by the criterion that BLOCKS the solve, not
+    # by the mean — a cell needs every criterion at 100%, so lifting three that already pass
+    # buys nothing (giftcard YK sat at [30, 100, 30, 100, 20]).
+    focus = blocking_criterion(conn, key)
+    verified = verified_delta_stats(conn, key, focus=focus[0] if focus else None)
     stats = verified or delta_stats(conn, key, hl)
+    if focus and verified:
+        log(f"CRITERION FOCUS {key}: criterion #{focus[0]} (mean {focus[1]}%) blocks the solve "
+            f"— arms ranked by it, not by the mean score")
     if not verified:
         log(f"delta choice for {key}: no verified judge score yet — falling back to the "
             f"reward channel ({stats_source})")

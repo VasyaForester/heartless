@@ -55,17 +55,18 @@ class Base(unittest.TestCase):
         self.conn.commit()
 
     def attempt(self, pair="s|m", *, reward=None, source=None, judge_status="unjudged",
-                verdict=None, score=None, delta="arm", ts=None):
+                verdict=None, score=None, pcts=None, delta="arm", ts=None):
         # `time.time_ns()` is too coarse on Windows (15.6 ms ticks): a loop of inserts gets
         # one timestamp, so the id carries a counter instead.
         self._seq += 1
         aid = f"{pair}-{self._seq}"
         self.conn.execute(
             "INSERT INTO attempts(attempt_id,pair_id,board_profile,scenario,model,lane,"
-            "started_at,delta,reward,reward_source,judge_status,verdict,score,state)"
-            " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "started_at,delta,reward,reward_source,judge_status,verdict,score,pcts,state)"
+            " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (aid, pair, driver.BOARD_NAME, pair.split("|")[0], "model", "test",
-             ts or time.time(), delta, reward, source, judge_status, verdict, score, "unjudged"))
+             ts or time.time(), delta, reward, source, judge_status, verdict, score,
+             pcts, "unjudged"))
         self.conn.commit()
         return aid
 
@@ -237,6 +238,77 @@ class DeltaGateTest(Base):
         self.assertIsNone(driver.make_generated_variant(self.conn, self.lease, "gen|model",
                                                         __import__("random").Random(1), []),
                           "a composed frame is a new delta and waits for two judges")
+
+
+class CriterionFocusTest(Base):
+    """Review 2026-11-15, cause #4: rank the arms by the BLOCKING criterion.
+
+    A cell is solved only when every criterion stands at 100%, so at [30,100,30,100,20] the
+    only useful target is the criterion at 20 — the mean (56) says "almost there" and is
+    exactly the number that hides the wall.
+    """
+
+    def test_the_blocking_criterion_is_the_lowest_mean(self):
+        self.pair("b|m")
+        self.attempt("b|m", delta="a", judge_status="verified", verdict="rejected",
+                     score=190, pcts="[30,100,30,100,20]")
+        self.assertEqual(driver.blocking_criterion(self.conn, "b|m")[:2], (4, 20.0))
+
+    def test_means_are_per_criterion_and_ties_go_to_the_earlier_index(self):
+        self.pair("t|m")
+        self.attempt("t|m", delta="a", judge_status="verified", verdict="rejected",
+                     score=60, pcts="[10,100,20]")
+        self.attempt("t|m", delta="b", judge_status="verified", verdict="rejected",
+                     score=60, pcts="[30,100,40]")
+        # per-criterion means: #0 = 20, #1 = 100, #2 = 30 -> #0 blocks
+        self.assertEqual(driver.blocking_criterion(self.conn, "t|m")[:2], (0, 20.0))
+
+
+    def test_vectors_of_different_lengths_are_not_mixed(self):
+        """3- and 6-entry vectors of the same cell appear in this journal; index i would
+        stand for different criteria in different probes, so only the modal layout decides."""
+        self.pair("v|m")
+        self.attempt("v|m", delta="a", judge_status="verified", verdict="rejected",
+                     score=30, pcts="[10,20,30]")
+        self.attempt("v|m", delta="b", judge_status="verified", verdict="rejected",
+                     score=300, pcts="[100,100,10,100,100,10]")
+        self.attempt("v|m", delta="c", judge_status="verified", verdict="rejected",
+                     score=300, pcts="[100,100,10,100,100,10]")
+        got = driver.blocking_criterion(self.conn, "v|m")
+        self.assertEqual(got[2]["layout"], 6, "the modal layout (6) decides, not the 3-entry one")
+        self.assertEqual(got[:2], (2, 10.0), "and the blocking index is read on that layout")
+
+    def test_no_pct_vector_means_no_focus(self):
+        self.pair("n|m")
+        self.attempt("n|m", judge_status="verified", verdict="rejected", score=50)
+        self.assertIsNone(driver.blocking_criterion(self.conn, "n|m"),
+                          "a pair without a criterion vector keeps the mean ranking")
+
+    def test_a_focus_ranks_by_that_criterion_not_by_the_mean(self):
+        self.pair("f|m")
+        self.attempt("f|m", delta="wide", judge_status="verified", verdict="rejected",
+                     score=200, pcts="[100,100,0]")     # best MEAN, worst criterion #2
+        self.attempt("f|m", delta="narrow", judge_status="verified", verdict="rejected",
+                     score=120, pcts="[20,0,100]")      # worse mean, closes criterion #2
+        by_mean = driver.verified_delta_stats(self.conn, "f|m")
+        self.assertGreater(by_mean["wide"]["mean"], by_mean["narrow"]["mean"])
+        focused = driver.verified_delta_stats(self.conn, "f|m", focus=2)
+        self.assertGreater(focused["narrow"]["mean"], focused["wide"]["mean"],
+                           "under a focus the arm that closes the blocking criterion wins")
+        self.assertEqual(focused["narrow"]["mean"], 1.0)
+
+    def test_an_attempt_without_the_focus_index_falls_back_to_its_criterion_mean(self):
+        self.pair("p|m")
+        self.attempt("p|m", delta="a", judge_status="verified", verdict="rejected",
+                     score=80, pcts="[10,20]")          # the vector stops before index 4
+        stats = driver.verified_delta_stats(self.conn, "p|m", focus=4)
+        self.assertAlmostEqual(stats["a"]["mean"], 0.15, places=6,
+                               msg="an observation that cannot be projected falls back to its "
+                                   "own criterion mean (same scale), never to a zero")
+        # and a row with no vector at all uses score/100
+        self.attempt("p|m", delta="b", judge_status="verified", verdict="rejected", score=80)
+        self.assertAlmostEqual(driver.verified_delta_stats(self.conn, "p|m", focus=4)["b"]["mean"],
+                               0.8, places=6)
 
 
 if __name__ == "__main__":
