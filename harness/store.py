@@ -22,7 +22,7 @@ import time
 import uuid
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 LEASE_TTL = 1800
 
 # Explicit lifecycle.  `judged` is not final: only a verified judge may
@@ -250,6 +250,12 @@ def _add_missing_columns(conn: sqlite3.Connection) -> list[str]:
             # (the randomized control of the generator experiment: re-probe the
             # best catalog delta instead of composing a new frame).
             ("arm_source", "TEXT"),
+            # v4 -> v5 (Grok review 2026-11-15, axis "reproducibility": 8/10): a replay
+            # needs to know WHICH board profile and WHICH model roster produced the
+            # probe.  Without them the same nonce can be replayed against a different
+            # profile and silently produce a different input.
+            ("profile_hash", "TEXT"),
+            ("models_hash", "TEXT"),
         ),
     }
     for table, cols in plans.items():
@@ -415,7 +421,7 @@ def insert_attempt(conn: sqlite3.Connection, lease: Lease, attempt: dict) -> Non
         assert_owner(conn, lease)
         cols = ["attempt_id", "pair_id", "board_profile", "scenario", "model",
                 "model_version", "lane", "chat_id", "started_at", "state",
-                "input_path"]
+                "input_path", "profile_hash", "models_hash"]
         vals = [(attempt.get("state") or "allocated") if c == "state" else attempt.get(c)
                 for c in cols]
         conn.execute(f"INSERT INTO attempts({','.join(cols)}) VALUES({','.join('?'*len(cols))})",

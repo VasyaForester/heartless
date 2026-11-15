@@ -94,9 +94,39 @@ def board_of(row: dict, by_scenario: dict | None = None) -> str | None:
     return (by_scenario or boards_by_scenario()).get(str(row.get("scenario") or ""))
 
 
+def db_rewards(db_path=None) -> dict:
+    """attempts.reward from the live journal, keyed by the input file name.
+
+    Grok's review (2026-11-15, axis "measurability": 8/10): the number the bench prints
+    must be the number the driver optimises.  The driver selects on `attempts.reward`
+    (written by apply_verdict: judge-anchored composite) — so the bench needs a channel
+    that reads exactly that column for the probes that have it.  The join key is the
+    input file name, which both the probe ledger and the attempts table carry.
+
+    Returns {basename: (reward, delta, pair_id)}.
+    """
+    import sqlite3
+    path = pathlib.Path(db_path or (WORK / "artifacts" / "harness.db"))
+    out: dict = {}
+    if not path.is_file():
+        return out
+    try:
+        conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        for r in conn.execute("SELECT input_path, reward, delta, pair_id FROM attempts"
+                              " WHERE reward IS NOT NULL AND input_path IS NOT NULL"):
+            base = pathlib.Path(str(r["input_path"]).replace("\\", "/")).name
+            out[base] = (float(r["reward"]), r["delta"], r["pair_id"])
+        conn.close()
+    except Exception as exc:  # noqa: BLE001 — a broken journal must not stop a bench
+        print(f"[bench] db rewards unavailable ({type(exc).__name__}: {exc})")
+    return out
+
+
 def load_history(path=REPEATS, *, arms: str = "catalog",
                  min_probes_per_context: int = 0, board: str | None = None,
-                 reward_map: tuple[bool, bool] = (True, True)) -> list[dict]:
+                 reward_map: tuple[bool, bool] = (True, True),
+                 reward_source: str = "local", db_path=None) -> list[dict]:
     """Real probes with an arm and an independently validated reward.
 
     `arms="catalog"` (default) restricts the arm space to the fixed delta
@@ -111,6 +141,8 @@ def load_history(path=REPEATS, *, arms: str = "catalog",
     out = []
     excluded = 0
     other_board = 0
+    db_map = db_rewards(db_path) if reward_source == "db" else {}
+    db_hits = 0
     by_scenario = boards_by_scenario()
     wanted = board if board is not None else os.environ.get("HERMES_BOARD") or "lucky-break-payday"
     p = pathlib.Path(path)
@@ -135,10 +167,17 @@ def load_history(path=REPEATS, *, arms: str = "catalog",
             excluded += 1
             continue
         reward, conf = local_reward(row, faults=reward_map[0], graded=reward_map[1])
+        channel = "local"
+        if db_map:
+            base = pathlib.Path(str(row.get("input") or "").replace("\\", "/")).name
+            hit = db_map.get(base)
+            if hit is not None:
+                reward, conf, channel = hit[0], 1.0, "db"
+                db_hits += 1
         out.append({
             "ts": row.get("ts"), "context": f"{row.get('scenario')}|{row.get('model')}",
             "scenario": row.get("scenario"), "model": row.get("model"),
-            "arm": arm, "reward": reward, "confidence": conf,
+            "arm": arm, "reward": reward, "confidence": conf, "channel": channel,
             "valid": reward is not None,
         })
     if excluded:
@@ -147,6 +186,11 @@ def load_history(path=REPEATS, *, arms: str = "catalog",
     if other_board:
         print(f"[bench] board = {wanted}; {other_board} probes of other boards excluded "
               f"(the probe ledger is shared by all boards)")
+    if db_map:
+        share = 100.0 * db_hits / len(out) if out else 0.0
+        print(f"[bench] reward channel: attempts.reward (the driver's own number) for "
+              f"{db_hits}/{len(out)} probes ({share:.1f}%); the rest fall back to the "
+              f"local map, each row says which via 'channel'")
     if min_probes_per_context:
         by_ctx = defaultdict(list)
         for row in out:
@@ -480,12 +524,15 @@ def main() -> int:
                     help="probe ledger board to analyse (default $HERMES_BOARD or "
                          "lucky-break-payday); the ledger is shared by all boards, so "
                          "this pins the domain")
-    ap.add_argument("--reward-map", default="v2", choices=("v1", "faults", "v2"),
-                    help="which local-reward mapping grades the probes: "
+    ap.add_argument("--reward-map", default="v2", choices=("v1", "faults", "v2", "db"),
+                    help="db = grade by attempts.reward — the very number the driver "
+                         "optimises — falling back to the local map for probes the "
+                         "journal has no reward for (each row says which, and the "
+                         "coverage share is printed); "
+                         "v2 = both local-map fixes (the default, see strategy.local_reward); "
                          "v1 = the old one (our own dropped probes graded as refusals, "
-                         "every refusal family clamped to the same 0.0), "
-                         "faults = v1 but our faults excluded, "
-                         "v2 = both fixes (default; see strategy.local_reward)")
+                         "every refusal family clamped to the same 0.0); "
+                         "faults = v1 but our faults excluded")
     ap.add_argument("--out", default=str(OUT_JSON))
     ap.add_argument("--json", action="store_true", help="print the whole report")
     ap.add_argument("--sweep", default="", help="comma-separated budgets for the sweep, e.g. 100,300,1000")
@@ -498,7 +545,8 @@ def main() -> int:
                            min_probes_per_context=a.min_probes_per_context,
                            board=a.board or None,
                            reward_map={"v1": (False, False), "faults": (True, False),
-                                       "v2": (True, True)}[a.reward_map])
+                                       "v2": (True, True), "db": (True, True)}[a.reward_map],
+                           reward_source=("db" if a.reward_map == "db" else "local"))
     if not history:
         print(json.dumps({"error": "no history", "path": a.history}))
         return 1

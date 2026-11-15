@@ -458,7 +458,8 @@ def make_generated_variant(conn, lease, key: str, rng: random.Random, model_rows
     out = WORK / "inputs" / PLATFORM.input_name(sid, arm, int(time.time()), rng.randint(100, 999))
     out.write_text(text, encoding="utf-8")
     attempt_id = attempts.allocate(conn, lease, pair_id=key, board=BOARD_NAME,
-                                   scenario=sid, model=model, lane=lease.lane)
+                                   scenario=sid, model=model, lane=lease.lane,
+                                   profile_hash=PROFILE_HASH, models_hash=_models_hash())
     attempts.prepare(conn, lease, attempt_id, input_text=text,
                      input_path=str(out.relative_to(WORK)),
                      parent_input_hash=attempts.sha256_text(base_text),
@@ -507,6 +508,21 @@ def spec_seen(conn, key: str) -> set:
     return {r["delta"] for r in conn.execute(
         "SELECT delta FROM deltas WHERE pair_id=? AND n>0", (key,))
         if frames.parse_spec(r["delta"])}
+
+
+def _models_hash() -> str:
+    """The model roster hash from the run manifest (empty when there is no manifest).
+
+    Recorded with every attempt so a replay knows which roster produced the probe
+    (Grok review 2026-11-15, axis "reproducibility").  The manifest is written by the
+    supervisor; a driver started by hand may legitimately have none, and then the
+    attempts say "unknown" instead of inventing a roster.
+    """
+    try:
+        man = manifest.load() or {}
+        return str(man.get("model_roster_hash") or "unknown")
+    except Exception:  # noqa: BLE001 — provenance must never stop a probe
+        return "unknown"
 
 
 def _pooled_arm_stats(conn, sid: str | None, half_life_probes: float | None = None) -> dict:
@@ -583,12 +599,12 @@ def make_variant(conn, lease: str, key: str, rng: random.Random, engine, strateg
     delta = engine.scheduler.choose(arms, stats, rng=rng, pooled_stats=pooled,
                                     novelty=novelty, board_stats=board_stats)
     nonce = f"{time.strftime('%Y%m%d-%H%M%S')}-{rng.randint(1000, 9999)}"
-    text = generation.generate(base_text, delta, nonce)
+    text = generation.generate(base_text, delta, nonce, profile_hash=PROFILE_HASH)
     out = WORK / "inputs" / PLATFORM.input_name(sid, delta, int(time.time()), rng.randint(100, 999))
     out.write_text(text, encoding="utf-8")
     attempt_id = attempts.allocate(
         conn, lease, pair_id=key, board=BOARD_NAME, scenario=sid, model=model,
-        lane=lease.lane)
+        lane=lease.lane, profile_hash=PROFILE_HASH, models_hash=_models_hash())
     attempts.prepare(
         conn, lease, attempt_id, input_text=text,
         input_path=str(out.relative_to(WORK)),
