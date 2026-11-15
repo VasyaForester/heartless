@@ -299,7 +299,7 @@ def compose(spec, base_text: str, nonce: str = "") -> str:
     else:  # plain
         tail = ""
     body = head + tail
-    return body + (f"\n\n[loop {nonce}]" if nonce else "")
+    return body + (f"\n\n(ref: {nonce})" if nonce else "")
 
 
 def catalog(claims=None, carriers=None) -> list:
