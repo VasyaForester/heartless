@@ -94,6 +94,36 @@ def board_of(row: dict, by_scenario: dict | None = None) -> str | None:
     return (by_scenario or boards_by_scenario()).get(str(row.get("scenario") or ""))
 
 
+DEFAULT_REWARD_MAP = "db"
+"""The reward channel the bench grades with unless told otherwise.
+
+Grok's review (2026-11-15, axis "measurability": 8/10): the number the bench prints must
+be the number the driver optimises.  The driver selects on `attempts.reward`; the nightly
+report reads the same column (`nightly.py`: reward >= 0.5 on attempts).  So the bench's
+DEFAULT is that channel too — with the local map as the documented fallback for the probes
+the journal has no reward for (74% of the ledger at the last measurement).
+
+`v1`/`faults`/`v2` remain available for comparability with earlier runs, but they are now
+the exception you have to ask for, not the headline.
+"""
+
+# choice -> (reward source, local-map flags (faults, graded))
+REWARD_CHANNELS = {
+    "db": ("db", (True, True)),
+    "v2": ("local", (True, True)),
+    "faults": ("local", (True, False)),
+    "v1": ("local", (False, False))
+}
+
+
+def reward_channel(choice: str) -> tuple:
+    """The channel a --reward-map choice means.  Pure, so the default is testable."""
+    try:
+        return REWARD_CHANNELS[str(choice)]
+    except KeyError as exc:
+        raise ValueError(f"unknown reward map {choice!r}; known: {sorted(REWARD_CHANNELS)}") from exc
+
+
 def db_rewards(db_path=None) -> dict:
     """attempts.reward from the live journal, keyed by the input file name.
 
@@ -524,7 +554,7 @@ def main() -> int:
                     help="probe ledger board to analyse (default $HERMES_BOARD or "
                          "lucky-break-payday); the ledger is shared by all boards, so "
                          "this pins the domain")
-    ap.add_argument("--reward-map", default="v2", choices=("v1", "faults", "v2", "db"),
+    ap.add_argument("--reward-map", default=DEFAULT_REWARD_MAP, choices=("v1", "faults", "v2", "db"),
                     help="db = grade by attempts.reward — the very number the driver "
                          "optimises — falling back to the local map for probes the "
                          "journal has no reward for (each row says which, and the "
@@ -544,9 +574,8 @@ def main() -> int:
     history = load_history(a.history, arms=a.arms,
                            min_probes_per_context=a.min_probes_per_context,
                            board=a.board or None,
-                           reward_map={"v1": (False, False), "faults": (True, False),
-                                       "v2": (True, True), "db": (True, True)}[a.reward_map],
-                           reward_source=("db" if a.reward_map == "db" else "local"))
+                           reward_map=reward_channel(a.reward_map)[1],
+                           reward_source=reward_channel(a.reward_map)[0])
     if not history:
         print(json.dumps({"error": "no history", "path": a.history}))
         return 1
