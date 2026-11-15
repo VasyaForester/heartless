@@ -38,6 +38,7 @@ import generation  # noqa: E402
 import judge_correlation  # noqa: E402
 import judge_ledger  # noqa: E402
 import manifest  # noqa: E402
+import online_learning  # noqa: E402
 import policy_classify  # noqa: E402
 import store  # noqa: E402
 import strategy  # noqa: E402
@@ -426,6 +427,17 @@ def load_repeats_observations(limit: int = 4000) -> list[dict]:
     return out
 
 
+_LIVE: dict = {}
+
+
+def _live(conn, rows):
+    """One LiveObservations per DB connection (watermark persisted on disk)."""
+    key = id(conn)
+    if key not in _LIVE:
+        _LIVE[key] = online_learning.LiveObservations(conn, rows, board=BOARD_NAME)
+    return _LIVE[key]
+
+
 def make_generated_variant(conn, lease, key: str, rng: random.Random, model_rows: list):
     """Compose a NEW frame for a pair whose fixed catalog has nothing new to offer.
 
@@ -445,6 +457,9 @@ def make_generated_variant(conn, lease, key: str, rng: random.Random, model_rows
     base_text, base_path = base_of(conn, key)
     if base_text is None:
         return None
+    n_new = _live(conn, model_rows).pull()
+    if n_new:
+        log(f"ONLINE LEARN +{n_new} observations -> {len(model_rows)} total")
     cmodel = candidate.ComponentModel().fit(model_rows)
     got = candidate.propose(cmodel, context=f"{BOARD_NAME}|{sid}|{model}", scenario=sid,
                             k=6, seen=spec_seen(conn, key))
