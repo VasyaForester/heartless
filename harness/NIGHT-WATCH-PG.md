@@ -1,7 +1,7 @@
-# NIGHT WATCH — PG lane (sibling) — night of 2026-11-13/14
+# NIGHT WATCH — PG lane (sibling) — playbook
 
-Standing order from the operator: keep Proving Ground solving CONTINUOUSLY through the night;
-NEVER pause; verify every 15 minutes; if something is stuck — resume it.
+Standing order from the operator: keep Proving Ground solving CONTINUOUSLY; NEVER pause;
+verify every 15 minutes; if something is stuck — resume it.
 
 ## Checks (cheap, ~1 min)
 1. Workspace (workdir already set):
@@ -15,33 +15,48 @@ NEVER pause; verify every 15 minutes; if something is stuck — resume it.
    An ATTEMPT/UNJUDGED/RESULT line newer than 20 min → loop healthy.
 4. DB counters (should grow overnight):
    `python3` one-liner on `artifacts/harness-pg.db` → count(attempts).
-   The 5 solved `proving-defcon33-secvc` pairs are INTENTIONALLY marked — never reset.
+   The solved `proving-defcon33-secvc` pairs are INTENTIONALLY marked — never reset.
 
 ## Resume procedure (only if STUCK: supervisor dead, or no attempt line for >20 min)
 1. Kill our leftovers only:
    `MSYS_NO_PATHCONV=1 taskkill /F /T /PID $S` (ignore errors)
-   `ps -W | grep python3.12` — inspect, kill ONLY processes running `driver.py --lane pg`
+   `ps -W | grep python3.12` — inspect, kill ONLY processes running driver.py --lane pg
    (do NOT touch lane=main / keeper / lucky-break processes).
 2. Relaunch (MUST outlive the cron session — background=true, persist_on_release=true):
-   `HERMES_BOARD=proving-ground python3 harness/supervisor.py --lane pg --port 9223 --target DBBAABBDF316BFB73616588BF041EA12 --db artifacts/harness-pg.db --max-hours 0`
-3. Wait ~60s; verify `driver start` in the supervisor log and a fresh ATTEMPT in driver.log.
+   `HERMES_BOARD=proving-ground python3 harness/supervisor.py --lane pg --port 9223 --db artifacts/harness-pg.db --max-hours 0`
+   **NO --target flag.**  CDP target ids rotate whenever the browser restarts; a baked-in
+   target makes the driver fail every attempt (`rc=1`, stale id).  The supervisor resolves
+   the tab itself via `harness/pick_target.py` at start and re-resolves in its loop.
+3. Wait ~60s; verify `driver start` in the supervisor log (target = the CURRENT tab id)
+   and a fresh ATTEMPT in driver.log.
 4. Stale locks are fine — acquire_lock checks pid liveness and replaces dead locks.
+
+## Dynamic target resolution (use everywhere instead of hardcoded ids)
+- Own tab:    `TARGET="$(HERMES_BOARD=proving-ground python3 harness/pick_target.py)"`
+  (exit 1 = no tab → open one:
+   `curl -X PUT "http://127.0.0.1:9223/json/new?https://app.grayswan.ai/arena/challenge/proving-ground"`
+   ; exit 2 = ambiguous → do NOT guess, inspect the tabs).
+- Sibling tab (to restore as active after own browser ops):
+  `SIB="$(HERMES_BOARD=lucky-break-payday python3 harness/pick_target.py)"`
+  `curl -s -X PUT "http://127.0.0.1:9223/json/activate/$SIB"`   (returns "Target activated")
 
 ## Hard rules (sibling coexistence — RULES 61/70–72)
 - NEVER pause: no `loop.paused`, no restart-flags as pause, no lowering max-hours to stop early.
-- NEVER touch: lane main, `Lucky Break: Payday`, tab `D769D07296DFEAD5E66D6AF990ECF0F9`,
-  `artifacts/lane-auto/*`, `tools/loop_watchdog.sh`, `tools/lane_auto.sh`, `tools/run1.sh`,
+- NEVER touch: lane main, `Lucky Break: Payday`, `artifacts/lane-auto/*`,
+  `tools/loop_watchdog.sh`, `tools/lane_auto.sh`, `tools/run1.sh`,
   `harness/loop.py`, `harness/lbp.py`.
-- ALL browser ops only with `HERMES_BOARD=proving-ground` and `--target DBBAABBDF316BFB73616588BF041EA12`.
-- After ANY browser action, restore the sibling tab as active (browser-level CDP `Target.activateTarget`,
-  targetId `D769D07296DFEAD5E66D6AF990ECF0F9`, via `http://127.0.0.1:9223/json/version`).
-- Do NOT launch speculative frames/batches at night — PG personas refuse them; monitor + resume + judge strays only.
+- ALL browser ops only with `HERMES_BOARD=proving-ground` and the dynamically resolved
+  `$TARGET` (never a hardcoded target id).
+- After ANY browser action, restore the sibling tab as active (browser-level CDP
+  activate, target id resolved dynamically as above).
+- Do NOT launch speculative frames/batches at night — PG personas refuse them; monitor +
+  resume + judge strays only.
 - Node for browser js: `/c/hermes-tools/node-26.12.1-win32-x64/node.exe`.
 
 ## Optional stray-judge step (only if trivially visible)
 If a fresh `artifacts/farm-*-send-result.json` shows `class=comply_full` and its chat has no judge yet:
-`python3 harness/chat_ops.py judge --target DBBAABBDF316BFB73616588BF041EA12 --chat-id <cid> --scenario-id <scene> --track Chat --opid night-judge-<hhmm>`
-(cid via `python3 harness/chat_ops.py find --target DBBA…`, or the judge-result naming; scenes in `boards/proving-ground.json`).
+`python3 harness/chat_ops.py judge --target "$TARGET" --chat-id <cid> --scenario-id <scene> --track Chat --opid night-judge-<hhmm>`
+(cid via `python3 harness/chat_ops.py find --target "$TARGET"`, or the judge-result naming; scenes in `boards/proving-ground.json`).
 
 ## Log line (append to `artifacts/night-pg-watch.log`)
 `<HH:MM> | OK|RESUMED | attempts=<N> | last=<first ~60 chars of the last attempt line>`

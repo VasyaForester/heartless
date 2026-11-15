@@ -255,3 +255,15 @@ Sanitizer/tag-resistant модели (которые режут <SYSTEM>-payload
   bleed detection works) or, if a stop is truly needed, stop AND restart via the tracked
   background channel in one motion, and expect the watch to resurrect the lane at its next tick.
 - Downtime is bounded by the watch (<=15 min) and self-healed; no data lost.
+
+## 2026-11-15 18:50 — CDP target ids rotate on browser restart (do NOT hardcode --target)
+
+- The operator accidentally closed Chrome. The browser relaunched with NEW CDP target ids;
+  the main lane self-resolved (it never bakes --target), the pg lane had a hardcoded
+  --target in the supervisor launch + watch playbook -> driver failed every attempt
+  (rc=1 with the dead id), sups churned, ~25 min of wasted attempts.
+- Fix: supervisor launched WITHOUT --target (resolves via harness/pick_target.py at start
+  and in its loop); playbook + cron prompt updated to resolve the target dynamically
+  (exit 1=none -> open tab, exit 2=ambiguous -> inspect, never guess).
+- Rule: any watchdog/playbook/keeper recipe for a CDP lane must resolve targets at run time,
+  never store them.
