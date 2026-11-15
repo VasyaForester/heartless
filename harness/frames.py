@@ -256,8 +256,15 @@ def _frame_text(carrier: str, claim: str, base_text: str, spec) -> str:
     return "\n".join(p for p in (text, claim_text) if p)
 
 
-def compose(spec, base_text: str, nonce: str = "") -> str:
-    """Render the probe text of a spec. Deterministic given (spec, base, nonce)."""
+def compose(spec, base_text: str, nonce: str = "",
+            profile_hash: str | None = None) -> str:
+    """Render the probe text of a spec. Deterministic given (spec, base, nonce).
+
+    `profile_hash` pins the frame to the board profile that produced it, exactly like
+    `generation.generate` does (Grok review 2026-11-15, axis "reproducibility"): the
+    payload is untouched, only the reference marker names the profile, so a replay
+    against another profile cannot silently reproduce a different input.
+    """
     carrier, delivery, claim = spec
     if carrier not in CARRIERS or delivery not in DELIVERIES or claim not in CLAIMS:
         raise ValueError(f"unknown component in spec {spec}")
@@ -299,7 +306,12 @@ def compose(spec, base_text: str, nonce: str = "") -> str:
     else:  # plain
         tail = ""
     body = head + tail
-    return body + (f"\n\n(ref: {nonce})" if nonce else "")
+    # The reference marker names the board profile when one is given, exactly like
+    # generation.generate (Grok review 2026-11-15, axis "reproducibility"): the payload
+    # is untouched, and a replay against another profile cannot silently reproduce a
+    # different input.
+    ref = f"{nonce}@{str(profile_hash)[:8]}" if (nonce and profile_hash) else nonce
+    return body + (f"\n\n(ref: {ref})" if ref else "")
 
 
 def catalog(claims=None, carriers=None) -> list:

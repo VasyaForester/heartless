@@ -454,7 +454,7 @@ def make_generated_variant(conn, lease, key: str, rng: random.Random, model_rows
     spec = tuple(pick["spec"])
     arm = frames.spec_id(spec)
     nonce = f"{time.strftime('%Y%m%d-%H%M%S')}-{rng.randint(1000, 9999)}"
-    text = frames.compose(spec, base_text, nonce)
+    text = frames.compose(spec, base_text, nonce, profile_hash=PROFILE_HASH)
     out = WORK / "inputs" / PLATFORM.input_name(sid, arm, int(time.time()), rng.randint(100, 999))
     out.write_text(text, encoding="utf-8")
     attempt_id = attempts.allocate(conn, lease, pair_id=key, board=BOARD_NAME,

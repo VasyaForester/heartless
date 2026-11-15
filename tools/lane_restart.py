@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
-"""Controlled restart of the Payday lane (supervisor + driver), 2026-11-13.
+"""Controlled restart of the Payday lane (supervisor + driver), windowless.
 
-Why: on 2026-11-13 a wedge left the lane dark for 2.5 h. The supervisor now has
-a stale-log watchdog; this script replaces a supervisor that predates it.
-
-Order: terminate driver -> terminate supervisor -> spawn fresh supervisor
-(detached, logs to artifacts/supervisor.out) -> wait for a new driver start.
-Safe with the sibling lane: only PID 1 (lock) and the last "driver start" PID
-from THIS board's supervisor.log are touched.
+2026-11-15: switched from DETACHED_PROCESS to CREATE_NO_WINDOW + hidden
+STARTUPINFO — a detached parent makes Windows create a VISIBLE console for every
+console child (python supervisor -> python driver). Verification now requires a
+NEW driver-start line (fresh pid, timestamp after the spawn).
 """
 import json
 import os
@@ -20,11 +17,10 @@ import pathlib
 
 W = pathlib.Path(__file__).resolve().parent.parent
 A = W / "artifacts"
-sys.path.insert(0, str(W / "harness"))
-from winquiet import windowless_kwargs  # noqa: E402
+IS_WIN = os.name == "nt"
 
 
-def winpids() -> set:
+def winpids():
     out = subprocess.run(["ps", "-W"], capture_output=True, text=True).stdout
     pids = set()
     for row in out.splitlines()[1:]:
@@ -58,14 +54,15 @@ def kill(pid, why):
         return
     try:
         os.kill(pid, signal.SIGTERM)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"SIGTERM failed for {pid}: {exc}")
     for _ in range(10):
         if pid not in winpids():
             break
         time.sleep(1)
-    if pid in winpids():
-        subprocess.run(["taskkill", "/PID", str(pid), "/F"], capture_output=True)
+    if pid in winpids() and IS_WIN:
+        subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)],
+                       capture_output=True, env={**os.environ, "MSYS_NO_PATHCONV": "1"})
         time.sleep(1)
     print(f"killed {why} pid={pid} alive={pid in winpids()}")
 
@@ -78,35 +75,50 @@ kill(sup, "supervisor")
 time.sleep(2)
 
 out = open(A / "supervisor.out", "a", encoding="utf-8")
-# 2026-11-14: was DETACHED_PROCESS — that is exactly what made every python the
-# supervisor later spawned (the driver, pick_target, lbp.py) open a NEW VISIBLE
-# console window branded with the WindowsApps interpreter path; closing that
-# window even killed the driver (STATUS_CONTROL_C_EXIT 0xC000013A).  CREATE_NO_WINDOW
-# keeps the supervisor equally outliving while leaving its children windowless.
-p = subprocess.Popen(
-    [sys.executable, str(W / "harness" / "supervisor.py"),
-     "--lane", "main", "--port", "9223", "--max-hours", "0"],
-    cwd=str(W), stdout=out, stderr=subprocess.STDOUT,
-    env=os.environ.copy(), **windowless_kwargs(new_process_group=True))
-print(f"new supervisor pid={p.pid}")
+kwargs = {}
+if IS_WIN:
+    si = subprocess.STARTUPINFO()
+    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    si.wShowWindow = 0  # SW_HIDE
+    kwargs = {"creationflags": subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP,
+              "startupinfo": si}
+t0 = time.time()
+p = subprocess.Popen([sys.executable, str(W / "harness" / "supervisor.py"),
+                      "--lane", "main", "--port", "9223", "--max-hours", "0"],
+                     cwd=str(W), stdout=out, stderr=subprocess.STDOUT,
+                     env=os.environ.copy(), **kwargs)
+print(f"new supervisor pid={p.pid} (windowless)")
 
-deadline = time.time() + 120
+deadline = time.time() + 150
 seen = None
 while time.time() < deadline:
     try:
-        log = (A / "supervisor.log").read_text(errors="replace").splitlines()
+        lines = (A / "supervisor.log").read_text(errors="replace").splitlines()
     except OSError:
-        log = []
-    for line in reversed(log[-8:]):
+        lines = []
+    for line in reversed(lines[-8:]):
         m = re.search(r"driver start pid=(\d+)", line)
-        if m and int(m.group(1)) != drv:
-            seen = line.strip()
-            break
+        if not m or int(m.group(1)) == (drv or -1):
+            continue
+        tm = re.search(r"\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\]", line)
+        if tm:
+            try:
+                ts = time.mktime(time.strptime(tm.group(1), "%Y-%m-%dT%H:%M:%S"))
+            except Exception:
+                ts = 0
+            if ts >= t0 - 3:
+                seen = line.strip()
+                break
     if seen:
         break
     time.sleep(5)
-print("driver:", seen or "NOT STARTED within 120s")
-print("lock:", (A / "supervisor.lock").read_text().strip())
-print("supervisor.log tail:")
-for line in (A / "supervisor.log").read_text(errors="replace").splitlines()[-5:]:
-    print("  " + line.strip())
+print("driver:", seen or "NOT STARTED within 150s")
+try:
+    print("lock:", (A / "supervisor.lock").read_text().strip())
+except OSError:
+    print("lock: missing")
+try:
+    for line in (A / "supervisor.log").read_text(errors="replace").splitlines()[-4:]:
+        print("  " + line.strip())
+except OSError:
+    pass
