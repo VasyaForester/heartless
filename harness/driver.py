@@ -759,6 +759,11 @@ def main(argv=None) -> int:
     if not target:
         rc, out, err = sh([sys.executable, str(WORK / "harness" / "pick_target.py")], timeout=30)
         target = (out or "").strip()
+        if not target and (err or "").strip():
+            # "no tab" vs "ambiguous: 2 tabs" — the operator must be able to tell the
+            # difference in the log (Grok review 2026-11-15: an empty target with two
+            # tabs is an attempt error, not a guess).
+            log(f"pick_target: {(err or '').strip()[:160]}")
     if not target:
         # An adapter can declare that it needs no browser (the offline sandbox:
         # harness/arena_fake.py).  Every other arena keeps the loud refusal, so a

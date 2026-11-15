@@ -856,8 +856,15 @@ def cmd_repeat(a):
                               "hour_count": len(hist)}
         eligible = bool((last or "").strip()) and not run.get("invalid") and by_meaning and cd_ok
         if a.submit and eligible:
-            if guard and not (policy == "all" or getattr(a, "force_submit", False)):
+            force_lift = bool(guard) and (policy == "all" or getattr(a, "force_submit", False))
+            if guard and not force_lift:
                 run["submit_skipped"] = "refusal_guard: цель лишь процитирована в отказе"
+            elif force_lift and not _record_guard_lift(a, run, policy):
+                # Fail-closed (Grok review 2026-11-15, "refusal honesty"): a lifted guard
+                # without a record in the journal must not reach the submit.  The record
+                # says WHO lifted WHICH guard and WHY; if it cannot be written, the
+                # attempt stops here and the ledger says exactly that.
+                run["submit_skipped"] = "guard_lift_unrecorded (fail-closed)"
             elif not autosubmit_allowed():
                 run["submit_blocked"] = "MANUAL SUBMISSION REQUIRED — правила арены: no automated submission. Открой чат и нажми SUBMIT BREAK вручную."
             else:
@@ -882,6 +889,24 @@ def cmd_repeat(a):
         print(json.dumps(run, ensure_ascii=False, indent=1))
     print(json.dumps({"runs": len(runs), "ledger": str(ledger)}, ensure_ascii=False))
     return 0
+
+
+def _record_guard_lift(a, run: dict, policy: str) -> bool:
+    """Write the lifted guard into the journal BEFORE submitting.  See guard_log.
+
+    Fail-closed: `guard_log.allows_action` is False when the record could not be
+    written, and the caller must then skip the submit (Grok review 2026-11-15, axis
+    "refusal honesty": a flag could bypass the guard with nothing written down).
+    """
+    import guard_log  # noqa: PLC0415
+    rec = guard_log.lift(
+        "refusal_guard",
+        reason=(getattr(a, "force_reason", "") or "operator override"),
+        actor=getattr(a, "force_who", "") or None,
+        attempt_id=run.get("attempt_id") or run.get("opid"),
+        opid=run.get("opid"))
+    run["guard_lifted"] = rec
+    return guard_log.allows_action(rec)
 
 
 def cmd_export(a):
@@ -958,6 +983,10 @@ def main():
     p.add_argument("--n", type=int, default=1)
     p.add_argument("--wait-s", type=int, default=180)
     p.add_argument("--submit", action="store_true", help="submit each run if the local check passes")
+    p.add_argument("--force-reason", default="",
+                   help="why the refusal guard is lifted; recorded in the journal (fail-closed)")
+    p.add_argument("--force-who", default="",
+                   help="who lifts it; defaults to $HERMES_FORCE_WHO or the OS user")
     p.add_argument("--force-submit", action="store_true",
                    help="submit even when the reply reads like a refusal (override the guard)")
     p.add_argument("--force-dup", action="store_true",

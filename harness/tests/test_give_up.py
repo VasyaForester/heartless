@@ -122,3 +122,44 @@ class GiveUpTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+class ParkedPairTest(unittest.TestCase):
+    """A parked pair must not be in the selection (Grok review 2026-11-15).
+
+    Two different mechanisms park a pair and both must keep it out of `pick_pair`:
+    the bookkeeping file (datasets/lbp/pair-status.json — POLICY_BLOCKED/UNSAFE_OBJECTIVE,
+    the sibling line's verdicts) and the data-driven give-up rule.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.work = pathlib.Path(self.tmp.name)
+        self._work, driver.WORK = driver.WORK, self.work
+        (self.work / "artifacts").mkdir(parents=True, exist_ok=True)
+        (self.work / "datasets/lbp").mkdir(parents=True, exist_ok=True)
+        self.conn = store.connect(self.work / "t.db")
+        for key in ("blocked|model", "open|model"):
+            self.conn.execute(
+                "INSERT INTO pairs(id,board_profile,scenario,model,solved,attempts,best_input)"
+                " VALUES(?,?,?,?,0,0,'inputs/x.txt')",
+                (key, driver.BOARD_NAME, key.split("|")[0], "model"))
+        self.conn.commit()
+
+    def tearDown(self):
+        driver.WORK = self._work
+        driver.PAIR_STATUS = self._pair_status
+        self.conn.close()
+        self.tmp.cleanup()
+
+    def test_a_bookkeeping_parked_pair_is_never_picked(self):
+        self._pair_status = driver.PAIR_STATUS
+        rel = "datasets/lbp/pair-status.json"
+        driver.PAIR_STATUS = rel
+        (self.work / rel).write_text(json.dumps({
+            "pairs": {"blocked|model": {"status": "POLICY_BLOCKED",
+                                        "rationale": "categorical safety gate"}}}),
+            encoding="utf-8")
+        self.assertIn("blocked|model", driver.load_parked())
+        picks = {driver.pick_pair(self.conn, random.Random(s), cooldown_s=0.0, window_s=1e9)
+                 for s in range(20)}
+        self.assertEqual(picks, {"open|model"}, f"parked pair was picked: {picks}")
