@@ -124,3 +124,61 @@ class ImmutabilityTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+class PendingOutcomeTest(unittest.TestCase):
+    """`pending` stays an UNKNOWN outcome (Grok review 2026-11-15, axis "refusal honesty").
+
+    A verdict the judge has not returned yet must not become a reward, must not finalize
+    the attempt, and must not feed the bandit — otherwise a "we do not know" is silently
+    counted as a failure, which is exactly the accounting lie the axis is about.  A later
+    verdict for the same attempt is still allowed to land (nothing is frozen by pending).
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.dir = pathlib.Path(self.tmp.name)
+        self.conn = store.connect(self.dir / "t.db")
+        self.lease = store.acquire_lease(self.conn, "lane-p", "target")
+        self.conn.execute(
+            "INSERT INTO pairs(id,board_profile,scenario,model) VALUES(?,?,?,?)",
+            (PAIR, driver.BOARD_NAME, "scenario", "model"))
+        self.conn.execute(
+            "INSERT INTO attempts(attempt_id,pair_id,board_profile,scenario,model,lane,"
+            "started_at,state,delta) VALUES('att-p',?,?,?,?,?,?,?,?)",
+            (PAIR, driver.BOARD_NAME, "scenario", "model", "lane-p", 0.0, "submitted", "arm"))
+        self.conn.commit()
+        self.engine = ImmutabilityTest._Engine()
+
+    def tearDown(self):
+        self.conn.close()
+        self.tmp.cleanup()
+
+    def _apply(self, status: str, **extra):
+        res = {"status": status, "judge_ref": "", "operation_id": "opid-p",
+               "chat_id": "deadbeef", "score": None, "pcts": [], "verdict": status,
+               "raw_hash": "h", "submitted_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+        res.update(extra)
+        return driver.apply_verdict(self.conn, self.lease, "att-p", PAIR, "scenario",
+                                    "model", "arm", res, {"probe_ok": True}, self.engine)
+
+    def test_pending_records_no_reward_and_does_not_finalize(self):
+        out = self._apply("pending")
+        self.assertEqual(out["outcome"], "pending")
+        row = store.get_attempt(self.conn, "att-p")
+        self.assertIsNone(row["reward"], "an unknown outcome must not become a number")
+        self.assertNotEqual(row["state"], "finalized")
+        self.assertEqual(row["judge_status"], "pending")
+
+    def test_pending_does_not_feed_the_bandit(self):
+        self._apply("pending")
+        self.assertEqual(self.engine.calls, [],
+                         "the engine must not be told about a verdict that has not landed")
+
+    def test_a_later_real_verdict_is_still_accepted(self):
+        self._apply("pending")
+        out = self._apply("verified", score=100, verdict="accepted", pcts=[100, 0])
+        self.assertEqual(out["outcome"], "verified")
+        row = store.get_attempt(self.conn, "att-p")
+        self.assertIsNotNone(row["reward"])
+        self.assertEqual(row["state"], "finalized")
+        self.assertEqual(len(self.engine.calls), 1, "exactly one real observation")
