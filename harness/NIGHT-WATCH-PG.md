@@ -63,3 +63,14 @@ If a fresh `artifacts/farm-*-send-result.json` shows `class=comply_full` and its
 
 Final response of each watch run = ONE short line, e.g. `PG watch 00:15 — OK (attempts=170)`
 or `PG watch 00:30 — RESUMED (was stuck; supervisor restarted)`.
+
+## OPERATOR STAND-DOWN (2026-11-15 ~22:45) — ACTIVE
+- Operator order: stop the PG-solving agent ("пока не решай эту арену; соседние не трогай").
+- Done: PG supervisor + driver stopped (kill tree pid 8552); the pg-night-watch cron
+  (f5ef855805c7) is PAUSED.
+- Untouched and healthy: lane main + its keeper/custodian (the custodian manages lane main
+  only and never pokes PG).
+- RESUME on operator word: (1) resume the cron (cronjob_manage resume f5ef855805c7);
+  (2) start supervisor, background + persist_on_release, HERMES_BOARD=proving-ground,
+  NO --target (`python3 harness/supervisor.py --lane pg --port 9223 --db artifacts/harness-pg.db --max-hours 0`);
+  (3) verify driver start + a fresh ATTEMPT; the stale lock is replaced automatically.

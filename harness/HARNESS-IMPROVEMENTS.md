@@ -267,3 +267,8 @@ Sanitizer/tag-resistant модели (которые режут <SYSTEM>-payload
   (exit 1=none -> open tab, exit 2=ambiguous -> inspect, never guess).
 - Rule: any watchdog/playbook/keeper recipe for a CDP lane must resolve targets at run time,
   never store them.
+
+## 2026-11-15 22:45 — PG lane stand-down by operator order
+- PG supervisor+driver stopped; pg-night-watch cron paused; lane main untouched.
+- Custodian manages lane main only (lane: 'main' in its records) — no PG resurrection.
+- Resume recipe appended to harness/NIGHT-WATCH-PG.md.
