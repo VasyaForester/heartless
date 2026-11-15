@@ -250,7 +250,11 @@ class DriverGeneratorTest(unittest.TestCase):
         self.assertEqual(row["strategy_version"], 4)
         self.assertEqual(row["state"], "prepared")
         text = (f.WORK / input_path).read_text(encoding="utf-8")
-        self.assertIn("loop ", text)
+        self.assertTrue(text.strip(), "a generated frame must carry probe text")
+        # The pipeline replaced the old "[loop ...]" tell with a benign "(ref: ...)"
+        # marker (sibling line, 2026-11-15).  A generated frame must not re-introduce
+        # the tell: this assertion is the guard that keeps the two lines aligned.
+        self.assertNotIn("[loop", text)
 
     def test_proposed_frames_are_not_repeats_within_a_pair(self):
         f = self.driver

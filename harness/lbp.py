@@ -727,6 +727,16 @@ def cmd_repeat(a):
                 run["send_diag" + tag] = _diag
             run["sent_via" + tag] = _sent_via
             run["sent_ok" + tag] = _sent_ok
+            if _sent_ok and run.get("probe_ok" + tag) is False:
+                # A CONFIRMED send is itself proof the fill worked: the text left the
+                # composer.  The textarea comparison had the same false-negative
+                # family as the send check (measured 2026-11-15 16:11: two probes with
+                # a real model answer were still counted as OUR loss because the
+                # textarea read did not contain our first 40 chars).  The send is the
+                # stronger witness, so it decides.
+                run["fill_ok" + tag] = True
+                run["probe_ok" + tag] = True
+                run["fill_note" + tag] = "confirmed by send"
             run["invalid" + tag] = (not _sent_ok)
             return n_before
         def _await_reply(n0, tag=""):
