@@ -292,7 +292,45 @@ def check_live_modules() -> dict:
     return _result("live_modules_present", not missing, f"missing={missing}")
 
 
-CHECKS = (check_rules, check_deprecated_stub, check_infra_files, check_archived_absent,
+ARCHIVE_JOURNAL = "pairs.jsonl"
+JOURNAL_CONSUMERS = ("lbp.py", "lbp_plan.py", "lbp_report.py")
+
+
+def check_single_journal() -> dict:
+    """ONE journal: the matrix is read from harness/journal.py, never from the archive.
+
+    Grok's review (2026-11-15, axis "one journal": 4/10) named three live readers that
+    still counted pairs from the v1 journal datasets/lbp/pairs.jsonl — and one of them
+    still WROTE it, so an archive nobody maintained was being treated as the present.
+    This check is the axis-10 invariant: it goes red the moment live code reads the
+    archive as data again.
+    """
+    problems = []
+    for name in JOURNAL_CONSUMERS:
+        path = WORK / "harness" / name
+        if not path.is_file():
+            problems.append(f"harness/{name} missing")
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        for i, line in enumerate(text.splitlines(), 1):
+            code = line.split("#", 1)[0]
+            if ARCHIVE_JOURNAL in code and any(
+                    k in code for k in ("read_text(", "open(", "glob(", "json.loads(")):
+                problems.append(f"harness/{name}:{i} reads the archive as data")
+        if "journal" not in text:
+            problems.append(f"harness/{name} does not go through harness/journal.py")
+    jr = WORK / "harness" / "journal.py"
+    if not jr.is_file():
+        problems.append("harness/journal.py (the single reader) is missing")
+    else:
+        jt = jr.read_text(encoding="utf-8", errors="replace")
+        for needed in ("def live_matrix", "def render_markdown", "def summary"):
+            if needed not in jt:
+                problems.append(f"harness/journal.py lost {needed}")
+    return _result("single_journal", not problems, "; ".join(problems))
+
+
+CHECKS = (check_rules, check_deprecated_stub, check_single_journal, check_infra_files, check_archived_absent,
           check_boards, check_default_board, check_board_runtime_parity, check_deltas,
           check_checks_module, check_manifest_fields, check_strategy_engine,
           check_docs_claims, check_readme, check_tree_claims, check_live_modules)

@@ -885,23 +885,19 @@ def cmd_repeat(a):
 
 
 def cmd_export(a):
-    """Assemble the consolidated deliverable from local datasets (no browser calls)."""
-    ds = WORK / "datasets/lbp"
-    pairs = [json.loads(l) for l in (ds / "pairs.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
-    scen = {}
-    for p in pairs:
-        scen.setdefault(p["scenario_id"], {})[p["model_id"]] = p.get("outcome") or "unconfirmed"
-    solved_pairs = [p for p in pairs if p.get("outcome") == "SUCCESS"]
-    scen_solved = [sid for sid, m in scen.items() if any(v == "SUCCESS" for v in m.values())]
-    lines = ["# Lucky Break: Payday - consolidated export", "",
-             f"- Scenarios solved: {len(scen_solved)}/5; breaks: {len(solved_pairs)}/20",
-             f"- Generated: {time.strftime('%Y-%m-%d %H:%M')}", "",
-             "## Scenario x model", "", "| scenario | model | outcome | attempts |", "|---|---|---|---|"]
-    for sid, m in sorted(scen.items()):
-        for mid, outc in sorted(m.items()):
-            att = next((p.get("attempts") for p in pairs
-                        if p["scenario_id"] == sid and p["model_id"] == mid), "")
-            lines.append(f"| {sid} | {mid} | {outc} | {att} |")
+    """Assemble the consolidated deliverable from the LIVE journal (no browser calls).
+
+    The matrix used to be read from the v1 archive `datasets/lbp/pairs.jsonl` — the
+    "four journals" defect (Grok review 2026-11-15).  It is now a view of
+    `artifacts/harness.db` rendered by the one shared renderer (harness/journal.py),
+    so the export cannot disagree with the plan or the report.
+    """
+    import journal  # noqa: PLC0415 — keeps lbp.py's import surface unchanged
+    board_slug = str(_PROFILE.get("name") or os.environ.get("HERMES_BOARD") or "")
+    rows = journal.live_matrix(board=board_slug or None)
+    lines = journal.render_markdown(
+        rows, title="Lucky Break: Payday - consolidated export",
+        board=board_slug or None).rstrip("\n").split("\n")
     lines += ["", "## References", "",
               "- Recipes/notes: artifacts/lbp-payday-notes.md",
               "- Methodology: deliverables/lbp-methodology-2026-11-09.md",

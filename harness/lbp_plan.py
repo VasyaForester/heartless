@@ -3,7 +3,8 @@
 
 Читает ТОЛЬКО локальные файлы (никаких браузерных действий):
   datasets/lbp/decision-tree.json   — курированное знание (rails/стратегии/принципы/парки)
-  datasets/lbp/pairs.jsonl          — исторический журнал v1 (append-only; живой учёт = artifacts/harness.db)
+  artifacts/harness.db              — ЕДИНСТВЕННЫЙ живой журнал (матрица берётся отсюда, harness/journal.py)
+  datasets/lbp/pairs.jsonl          — архив v1 (только чтение истории; живые компоненты его не читают)
 
 План НЕ отправляет ничего сам. Прогон — отдельными командами (lbp.py repeat / lbp_blitz.py),
 которые планировщик печатает готовыми к запуску.
@@ -19,13 +20,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import journal  # noqa: E402
+
 WORK = HERE.parent
 TREE_PATH = WORK / "datasets/lbp/decision-tree.json"
-PAIRS_PATH = WORK / "datasets/lbp/pairs.jsonl"
+# The live matrix comes from the database through ONE reader (harness/journal.py).
+# The v1 journal datasets/lbp/pairs.jsonl is an archive: reading it as the matrix
+# was the "four journals" defect Grok flagged (2026-11-15); config_check guards it.
 
 
 def load_tree():
@@ -36,12 +43,9 @@ def load_tree():
         raise SystemExit(2)
 
 
-def load_pairs():
-    rows = []
-    for line in PAIRS_PATH.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            rows.append(json.loads(line))
-    return rows
+def load_pairs(board: str | None = None):
+    """The live pair matrix — from the database, never from the archive."""
+    return journal.live_matrix(board=board or os.environ.get("HERMES_BOARD") or None)
 
 
 def model_class(tree, model):
@@ -127,7 +131,7 @@ def plan_pair(tree, scen_key, model, row):
 def cmd_all(tree, pairs):
     print("=== ПЛАН ПО ДОСКЕ Lucky Break: Payday (все 5 сценариев) ===\n")
     solved = sum(1 for r in pairs if (r.get("outcome") or "").upper() == "SUCCESS")
-    print(f"Матрица (история v1): {solved}/20 пар закрыто. Живой учёт: artifacts/harness.db; pairs.jsonl — исторический срез\n")
+    print(f"Матрица (живой учёт, harness.db): {solved}/{len(pairs)} пар закрыто\n")
     for scen_key, sc in tree["scenarios"].items():
         rows = [r for r in pairs if r["scenario_id"] == scen_key]
         solved_here = sum(1 for r in rows if (r.get("outcome") or "").upper() == "SUCCESS")
@@ -181,16 +185,17 @@ def cmd_check(tree):
     try:
         pairs = load_pairs()
         if len(pairs) != 20:
-            errors.append(f"pairs.jsonl: expected 20 rows, found {len(pairs)}")
+            errors.append(f"harness.db: expected 20 pairs on the board, found {len(pairs)}")
     except Exception as exc:  # noqa: BLE001
-        errors.append(f"pairs.jsonl unreadable: {exc}")
+        errors.append(f"harness.db unreadable for the pair matrix: {exc}")
     print(f"inputs verified: {ok}")
     if errors:
         print("ERRORS:")
         for e in errors:
             print(" -", e)
         return 1
-    print("check OK: дерево консистентно, все input-файлы на месте, pairs.jsonl читается (20 пар).")
+    print("check OK: дерево консистентно, все input-файлы на месте, "
+          "матрица читается из harness.db (20 пар).")
     return 0
 
 

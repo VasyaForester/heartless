@@ -62,3 +62,34 @@ class ConfigCheckTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class SingleJournalTest(unittest.TestCase):
+    """The axis-10 invariant of Grok's "one journal" axis: the check must go red when
+    live code reads the v1 archive as data, and green when everything goes through
+    harness/journal.py."""
+
+    def test_the_check_is_green_now(self):
+        res = config_check.check_single_journal()
+        self.assertTrue(res["ok"], res.get("detail"))
+
+    def test_the_check_names_every_consumer(self):
+        for name in config_check.JOURNAL_CONSUMERS:
+            path = config_check.WORK / "harness" / name
+            self.assertTrue(path.is_file(), f"harness/{name} missing")
+            self.assertIn("journal", path.read_text(encoding="utf-8", errors="replace"))
+
+    def test_the_guard_fires_on_a_fake_read(self):
+        victim = config_check.WORK / "harness" / "lbp_plan.py"
+        original = victim.read_text(encoding="utf-8")
+        fake = ("def _bad():\n"
+                "    return (WORK / 'datasets/lbp/pairs.jsonl').read_text()\n"
+                "\n\n")
+        try:
+            victim.write_text(original.replace("def load_pairs(", fake + "def load_pairs(", 1),
+                              encoding="utf-8")
+            res = config_check.check_single_journal()
+            self.assertFalse(res["ok"])
+            self.assertIn("reads the archive as data", res.get("detail") or "")
+        finally:
+            victim.write_text(original, encoding="utf-8")
+        self.assertTrue(config_check.check_single_journal()["ok"])
