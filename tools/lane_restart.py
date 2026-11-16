@@ -21,7 +21,8 @@ IS_WIN = os.name == "nt"
 
 
 def winpids():
-    out = subprocess.run(["ps", "-W"], capture_output=True, text=True).stdout
+    out = subprocess.run(["ps", "-W"], capture_output=True, text=True,
+                         stdin=subprocess.DEVNULL).stdout
     pids = set()
     for row in out.splitlines()[1:]:
         cols = row.split()
@@ -62,7 +63,8 @@ def kill(pid, why):
         time.sleep(1)
     if pid in winpids() and IS_WIN:
         subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)],
-                       capture_output=True, env={**os.environ, "MSYS_NO_PATHCONV": "1"})
+                       capture_output=True, stdin=subprocess.DEVNULL,
+                       env={**os.environ, "MSYS_NO_PATHCONV": "1"})
         time.sleep(1)
     print(f"killed {why} pid={pid} alive={pid in winpids()}")
 
@@ -85,7 +87,7 @@ if IS_WIN:
 t0 = time.time()
 p = subprocess.Popen([sys.executable, str(W / "harness" / "supervisor.py"),
                       "--lane", "main", "--port", "9223", "--max-hours", "0"],
-                     cwd=str(W), stdout=out, stderr=subprocess.STDOUT,
+                     cwd=str(W), stdin=subprocess.DEVNULL, stdout=out, stderr=subprocess.STDOUT,
                      env=os.environ.copy(), **kwargs)
 print(f"new supervisor pid={p.pid} (windowless)")
 
