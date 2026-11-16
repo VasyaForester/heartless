@@ -81,7 +81,12 @@ def stamp() -> str:
 
 def run(cmd: list, timeout: int = 900) -> tuple[int, str]:
     try:
+        # stdin must be DEVNULL: this runs from cron, where the process has no console at
+        # all, and subprocess then dies in _get_handles with "[WinError 6] Неверный
+        # дескриптор" on GetStdHandle(STD_INPUT_HANDLE) — measured 2026-11-16, the restart
+        # step of the nightly crashed before it could lift a dead lane.
         p = subprocess.run(cmd, cwd=str(WORK), capture_output=True, text=True,
+                           stdin=subprocess.DEVNULL,
                            timeout=timeout, **winquiet.windowless_kwargs())
         return p.returncode, (p.stdout or "") + (p.stderr or "")
     except subprocess.TimeoutExpired:

@@ -13,12 +13,24 @@ import pathlib
 import sqlite3
 import sys
 import tempfile
+import time
 import unittest
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 
 import efficiency  # noqa: E402
+
+
+def ago(seconds: float = 60) -> str:
+    """An ISO timestamp that is INSIDE the report window.
+
+    These fixtures used fixed calendar dates ("2026-11-15T10:00"), and the report reads the
+    last N hours — so the next morning the rows had silently fallen out of the window and
+    three tests went red for a reason that had nothing to do with the code.  Caught by the
+    nightly regression guard (2026-11-16); the timestamps now move with the clock.
+    """
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(time.time() - seconds))
 
 
 def make_ledger(path: pathlib.Path, rows: list) -> None:
@@ -53,8 +65,8 @@ class EfficiencyTest(unittest.TestCase):
     def test_boards_are_reported_separately_and_never_pooled(self):
         now = __import__("time").time()
         make_ledger(self.ledger, [
-            {"ts": "2026-11-15T10:00:00", "scenario": "scam-retail", "probe_ok": True},
-            {"ts": "2026-11-15T10:01:00", "scenario": "scam-retail", "probe_ok": False},
+            {"ts": ago(180), "scenario": "scam-retail", "probe_ok": True},
+            {"ts": ago(120), "scenario": "scam-retail", "probe_ok": False},
         ])
         make_db(self.db, [{"board": "lucky-break-payday", "ts": now, "judge": "verified", "score": 30},
                           {"board": "proving-ground", "ts": now}])
@@ -73,10 +85,9 @@ class EfficiencyTest(unittest.TestCase):
 
     def test_our_own_faults_are_counted_outside_the_probe_count(self):
         make_ledger(self.ledger, [
-            {"ts": "2026-11-15T10:00:00", "scenario": "scam-retail", "probe_ok": True},
-            {"ts": "2026-11-15T10:00:30", "scenario": "scam-retail", "probe_ok": False},
-            {"ts": "2026-11-15T10:00:45", "scenario": "scam-retail",
-             "probe_ok": True, "invalid": True},
+            {"ts": ago(180), "scenario": "scam-retail", "probe_ok": True},
+            {"ts": ago(150), "scenario": "scam-retail", "probe_ok": False},
+            {"ts": ago(120), "scenario": "scam-retail", "probe_ok": True, "invalid": True},
         ])
         rep = efficiency.report(24.0, db=self.db, repeats=self.ledger)
         total = rep["total"]
@@ -88,8 +99,8 @@ class EfficiencyTest(unittest.TestCase):
         """Measured defect: after a machine sleep the window held two probes, both
         faults, and the alarm fired with 1.00 — noise dressed as a signal."""
         make_ledger(self.ledger, [
-            {"ts": "2026-11-15T10:00:00", "scenario": "scam-retail", "probe_ok": False},
-            {"ts": "2026-11-15T10:00:30", "scenario": "scam-retail", "probe_ok": False},
+            {"ts": ago(180), "scenario": "scam-retail", "probe_ok": False},
+            {"ts": ago(150), "scenario": "scam-retail", "probe_ok": False},
         ])
         rep = efficiency.report(24.0, db=self.db, repeats=self.ledger, fail_over=0.45)
         gate = rep["total"]["loss_gate"]
@@ -98,7 +109,7 @@ class EfficiencyTest(unittest.TestCase):
         self.assertIn("asleep", gate.get("note", ""))
 
     def test_the_loss_gate_trips_on_a_real_loss_share(self):
-        rows = [{"ts": f"2026-11-15T10:{i:02d}:00", "scenario": "scam-retail",
+        rows = [{"ts": ago(3600 - 30 * i), "scenario": "scam-retail",
                  "probe_ok": False} for i in range(60)]
         make_ledger(self.ledger, rows)
         rep = efficiency.report(24.0, db=self.db, repeats=self.ledger, fail_over=0.45)
